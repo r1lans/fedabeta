@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <script src="sheets-config.js"></script>
+    <title>Новости — TheStarth</title>
+    <meta name="description" content="Новости и объявления TheStarth.">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+        main.news-main { max-width: 760px; margin: 0 auto; padding: 7rem 1.5rem 4rem; }
+        main.news-main h1 { font-size: 2rem; margin-bottom: 2.5rem; }
+        .news-item {
+            background: var(--paper); border: 1px solid var(--rule); border-radius: 12px;
+            padding: 1.75rem; margin-bottom: 1.25rem;
+        }
+        .news-item .n-date { color: var(--ink-soft); font-size: 0.82rem; margin-bottom: 0.5rem; }
+        .news-item h3 { margin-bottom: 0.6rem; font-size: 1.15rem; }
+        .news-item p { color: var(--ink-soft); line-height: 1.7; }
+        .empty-state { color: var(--ink-soft); text-align: center; padding: 4rem 0; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
+            <div class="nav-links">
+                <a href="index.html#courses" data-i18n="nav.courses">Курсы</a>
+                <a href="results.html" data-i18n="nav.results">Результаты</a>
+                <a href="about.html" data-i18n="nav.about">О нас</a>
+                <a href="news.html" style="color: var(--accent); font-weight: bold;" data-i18n="nav.news">Новости</a>
+                <a href="dashboard.html" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="news-main">
+        <h1><span data-i18n="section.news">Новости</span> <span class="text-premium" data-i18n="section.news_highlight">и объявления</span></h1>
+        <div id="news-page-list"><div class="empty-state">Загрузка…</div></div>
+    </main>
+
+    <footer style="margin-top: 4rem;">
+        <div class="footer-content">
+            <div class="footer-col">
+                <div class="logo" style="margin-bottom: 1rem;">The<span>Starth</span></div>
+                <p style="color: var(--ink-soft); font-size: 0.9rem;" data-i18n="footer.tagline">Платформа развития навыков. Английский и математика.</p>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer.quicklinks">Быстрые ссылки</h4>
+                <ul>
+                    <li><a href="index.html#courses" data-i18n="nav.courses">Курсы</a></li>
+                    <li><a href="about.html" data-i18n="nav.about">О нас</a></li>
+                    <li><a href="careers.html" data-i18n="footer.careers">Вакансии</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer.contacts">Контакты</h4>
+                <ul>
+                    <li><a href="#">TheStarthInternational@gmail.com</a></li>
+                    <li><a href="https://wa.me/998918679777" target="_blank">WhatsApp: +998 91 867 97 77</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p data-i18n="footer.copyright">© 2026 TheStarth. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin-nav.js"></script>
+    <script src="translations.js"></script>
+    <script src="content-i18n.js"></script>
+    <script src="app.js"></script>
+    <script>
+        (async function () {
+            const wrap = document.getElementById('news-page-list');
+            let items = null, state = 'loading';    // state: loading | offline | empty | error | ok
+
+            function render() {
+                if (state === 'offline') { wrap.innerHTML = '<div class="empty-state">' + escapeHtml(t('news.soon')) + '</div>'; return; }
+                if (state === 'empty') { wrap.innerHTML = '<div class="empty-state">' + escapeHtml(t('news.none')) + '</div>'; return; }
+                if (state === 'error') { wrap.innerHTML = '<div class="empty-state">' + escapeHtml(t('news.error')) + '</div>'; return; }
+                if (state !== 'ok') return;
+                wrap.innerHTML = '';
+                items.forEach(n => {
+                    const item = document.createElement('div');
+                    item.className = 'news-item';
+                    item.innerHTML = `
+                        <div class="n-date">${n.date ? new Date(n.date).toLocaleDateString(dateLocale()) : ''}</div>
+                        <h3>${escapeHtml(pickText(n, 'title'))}</h3>
+                        <p>${escapeHtml(pickText(n, 'body'))}</p>
+                    `;
+                    wrap.appendChild(item);
+                });
+            }
+            window.addEventListener('starth-lang-changed', render);
+
+            if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) { state = 'offline'; render(); return; }
+            try {
+                // no orderBy in the query: where()+orderBy() on different fields needs a manual composite index
+                const rawSnap = await db.collection('news').where('published', '==', true).get();
+                const docs = []; rawSnap.forEach(d => docs.push(d.data()));
+                docs.sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+                items = docs;
+                state = docs.length ? 'ok' : 'empty';
+            } catch (err) {
+                state = 'error';
+                console.warn(err);
+            }
+            render();
+        })();
+    </script>
+    
+</body>
+</html>

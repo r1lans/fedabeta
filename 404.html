@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <title>Упс! Страница не найдена — TheStarth</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 5;
+            background: radial-gradient(circle at center, var(--paper-alt) 0%, var(--paper) 80%);
+            overflow: hidden;
+        }
+
+        .error-code {
+            font-family: var(--font-heading);
+            font-size: 8rem;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            filter: drop-shadow(0 2px 20px rgba(143, 90, 12, 0.15));
+            animation: pulse 4s infinite alternate;
+        }
+
+        .error-title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            font-family: var(--font-heading);
+        }
+
+        .error-desc {
+            color: var(--ink-soft);
+            max-width: 500px;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Puzzle Box */
+        .puzzle-box {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            padding: 2rem;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+
+        .puzzle-box:hover {
+            border-color: var(--accent);
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.1);
+        }
+
+        .puzzle-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .puzzle-question {
+            font-size: 1.5rem;
+            color: var(--ink);
+            margin-bottom: 1.5rem;
+            font-family: var(--font-heading);
+            letter-spacing: 1px;
+        }
+
+        .puzzle-input-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .puzzle-input {
+            width: 120px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 1px solid var(--rule);
+            background: var(--paper);
+            color: var(--ink);
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: var(--font-heading);
+        }
+
+        .puzzle-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .puzzle-feedback {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+
+        /* Glow effects */
+        .bg-glow-orange, .bg-glow-gold {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .bg-glow-orange {
+            width: 300px;
+            height: 300px;
+            background: var(--accent-tint);
+            top: 10%;
+            left: 10%;
+            animation: floatGlow 12s infinite alternate;
+        }
+
+        .bg-glow-gold {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            bottom: 10%;
+            right: 10%;
+            animation: floatGlow 15s infinite alternate-reverse;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 2px 20px rgba(143, 90, 12, 0.15)); }
+            100% { transform: scale(1.03); filter: drop-shadow(0 2px 35px rgba(212, 175, 55, 0.4)); }
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .logo-top {
+            position: absolute;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+    </style>
+</head>
+<body style="background-color: var(--paper);">
+    
+    <!-- Background Glows -->
+    <div class="bg-glow-orange"></div>
+    <div class="bg-glow-gold"></div>
+
+    <div class="error-container">
+        
+        <!-- Logo -->
+        <div class="logo-top">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:43px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+        </div>
+
+        <div class="error-code">404</div>
+        <h1 class="error-title">Похоже, вы сбились с пути...</h1>
+        <p class="error-desc">Страница, которую вы ищете, не существует или была перемещена. Но в TheStarth любое препятствие — это повод для разминки ума!</p>
+
+        <!-- Dynamic SAT Math Riddle -->
+        <div class="puzzle-box">
+            <div class="puzzle-title"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M3 20 20 3"/><path d="M14 9l2.5 2.5"/><path d="M10.5 12.5 13 15"/><path d="M7 16l2.5 2.5"/><path d="M3 20 3 12 11 20Z"/></svg> Мини-тест уровня SAT Math</div>
+            <div class="puzzle-question" id="puzzle-q">2x + 7 = 19. <br>Чему равен x?</div>
+            <div class="puzzle-input-group">
+                <input type="number" id="puzzle-ans" class="puzzle-input" placeholder="Ответ">
+                <button class="btn-primary" id="puzzle-submit-btn" style="padding: 0.75rem 1.5rem;">Решить</button>
+            </div>
+            <div class="puzzle-feedback" id="puzzle-feedback">Решите уравнение, чтобы разблокировать золотой путь! <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        </div>
+
+        <!-- Dynamic Action Link -->
+        <div id="home-action-wrap">
+            <a href="index.html" class="btn-outline" style="border-color: var(--rule); color: var(--ink-soft); cursor: not-allowed;" id="home-link" onclick="event.preventDefault(); alert('Решите уравнение сначала!');">Вернуться на главную</a>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Generate a random fun math question suitable for SAT Prep
+            const riddles = [
+                { q: "3x - 5 = 16. <br>Чему равен x?", ans: 7 },
+                { q: "x² - 9 = 0. <br>Чему равен положительный корень x?", ans: 3 },
+                { q: "Если 20% от числа N равно 8. <br>Чему равно N?", ans: 40 },
+                { q: "Угол A и угол B смежные. <br>Если ∠A = 45°, чему равен ∠B в градусах?", ans: 135 },
+                { q: "Среднее арифметическое чисел 4, 8 и X равно 9. <br>Чему равен X?", ans: 15 }
+            ];
+
+            // Pick a random riddle
+            const selected = riddles[Math.floor(Math.random() * riddles.length)];
+            const qEl = document.getElementById('puzzle-q');
+            const ansInput = document.getElementById('puzzle-ans');
+            const submitBtn = document.getElementById('puzzle-submit-btn');
+            const feedbackEl = document.getElementById('puzzle-feedback');
+            const homeLink = document.getElementById('home-link');
+            
+            qEl.innerHTML = selected.q;
+
+            submitBtn.addEventListener('click', () => {
+                const userAns = parseInt(ansInput.value.trim());
+                if (userAns === selected.ans) {
+                    feedbackEl.style.color = '#25D366';
+                    feedbackEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 21 8.5 9.5 14.5 15.5Z"/><path d="M13 8l1.3-3.3M17 10.3l3.3-1.3M9.7 5.3 8 2"/><circle cx="18.5" cy="5.5" r="1" fill="currentColor" stroke="none"/></svg> Отлично! Вы истинный математик. Путь свободен! <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg>';
+                    
+                    // Unlock the button
+                    homeLink.style.borderColor = 'var(--accent)';
+                    homeLink.style.color = 'var(--accent)';
+                    homeLink.style.cursor = 'pointer';
+                    homeLink.onclick = null;
+                    homeLink.classList.remove('btn-outline');
+                    homeLink.classList.add('btn-primary');
+                    
+                    // Trigger confetti-like animation by scaling puzzle box
+                    document.querySelector('.puzzle-box').style.borderColor = '#25D366';
+                } else {
+                    feedbackEl.style.color = '#e74c3c';
+                    feedbackEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg> Не совсем верно. Попробуйте еще раз!';
+                    ansInput.value = '';
+                    ansInput.focus();
+                }
+            });
+
+            // Allow enter key press
+            ansInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    submitBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

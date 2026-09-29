@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <script src="theme.js"></script>
+    <title>Моё расписание — TheStarth</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+        main.tsched-main { max-width: 700px; margin: 0 auto; padding: 7rem 1.5rem 4rem; }
+        main.tsched-main h1 { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        main.tsched-main .sub { color: var(--ink-soft); margin-bottom: 2.5rem; }
+        .lesson-card {
+            background: var(--paper); border: 1px solid var(--rule); border-radius: 12px;
+            padding: 1.5rem; margin-bottom: 1rem; display: flex; justify-content: space-between;
+            align-items: center; flex-wrap: wrap; gap: 0.75rem;
+        }
+        .lesson-card strong { display: block; font-family: var(--font-heading); }
+        .lesson-card .sub2 { color: var(--ink-soft); font-size: 0.85rem; margin-top: 0.25rem; }
+        .empty-state { color: var(--ink-soft); text-align: center; padding: 3rem 0; }
+        #not-found { display: none; text-align: center; padding: 5rem 0; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+        </div>
+    </nav>
+
+    <main class="tsched-main">
+        <div id="tsched-content">
+            <h1>Расписание: <span class="text-premium" id="t-name">—</span></h1>
+            <p class="sub">Ближайшие уроки. Ссылка на звонок появляется прямо здесь — куда-то ещё заходить не нужно.</p>
+            <div id="t-lessons"><div class="empty-state">Загрузка…</div></div>
+        </div>
+        <div id="not-found">
+            <h1>Ссылка недействительна</h1>
+            <p style="color: var(--ink-soft); margin-top: 1rem;">Обратитесь к администратору TheStarth за правильной ссылкой.</p>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script>
+        function escapeHtml(str) {
+            if (str === undefined || str === null) return '';
+            return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        const TEACHER_NAMES = {
+            firdavs: 'Убайдуллоев Фирдавс', sadokat: 'Убайдуллоева Садокат', javokhir: 'Солиев Жавохир',
+            behruz: 'Соатбоев Бехруз', azizbek: 'Елмуратов Азизбек'
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const teacherId = params.get('id');
+
+        (async function () {
+            // built-in teachers first; teachers added in the admin panel are looked up in the database
+            let teacherName = teacherId ? TEACHER_NAMES[teacherId] : '';
+            if (teacherId && !teacherName && typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
+                try {
+                    const t = await db.collection('teachers').doc(teacherId).get();
+                    if (t.exists) teacherName = t.data().name;
+                } catch (err) { console.warn(err); }
+            }
+            if (!teacherId || !teacherName) {
+                document.getElementById('tsched-content').style.display = 'none';
+                document.getElementById('not-found').style.display = 'block';
+                return;
+            }
+            document.getElementById('t-name').textContent = teacherName;
+
+            const wrap = document.getElementById('t-lessons');
+            if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
+                wrap.innerHTML = '<div class="empty-state">Расписание скоро заработает здесь.</div>';
+                return;
+            }
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                const rawSnap = await db.collection('schedule')
+                    .where('teacherId', '==', teacherId).get();
+                const docs = []; rawSnap.forEach(d => { if (d.data().date >= today) docs.push(d); });
+                docs.sort((a, b) => (a.data().date + ' ' + a.data().time).localeCompare(b.data().date + ' ' + b.data().time));
+                const snap = { empty: docs.length === 0, forEach: fn => docs.forEach(fn) };
+                if (snap.empty) {
+                    wrap.innerHTML = '<div class="empty-state">Пока нет запланированных уроков.</div>';
+                    return;
+                }
+                wrap.innerHTML = '';
+                snap.forEach(doc => {
+                    const s = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'lesson-card';
+                    card.innerHTML = `
+                        <div>
+                            <strong>${new Date(s.date).toLocaleDateString('ru-RU', {weekday:'long', day:'numeric', month:'long'})}, ${s.time}</strong>
+                            <div class="sub2">Ученик: @${escapeHtml(s.studentNickname)}${s.subject ? ' · ' + escapeHtml(s.subject) : ''}</div>
+                        </div>
+                        <a href="video-lesson.html?room=${s.room}" class="btn-primary">Войти на урок</a>
+                    `;
+                    wrap.appendChild(card);
+                });
+            } catch (err) {
+                wrap.innerHTML = '<div class="empty-state">Не удалось загрузить расписание.</div>';
+                console.warn(err);
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <script src="sheets-config.js"></script>
+    <title>Карьера и Вакансии — TheStarth</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .careers-hero {
+            padding: 8rem 2rem 4rem;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .careers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 3rem auto;
+        }
+
+        .job-card {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            padding: 2.5rem;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .job-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(24, 27, 32, 0.06);
+        }
+
+        .job-title {
+            font-size: 1.5rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            font-family: var(--font-heading);
+        }
+
+        .job-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-badge {
+            background: rgba(255,255,255,0.05);
+            color: var(--ink-soft);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 500;
+        }
+
+        .meta-badge.gold {
+            background: rgba(212,175,55,0.1);
+            color: var(--accent);
+        }
+
+        .job-details {
+            margin-bottom: 2rem;
+        }
+
+        .job-details h4 {
+            color: var(--ink);
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .job-details ul {
+            list-style: none;
+            padding-left: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .job-details ul li {
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+            margin-bottom: 0.4rem;
+            position: relative;
+        }
+
+        .job-details ul li::before {
+            content: '•';
+            color: var(--accent);
+            position: absolute;
+            left: -1rem;
+        }
+
+        /* Form styling */
+        .apply-section {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 20px;
+            padding: 4rem 3rem;
+            max-width: 800px;
+            margin: 4rem auto;
+        }
+
+        .apply-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-col-full {
+            grid-column: span 2;
+        }
+
+        .apply-form input, .apply-form select, .apply-form textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--rule);
+            background: var(--paper);
+            color: var(--ink);
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .apply-form input:focus, .apply-form select:focus, .apply-form textarea:focus {
+            border-color: var(--accent);
+            outline: none;
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.15);
+        }
+
+        .apply-form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .apply-form {
+                grid-template-columns: 1fr;
+            }
+            .form-col-full {
+                grid-column: span 1;
+            }
+            .apply-section {
+                padding: 2.5rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body style="padding-top: 80px;">
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
+            <div class="nav-links">
+                <a href="index.html">На главную</a>
+                <a href="index.html#courses" data-i18n="nav.courses">Курсы</a>
+                <a href="results.html" data-i18n="nav.results">Результаты</a>
+                <a href="about.html" data-i18n="nav.about">О нас</a>
+                <a href="news.html" data-i18n="nav.news">Новости</a>
+                <a href="payment.html" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="careers-hero">
+        <div style="font-family: var(--font-heading); font-weight: 800; font-size: 1rem; color: var(--accent); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem;">Careers · Join The Team</div>
+        <h1>Растите вместе с <span class="text-premium">TheStarth</span></h1>
+        <p style="font-size: 1.2rem; color: var(--ink-soft); max-width: 700px; margin: 1.5rem auto 0;">Мы ищем талантливых преподавателей, которые любят математику и английский язык так же, как и мы. Мы ценим личные результаты учеников, непрерывное развитие и высокий уровень преподавания.</p>
+    </header>
+
+    <main style="padding: 0 2rem;">
+        
+        <!-- Job Cards Grid -->
+        <section class="careers-grid">
+            
+            <!-- Job 1 -->
+            <div class="job-card">
+                <div>
+                    <h3 class="job-title">Преподаватель IELTS</h3>
+                    <div class="job-meta">
+                        <span class="meta-badge gold">IELTS 7.5+</span>
+                        <span class="meta-badge">Онлайн / Удаленно</span>
+                        <span class="meta-badge">Гибкий график</span>
+                    </div>
+                    <div class="job-details">
+                        <h4>Требования:</h4>
+                        <ul>
+                            <li>Собственный балл IELTS Academic 7.5+ (сертификат обязателен)</li>
+                            <li>Опыт успешной подготовки студентов от 2 лет</li>
+                            <li>Знание современных онлайн-инструментов (Zoom, Miro)</li>
+                        </ul>
+                        <h4>Условия:</h4>
+                        <ul>
+                            <li>Конкурентная ставка оплаты ($13-$17 за урок)</li>
+                            <li>Готовые методические материалы и поддержка</li>
+                            <li>Обучение в мини-группах (до 3 учеников)</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="#apply" class="btn-primary" style="text-align: center; width: 100%;">Откликнуться</a>
+            </div>
+
+            <!-- Job 2 -->
+            <div class="job-card">
+                <div>
+                    <h3 class="job-title">Преподаватель SAT Math</h3>
+                    <div class="job-meta">
+                        <span class="meta-badge gold">SAT Math 750+</span>
+                        <span class="meta-badge">Онлайн / Удаленно</span>
+                        <span class="meta-badge">Гибкий график</span>
+                    </div>
+                    <div class="job-details">
+                        <h4>Требования:</h4>
+                        <ul>
+                            <li>Высокий балл по SAT Math (750+) или профильное олимпиадное прошлое</li>
+                            <li>Свободное владение английским языком для ведения курса</li>
+                            <li>Умение объяснять сложные формулы простым языком</li>
+                        </ul>
+                        <h4>Условия:</h4>
+                        <ul>
+                            <li>Высокая ставка и своевременные выплаты</li>
+                            <li>Методическая поддержка от нашего ведущего SAT тренера Бехруза</li>
+                            <li>Ученики, мотивированные на поступление в топ-вузы США/Европы</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="#apply" class="btn-primary" style="text-align: center; width: 100%;">Откликнуться</a>
+            </div>
+
+            <!-- Job 3 -->
+            <div class="job-card">
+                <div>
+                    <h3 class="job-title">General English Tutor (A2-B2)</h3>
+                    <div class="job-meta">
+                        <span class="meta-badge gold">CEFR C1 / IELTS 7.0</span>
+                        <span class="meta-badge">Онлайн / Удаленно</span>
+                        <span class="meta-badge">Полная/Частичная занятость</span>
+                    </div>
+                    <div class="job-details">
+                        <h4>Требования:</h4>
+                        <ul>
+                            <li>Уровень английского Advanced (C1)</li>
+                            <li>Специализация на снятии языкового барьера</li>
+                            <li>Интерактивный формат ведения уроков</li>
+                        </ul>
+                        <h4>Условия:</h4>
+                        <ul>
+                            <li>Ставка оплаты: <strong style="color: var(--accent);">$10–$14 за урок</strong></li>
+                            <li>Постоянный поток мотивированных учеников</li>
+                            <li>Удобная LMS-система и кабинет преподавателя</li>
+                            <li>Регулярные тренинги повышения квалификации</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="#apply" class="btn-primary" style="text-align: center; width: 100%;">Откликнуться</a>
+            </div>
+
+        </section>
+
+        <!-- Apply Form Section -->
+        <section id="apply" class="apply-section">
+            <h2 style="text-align: center; font-size: 2rem; font-family: var(--font-heading);">Заполните <span class="text-premium">Анкету</span> кандидатуры</h2>
+            <p style="text-align: center; color: var(--ink-soft); font-size: 0.95rem; margin-top: 0.5rem;">Мы свяжемся с вами в течение 2 рабочих дней для назначения собеседования.</p>
+            
+            <form class="apply-form" id="applyForm" action="https://formspree.io/f/mqennban" method="POST">
+                <div>
+                    <label for="name">Ваше имя</label>
+                    <input type="text" id="name" name="name" placeholder="Иван Иванов" required>
+                </div>
+                <div>
+                    <label for="phone">Телефон / Telegram</label>
+                    <input type="text" id="phone" name="phone" placeholder="+998 90 123 45 67" required>
+                </div>
+                <div>
+                    <label for="email">E-mail</label>
+                    <input type="email" id="email" name="email" placeholder="example@gmail.com" required>
+                </div>
+                <div>
+                    <label for="vacancy">Желаемая вакансия</label>
+                    <select id="vacancy" name="vacancy" required>
+                        <option value="" disabled selected>Выберите вакансию</option>
+                        <option value="ielts">Преподаватель IELTS</option>
+                        <option value="sat">Преподаватель SAT Math</option>
+                        <option value="general">General English Tutor</option>
+                    </select>
+                </div>
+                <div class="form-col-full">
+                    <label for="score">Ваши результаты (IELTS / SAT / CEFR / Опыт)</label>
+                    <input type="text" id="score" name="score" placeholder="Например: IELTS 8.0, 5 лет опыта в преподавании" required>
+                </div>
+                <div class="form-col-full">
+                    <label for="message">Расскажите немного о себе и вашем подходе</label>
+                    <textarea id="message" name="message" rows="4" placeholder="Ваша методика, почему хотите в TheStarth..." required></textarea>
+                </div>
+                <div class="form-col-full" style="text-align: center; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-primary" style="padding: 1rem 3rem; font-size: 1.05rem;">Отправить резюме</button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 3rem; margin-bottom: 3rem;">
+            <div class="footer-col">
+                <div class="logo" style="margin-bottom: 1rem;">The<span>Starth</span></div>
+                <p style="color: var(--ink-soft); font-size: 0.9rem;">Образование будущего. Математика и Английский язык.</p>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer.quicklinks">Быстрые ссылки</h4>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="index.html#courses" data-i18n="nav.courses">Курсы</a></li>
+                    <li><a href="about.html" data-i18n="nav.about">О нас</a></li>
+                    <li><a href="news.html" data-i18n="nav.news">Новости</a></li>
+                    <li><a href="careers.html" style="color: var(--accent);">Вакансии</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer.contacts">Контакты</h4>
+                <ul>
+                    <li><a href="#">TheStarthInternational@gmail.com</a></li>
+                    <li><a href="https://wa.me/998500974424" target="_blank">WhatsApp: +998 50 097 44 24</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom" style="text-align: center; color: var(--ink-soft); font-size: 0.9rem; padding-top: 2rem; border-top: 1px solid var(--rule);">
+            <p><span data-i18n="footer.copyright">&copy; 2026 TheStarth. Все права защищены.</span> | <a href="privacy.html" style="color: var(--ink-soft); text-decoration: underline;" data-i18n="footer.privacy">Политика конфиденциальности</a></p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ── Smooth scroll for all 'Откликнуться' buttons
+            document.querySelectorAll('a[href="#apply"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const target = document.getElementById('apply');
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Pre-select vacancy based on card position
+                        const card = btn.closest('.job-card');
+                        if (card) {
+                            const title = card.querySelector('.job-title')?.textContent || '';
+                            const select = document.getElementById('vacancy');
+                            if (select && title.includes('IELTS')) select.value = 'ielts';
+                            else if (select && title.includes('SAT')) select.value = 'sat';
+                            else if (select && title.includes('General')) select.value = 'general';
+                        }
+                    }
+                });
+            });
+
+            // ── Formspree AJAX submission with proper feedback
+            const form = document.getElementById('applyForm');
+            if (form) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = form.querySelector('button[type="submit"]');
+                    const originalText = btn.textContent;
+                    btn.textContent = '⏳ Отправка...';
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
+
+                    try {
+                        const res = await fetch('https://formspree.io/f/mqennban', {
+                            method: 'POST',
+                            body: new FormData(form),
+                            headers: { 'Accept': 'application/json' }
+                        });
+
+                        if (res.ok) {
+                            logToSheet('log_career_application', {
+                                name: form.elements['name'].value.trim(),
+                                phone: form.phone.value.trim(),
+                                email: form.email.value.trim(),
+                                vacancy: form.vacancy.value,
+                                score: form.score.value.trim(),
+                                message: form.message.value.trim()
+                            });
+                            btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.3 2.3L16 10"/></svg> Отправлено!';
+                            btn.style.background = '#25D366';
+                            btn.style.opacity = '1';
+                            form.reset();
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.style.background = '';
+                                btn.disabled = false;
+                            }, 4000);
+                        } else {
+                            throw new Error('Server error');
+                        }
+                    } catch (err) {
+                        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></svg> Ошибка — попробуйте ещё раз';
+                        btn.style.background = '#e74c3c';
+                        btn.style.opacity = '1';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.style.background = '';
+                            btn.disabled = false;
+                        }, 3000);
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin-nav.js"></script>
+    <script src="translations.js"></script>
+    <script src="content-i18n.js"></script>
+    <script src="app.js"></script>
+    
+</body>
+</html>

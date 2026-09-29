@@ -1,0 +1,100 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Each student can read/write only their own profile document.
+    // Admins can read every profile, and can also write to any profile
+    // (needed to change roles from the admin panel).
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Nickname uniqueness "reservation" documents: doc id == the nickname.
+    // Read is public (not signed-in yet) because availability must be
+    // checkable *before* the account exists — that's the whole point.
+    // Creating one still requires being signed in as that exact uid.
+    match /nicknames/{nickname} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // Student ID counter (000001, 000002, ...). Any signed-in user may read it and
+    // move it forward by exactly +1 (that is how a new student takes the next number).
+    // Nobody can lower it, skip numbers, or delete it.
+    match /counters/{doc} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && doc == 'students' && request.resource.data.last == 1;
+      allow update: if isSignedIn() && doc == 'students' &&
+        request.resource.data.last == resource.data.last + 1;
+      allow delete: if false;
+    }
+
+    // News & reviews: public read of published items. Admins can write
+    // anything; signed-in students can submit a review, but only ever
+    // as unpublished (pending admin approval) — never publish themselves.
+    match /news/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /reviews/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      // Visitors can only send a review as "not published yet", with sane sizes.
+      allow create: if isAdmin() || (
+        request.resource.data.published == false &&
+        request.resource.data.keys().hasOnly(['name', 'rating', 'text', 'published', 'createdAt']) &&
+        request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 80 &&
+        request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1500
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // Teachers shown in "О нас -> Команда Экспертов" and on teacher.html.
+    // Everyone can read; only admins can add / edit / delete (Admin panel -> Учителя).
+    match /teachers/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Student results (certificates with the magnifier) on results.html.
+    // Everyone can read; only admins can add / delete (Admin panel -> Результаты).
+    match /results/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Lesson schedule: admin assigns lessons (teacher + student + time).
+    // Public read (needed by the teacher's own unauthenticated schedule
+    // link and the student dashboard); only admins can write.
+    match /schedule/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Site-wide settings (accent color, logo, announcement banner):
+    // public read, admin-only write.
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Admin allowlist: existing admins can promote/demote other admins
+    // from the admin panel. The very first admin still has to be added
+    // by hand in the Firebase console (see FIREBASE_SETUP.md, step 6) —
+    // there has to be one admin before any admin-granted permission works.
+    match /admins/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
