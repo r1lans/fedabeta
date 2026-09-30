@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <script src="sheets-config.js"></script>
+    <title>Личный кабинет — TheStarth</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Личный кабинет TheStarth: ваши результаты тестов, реферальная программа и бонусы.">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+        main.dash-main {
+            padding: 6.5rem 1.5rem 4rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ── Login required state ── */
+        .login-required {
+            text-align: center;
+            padding: 6rem 1.5rem;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .login-required .icon { font-size: 3rem; margin-bottom: 1rem; }
+        .login-required h1 { font-size: 1.8rem; margin-bottom: 0.75rem; }
+        .login-required p { color: var(--ink-soft); margin-bottom: 2rem; line-height: 1.6; }
+
+        /* ── Greeting header ── */
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--rule);
+        }
+        .dash-header h1 { font-size: 2.1rem; margin-bottom: 0.4rem; }
+        .dash-header p { color: var(--ink-soft); }
+        .dash-header .btn-outline {
+            padding: 0.6rem 1.4rem;
+            border-radius: 8px;
+            border: 1px solid var(--rule);
+            white-space: nowrap;
+        }
+
+        .dash-section-title {
+            font-size: 1.3rem;
+            margin: 3rem 0 1.25rem;
+            color: var(--ink);
+        }
+        .dash-section-title:first-of-type { margin-top: 0; }
+
+        /* ── Result cards ── */
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: 1.5rem;
+        }
+        .result-card {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            padding: 1.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent);
+        }
+        .result-card .r-icon { font-size: 1.6rem; margin-bottom: 0.75rem; color: var(--accent); }
+        .result-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--ink); }
+        .result-card .r-score {
+            font-family: var(--font-heading);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin: 0.25rem 0;
+        }
+        .result-card .r-meta { color: var(--ink-soft); font-size: 0.85rem; }
+        .result-card .r-empty { color: var(--ink-soft); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.25rem; }
+
+        /* ── Profile card ── */
+        .profile-card {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+        .profile-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: var(--paper);
+            flex-shrink: 0;
+        }
+        .profile-details { flex-grow: 1; min-width: 180px; }
+        .profile-details .p-name { font-size: 1.05rem; font-weight: 600; color: var(--ink); }
+        .profile-details .p-contact { color: var(--ink-soft); font-size: 0.85rem; margin-top: 2px; }
+
+        /* ── Reward section (reused from homepage) ── */
+        .loyalty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+            gap: 1.5rem;
+        }
+        .loyalty-card {
+            background: var(--paper-alt);
+            border: 1px solid rgba(143, 90, 12, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .loyalty-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(143, 90, 12, 0.4);
+            box-shadow: 0 10px 30px rgba(143, 90, 12, 0.05);
+        }
+        .loyalty-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.5;
+        }
+        .loyalty-icon {
+            font-size: 2.2rem;
+            margin-bottom: 1.25rem;
+            color: var(--accent);
+        }
+        .loyalty-card h3 { font-size: 1.25rem; color: var(--ink); margin-bottom: 0.75rem; }
+        .loyalty-card p { color: var(--ink-soft); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1.25rem; flex-grow: 1; }
+        .loyalty-badge {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            background: rgba(143, 90, 12, 0.15);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 1px solid rgba(143, 90, 12, 0.3);
+        }
+        .loyalty-quests { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .quest-item {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+        .quest-item:hover { background: rgba(143, 90, 12, 0.03); border-color: rgba(143, 90, 12, 0.2); }
+        .quest-item.completed { border-color: #25D366; background: rgba(37, 211, 102, 0.02); }
+        .quest-checkbox {
+            width: 18px; height: 18px; border-radius: 50%;
+            border: 2px solid var(--ink-soft);
+            display: flex; align-items: center; justify-content: center;
+            color: transparent; font-weight: bold; font-size: 0.7rem; flex-shrink: 0;
+        }
+        .quest-item.completed .quest-checkbox { border-color: #25D366; background: #25D366; color: black; }
+
+        .starth-toast {
+            position: fixed; bottom: 2rem; right: 2rem;
+            background: var(--paper-alt);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 8px 30px rgba(24, 27, 32, 0.15), 0 0 20px rgba(143, 90, 12,0.15);
+            color: var(--ink); z-index: 9999;
+            display: flex; align-items: center; gap: 12px;
+            transform: translateY(150px); opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+        }
+        .starth-toast.show { transform: translateY(0); opacity: 1; }
+        .starth-toast-icon { color: var(--accent); font-size: 1.3rem; }
+        /* ── Homework (student view) ── */
+        .hw-card { background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 16px; padding: 1.5rem; margin-bottom: 0.75rem; }
+        .hw-card .hw-date { color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 0.5rem; }
+        .hw-card .hw-text { white-space: pre-wrap; line-height: 1.6; }
+
+        /* ── Teacher lesson card ── */
+        .tch-lesson { background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 16px; padding: 1.5rem; margin-bottom: 0.75rem; }
+        .tch-lesson-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+        .tch-status-badge { display: inline-block; font-size: 0.78rem; font-weight: 600; padding: 3px 10px; border-radius: 20px; margin-left: 0.6rem; vertical-align: middle; }
+        .tch-status-badge.done { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
+        .tch-status-badge.missed { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+        .tch-status-badge.upcoming { background: rgba(128, 128, 128, 0.15); color: var(--ink-soft); }
+        .tch-status-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tch-status-btns button {
+            font-size: 0.82rem; padding: 0.45rem 0.9rem; border-radius: 8px;
+            border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer;
+        }
+        .tch-status-btns button.active { border-color: var(--accent); color: var(--accent); }
+        .tch-lesson textarea {
+            width: 100%; min-height: 80px; resize: vertical; margin-top: 0.5rem;
+            padding: 0.7rem 0.9rem; border-radius: 10px; border: 1px solid var(--rule);
+            background: var(--paper); color: var(--ink); font-family: inherit; font-size: 0.92rem;
+        }
+        .tch-hw-save { margin-top: 0.6rem; padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 0.85rem; }
+        .tch-hw-saved { color: var(--ink-soft); font-size: 0.8rem; margin-left: 0.75rem; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
+            <div class="nav-links">
+                <a href="index.html#courses" data-i18n="nav.courses">Курсы</a>
+                <a href="results.html" data-i18n="nav.results">Результаты</a>
+                <a href="about.html" data-i18n="nav.about">О нас</a>
+                <a href="news.html" data-i18n="nav.news">Новости</a>
+                <a href="mock-exam.html" style="color: var(--accent); font-weight: bold; position: relative;">Mock Exam <span style="position: absolute; top: -12px; right: -15px; background: red; color: white; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; text-transform: uppercase;">New</span></a>
+                <a href="payment.html" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <a href="dashboard.html" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Shown when the visitor is NOT logged in -->
+    <div class="login-required" id="loginRequired" style="display: none;">
+        <div class="icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+        <h1>Личный кабинет</h1>
+        <p>Войдите, чтобы увидеть свои результаты тестов, реферальную ссылку и бонусы TheStarth.</p>
+        <button class="btn-primary" onclick="document.getElementById('authModal').style.display='block'">Войти в кабинет</button>
+    </div>
+
+    <!-- Dashboard content, shown only when logged in -->
+    <main class="dash-main" id="dashContent" style="display: none;">
+
+        <div class="dash-header">
+            <div>
+                <h1>С возвращением, <span class="text-premium" id="dashUserName">студент</span>!</h1>
+                <p id="dashSubtitle">Здесь собраны ваши результаты, бонусы и статус обучения в TheStarth.</p>
+            </div>
+            <button class="btn-outline" onclick="starthLogout()">Выйти</button>
+        </div>
+
+        <!-- Profile -->
+        <div class="profile-card">
+            <div class="profile-avatar" id="dashAvatar">S</div>
+            <div class="profile-details">
+                <div class="p-name" id="dashProfileName">—</div>
+                <div class="p-contact" id="dashProfileNickname" style="color: var(--accent); font-weight: 600;"></div>
+                <div class="p-contact" id="dashProfileId" style="font-weight: 600;"></div>
+                <div class="p-contact" id="dashProfileContact">—</div>
+            </div>
+            <a href="video-lesson.html" class="btn-outline" style="white-space: nowrap;">Войти на видеоурок</a>
+            <a href="payment.html" id="dashPayLink" class="btn-primary" style="white-space: nowrap;">Оплатить курс</a>
+        </div>
+
+        <!-- ═══ MESSENGER (students and teachers) ═══ -->
+        <div id="messengerSection"></div>
+
+        <!-- ═══ STUDENT VIEW (hidden for teachers) ═══ -->
+        <div id="studentOnly">
+            <div id="remindersSection"></div>
+            <div id="gameSection"></div>
+            <div id="dashMyGroupsSection" style="display:none;">
+                <h2 class="dash-section-title">Мои группы, оценки и посещаемость</h2>
+                <div id="dashMyGroups"></div>
+            </div>
+        <!-- Test results -->
+        <!-- My schedule -->
+        <h2 class="dash-section-title">Моё расписание</h2>
+        <div id="dashSchedule"><p style="color: var(--ink-soft); font-size: 0.9rem;">Загрузка…</p></div>
+
+        <!-- Homework left by the teacher — only shown once at least one lesson has some -->
+        <div id="dashHomeworkSection" style="display:none;">
+            <h2 class="dash-section-title">Домашние задания</h2>
+            <div id="dashHomework"></div>
+        </div>
+
+        <h2 class="dash-section-title">Результаты тестов</h2>
+        <div class="dash-grid">
+            <div class="result-card" id="levelTestCard">
+                <div class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/></svg></div>
+                <h3>Тест уровня английского</h3>
+                <p class="r-empty" id="levelTestEmpty">Вы ещё не проходили тест на уровень английского языка.</p>
+                <div id="levelTestResult" style="display: none;">
+                    <div class="r-score" id="levelTestScoreEl">—</div>
+                    <div class="r-meta" id="levelTestLevelEl">—</div>
+                    <div class="r-meta" id="levelTestDateEl" style="margin-top: 0.5rem;"></div>
+                </div>
+                <a href="level-test.html" class="btn-outline" style="display: inline-block; margin-top: 1rem; padding: 0.55rem 1.2rem; border-radius: 8px;" id="levelTestBtn">Пройти тест</a>
+            </div>
+
+            <div class="result-card" id="satTestCard">
+                <div class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M9 3.5 7 20.5"/><path d="M17 3.5 15 20.5"/><path d="M4 8.5h17"/><path d="M3 15.5h17"/></svg></div>
+                <h3>SAT Math</h3>
+                <p class="r-empty" id="satTestEmpty">Вы ещё не проходили тест SAT Math.</p>
+                <div id="satTestResult" style="display: none;">
+                    <div class="r-score" id="satTestScoreEl">—</div>
+                    <div class="r-meta" id="satTestCorrectEl">—</div>
+                    <div class="r-meta" id="satTestDateEl" style="margin-top: 0.5rem;"></div>
+                </div>
+                <a href="math-test.html" class="btn-outline" style="display: inline-block; margin-top: 1rem; padding: 0.55rem 1.2rem; border-radius: 8px;" id="satTestBtn">Пройти тест</a>
+            </div>
+        </div>
+
+        <div id="refSection"></div>
+
+        <!-- Rewards -->
+        <h2 class="dash-section-title">Привилегии и бонусы</h2>
+        <div class="loyalty-grid">
+            <div class="loyalty-card">
+                <span class="loyalty-badge">Бонусы</span>
+                <div>
+                    <div class="loyalty-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M12.5 2 4 14h6l-1.5 8L20 10h-6l-1.5-8Z"/></svg></div>
+                    <h3>Интерактивные квесты</h3>
+                    <p>Выполняйте задания от академии и забирайте полезные учебные материалы и скидки:</p>
+                    <div class="loyalty-quests">
+                        <a href="level-test.html" class="quest-item" id="quest-level-test" style="text-decoration: none; color: inherit;">
+                            <div class="quest-checkbox" id="chk-level-test"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>
+                            <div>
+                                <strong style="display:block; color: var(--ink);">Пройти тест на уровень</strong>
+                                <span style="color: var(--accent);">Награда: скидка 10% на первый месяц</span>
+                            </div>
+                        </a>
+                        <a href="https://t.me/TheStarthChannel" target="_blank" class="quest-item" id="quest-telegram" onclick="completeTelegramQuest(event)" style="text-decoration: none; color: inherit;">
+                            <div class="quest-checkbox" id="chk-telegram"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>
+                            <div>
+                                <strong style="display:block; color: var(--ink);">Подписка на Telegram-канал</strong>
+                                <span style="color: var(--accent);">Награда: Книга IELTS Writing & Speaking PDF</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leave a review -->
+        <h2 class="dash-section-title">Оставить отзыв</h2>
+        <div class="result-card" style="max-width: 600px;">
+            <p style="color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 1rem;">Ваш отзыв появится на сайте после проверки администратором.</p>
+            <select id="dashReviewRating" style="width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); margin-bottom: 0.75rem;">
+                <option value="5">5 ★★★★★</option>
+                <option value="4">4 ★★★★</option>
+                <option value="3">3 ★★★</option>
+            </select>
+            <textarea id="dashReviewText" placeholder="Расскажите, как проходит обучение..." style="width: 100%; min-height: 100px; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-family: var(--font-main); margin-bottom: 0.75rem;"></textarea>
+            <button class="btn-primary" onclick="submitDashReview()">Отправить отзыв</button>
+            <div id="dashReviewStatus" style="font-size: 0.85rem; margin-top: 0.75rem;"></div>
+        </div>
+        </div>
+
+        <!-- ═══ TEACHER VIEW (shown only for accounts with the teacher role) ═══ -->
+        <div id="dashTeacherSection" style="display:none;">
+            <div class="tc-tabs" role="tablist">
+                <button class="tc-tab active" type="button" data-main="groups">Мои группы</button>
+                <button class="tc-tab" type="button" data-main="lessons">Уроки по расписанию</button>
+            </div>
+            <div id="tcMainGroups">
+                <p style="color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1.25rem;">Создавайте группы, добавляйте учеников по никнейму, отмечайте посещаемость, ставьте оценки и проводите урок с общей доской — писать на ней смогут только те, кому вы разрешите.</p>
+                <div id="tcGroupsRoot"></div>
+            </div>
+            <div id="tcMainLessons" style="display:none;">
+                <p style="color: var(--ink-soft); font-size: 0.85rem; margin: 0 0 1.25rem;">Индивидуальные уроки, которые назначил куратор. Отмечайте урок после занятия и оставляйте домашнее задание — ученик увидит его в своём кабинете.</p>
+                <div id="dashTeacherSchedule"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function escapeHtml(str) {
+            if (str === undefined || str === null) return '';
+            return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        }
+        async function submitDashReview() {
+            const statusEl = document.getElementById('dashReviewStatus');
+            const text = document.getElementById('dashReviewText').value.trim();
+            const rating = document.getElementById('dashReviewRating').value;
+            if (!text) { statusEl.textContent = 'Напишите текст отзыва.'; statusEl.style.color = 'var(--accent-warm)'; return; }
+            if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY || !auth.currentUser) {
+                statusEl.textContent = 'Нужно быть в системе (обновите страницу и войдите заново).';
+                statusEl.style.color = 'var(--accent-warm)';
+                return;
+            }
+            try {
+                const profile = window.currentUserProfile || {};
+                await db.collection('reviews').add({
+                    name: profile.name || 'Ученик TheStarth',
+                    rating,
+                    text,
+                    published: false,
+                    createdAt: new Date().toISOString()
+                });
+                statusEl.textContent = 'Спасибо! Отзыв отправлен на проверку.';
+                statusEl.style.color = 'var(--accent)';
+                document.getElementById('dashReviewText').value = '';
+            } catch (err) {
+                statusEl.textContent = 'Ошибка: ' + err.message;
+                statusEl.style.color = 'var(--accent-warm)';
+            }
+        }
+    </script>
+
+    <!-- Toast Notification container (used by "Получить реф-ссылку") -->
+    <div class="starth-toast" id="starth-toast">
+        <span class="starth-toast-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M11 3v3.4M11 15.6V19M4 11h3.4M15.6 11H19M6.3 6.3l2.1 2.1M13.6 13.6l2.1 2.1M15.7 6.3l-2.1 2.1M8.4 13.6l-2.1 2.1"/><circle cx="11" cy="11" r="2.1" fill="currentColor" stroke="none"/></svg></span>
+        <span id="starth-toast-message">Ссылка скопирована!</span>
+    </div>
+
+    <!-- Auth modal, same as on the homepage, so login works without leaving this page -->
+        <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close-auth-modal" style="float: right; cursor: pointer; font-size: 1.5rem; color: var(--ink-soft);">&times;</span>
+
+            <div id="auth-login-view">
+                <h2 data-i18n="auth.login_title">Вход в кабинет</h2>
+                <p data-i18n="auth.login_sub">Войдите по email и паролю.</p>
+                <form id="loginForm">
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" data-i18n-placeholder="auth.password_ph" placeholder="Пароль" required>
+                    <div id="login-form-error" style="color: var(--accent-warm); font-size: 0.85rem; margin-top: 0.5rem;"></div>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="nav.login">Войти</button>
+                </form>
+                <p style="text-align: center; margin-top: 0.75rem; font-size: 0.82rem;"><a href="#" id="show-forgot" style="color: var(--ink-soft);" data-i18n="auth.forgot">Забыли пароль?</a></p>
+                <p style="text-align: center; margin-top: 0.5rem; font-size: 0.85rem; color: var(--ink-soft);"><span data-i18n="auth.no_account">Нет аккаунта?</span> <a href="#" id="show-register" style="color: var(--accent);" data-i18n="auth.register_link">Зарегистрироваться</a></p>
+            </div>
+
+            <div id="auth-register-view" style="display:none;">
+                <h2 data-i18n="auth.register_title">Регистрация</h2>
+                <p data-i18n="auth.register_sub">Создайте аккаунт, чтобы получить доступ к личному кабинету.</p>
+                <form id="registerForm">
+                    <input type="text" name="name" data-i18n-placeholder="form.name_ph" placeholder="Ваше имя" required>
+                    <input type="text" name="surname" data-i18n-placeholder="form.surname_ph" placeholder="Ваша фамилия" required>
+                    <input type="tel" name="phone" data-i18n-placeholder="form.phone_ph" placeholder="Номер телефона" required>
+                    <input type="text" name="nickname" data-i18n-placeholder="auth.nickname_ph" placeholder="Никнейм (латиницей, напр. aziz_2010)" required pattern="[a-zA-Z0-9_]{3,20}">
+                    <select name="course" required>
+                        <option value="" disabled selected data-i18n="auth.course_ph">Какой курс интересует?</option>
+                        <option value="Общий английский" data-i18n="auth.opt_general">Общий английский</option>
+                        <option value="IELTS Preparation">IELTS Preparation</option>
+                        <option value="SAT Math">SAT Math</option>
+                        <option value="Олимпиадная математика" data-i18n="chat.role_olymp">Олимпиадная математика</option>
+                        <option value="Пока не уверен(а)" data-i18n="auth.opt_unsure">Пока не уверен(а)</option>
+                    </select>
+                    <input type="email" name="email" placeholder="Email" required>
+                    <input type="password" name="password" data-i18n-placeholder="auth.password_new_ph" placeholder="Пароль (мин. 6 символов)" required minlength="6">
+                    <div id="register-form-error" style="color: var(--accent-warm); font-size: 0.85rem; margin-top: 0.5rem;"></div>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="auth.register_link">Зарегистрироваться</button>
+                    <p data-i18n-html="auth.agree" style="font-size: 0.75rem; color: var(--ink-soft); text-align: center; margin-top: 1rem;">
+                        Нажимая кнопку, вы соглашаетесь с <a href="privacy.html" style="color: var(--accent); text-decoration: underline;">Политикой конфиденциальности</a>.
+                    </p>
+                </form>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--ink-soft);"><span data-i18n="auth.have_account">Уже есть аккаунт?</span> <a href="#" id="show-login" style="color: var(--accent);" data-i18n="nav.login">Войти</a></p>
+            </div>
+
+            <div id="auth-forgot-view" style="display:none;">
+                <h2 data-i18n="auth.forgot_title">Восстановление пароля</h2>
+                <p data-i18n="auth.forgot_sub">Укажите email, на него придёт письмо со ссылкой для сброса пароля.</p>
+                <form id="forgotForm">
+                    <input type="email" name="email" placeholder="Email" required>
+                    <div id="forgot-form-error" style="font-size: 0.85rem; margin-top: 0.5rem;"></div>
+                    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="auth.forgot_btn">Отправить ссылку</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--ink-soft);"><a href="#" id="show-login-from-forgot" style="color: var(--accent);" data-i18n="auth.back_login">Назад ко входу</a></p>
+            </div>
+        </div>
+    </div>
+
+    <footer style="margin-top: 4rem;">
+        <div class="footer-content">
+            <div class="footer-col">
+                <div class="logo" style="margin-bottom: 1rem;">The<span>Starth</span></div>
+                <p style="color: var(--ink-soft); font-size: 0.9rem;">Образование будущего. Математика и Английский язык.</p>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer.quicklinks">Быстрые ссылки</h4>
+                <ul>
+                    <li><a href="index.html#courses" data-i18n="nav.courses">Курсы</a></li>
+                    <li><a href="about.html" data-i18n="nav.about">О нас</a></li>
+                    <li><a href="news.html" data-i18n="nav.news">Новости</a></li>
+                    <li><a href="careers.html" data-i18n="footer.careers">Вакансии</a></li>
+                    <li><a href="dashboard.html">Личный кабинет</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4 data-i18n="footer.contacts">Контакты</h4>
+                <ul>
+                    <li><a href="#">TheStarthInternational@gmail.com</a></li>
+                    <li><a href="https://wa.me/998918679777" target="_blank">WhatsApp: +998 91 867 97 77</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p><span data-i18n="footer.copyright">&copy; 2026 TheStarth. Все права защищены.</span> | <a href="privacy.html" style="color: var(--ink-soft); text-decoration: underline;" data-i18n="footer.privacy">Политика конфиденциальности</a></p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin-nav.js"></script>
+    <script src="translations.js"></script>
+    <script src="content-i18n.js"></script>
+    <script src="icons.js"></script>
+    <script src="app.js"></script>
+    <script src="teacher-cabinet.js"></script>
+    <script src="cert-art.js"></script>
+    <script src="gamification.js"></script>
+    <script src="i18n-extra.js"></script>
+    <script src="csv-export.js"></script>
+    <script src="reminders.js"></script>
+    <script src="messenger.js"></script>
+    <script src="dashboard-student.js"></script>
+    <script>
+        async function loadStudentSchedule(nickname) {
+            const wrap = document.getElementById('dashSchedule');
+            const hwSection = document.getElementById('dashHomeworkSection');
+            const hwWrap = document.getElementById('dashHomework');
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                // One query covers both sections: upcoming lessons here, and
+                // homework (any date, newest first) below.
+                const rawSnap = await db.collection('schedule')
+                    .where('studentNickname', '==', nickname).get();
+                const all = []; rawSnap.forEach(d => all.push(d.data()));
+
+                const upcoming = all.filter(s => s.date >= today);
+                upcoming.sort((a, b) => (a.date + ' ' + a.time).localeCompare(b.date + ' ' + b.time));
+                if (!upcoming.length) {
+                    wrap.innerHTML = '<p style="color: var(--ink-soft); font-size: 0.9rem;">Пока нет запланированных уроков — куратор добавит их сюда.</p>';
+                } else {
+                    wrap.innerHTML = '';
+                    upcoming.forEach(s => {
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        card.style.marginBottom = '0.75rem';
+                        card.innerHTML = `
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                                <div>
+                                    <strong>${new Date(s.date).toLocaleDateString((window.starthLocale ? window.starthLocale() : 'ru-RU'), {weekday:'long', day:'numeric', month:'long'})}, ${s.time}</strong>
+                                    <div style="color: var(--ink-soft); font-size: 0.85rem; margin-top:0.25rem;">Преподаватель: ${escapeHtml(s.teacherName)}${s.subject ? ' · ' + escapeHtml(s.subject) : ''}</div>
+                                </div>
+                                <a href="video-lesson.html?room=${s.room}" class="btn-primary" style="white-space:nowrap;">Войти на урок</a>
+                            </div>
+                        `;
+                        wrap.appendChild(card);
+                    });
+                }
+
+                const withHomework = all.filter(s => s.homework && s.homework.trim());
+                withHomework.sort((a, b) => (b.date + ' ' + b.time).localeCompare(a.date + ' ' + a.time));
+                if (withHomework.length) {
+                    hwSection.style.display = 'block';
+                    hwWrap.innerHTML = '';
+                    withHomework.forEach(s => {
+                        const card = document.createElement('div');
+                        card.className = 'hw-card';
+                        card.innerHTML = `
+                            <div class="hw-date">${new Date(s.date).toLocaleDateString((window.starthLocale ? window.starthLocale() : 'ru-RU'), {day:'numeric', month:'long'})} · ${escapeHtml(s.teacherName)}${s.subject ? ' · ' + escapeHtml(s.subject) : ''}</div>
+                            <div class="hw-text">${escapeHtml(s.homework)}</div>
+                        `;
+                        hwWrap.appendChild(card);
+                    });
+                }
+            } catch (err) {
+                wrap.innerHTML = '<p style="color: var(--ink-soft); font-size: 0.9rem;">Не удалось загрузить расписание.</p>';
+                console.warn(err);
+            }
+        }
+
+        // Saves {status} and/or {homework} on one lesson. Rules only let the
+        // assigned teacher touch these two fields — nothing else.
+        async function saveLessonField(id, patch) {
+            await db.collection('schedule').doc(id).update(patch);
+        }
+
+        async function loadTeacherSchedule(uid) {
+            const wrap = document.getElementById('dashTeacherSchedule');
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                const rawSnap = await db.collection('schedule')
+                    .where('teacherUid', '==', uid).get();
+                const docs = []; rawSnap.forEach(d => docs.push({ id: d.id, data: d.data() }));
+                // Soonest upcoming lesson first, then most recent past lesson first.
+                docs.sort((a, b) => {
+                    const aUp = a.data.date >= today, bUp = b.data.date >= today;
+                    if (aUp !== bUp) return aUp ? -1 : 1;
+                    const cmp = (a.data.date + ' ' + a.data.time).localeCompare(b.data.date + ' ' + b.data.time);
+                    return aUp ? cmp : -cmp;
+                });
+                if (!docs.length) {
+                    wrap.innerHTML = '<p style="color: var(--ink-soft); font-size: 0.9rem;">Пока нет уроков в расписании.</p>';
+                    return;
+                }
+                wrap.innerHTML = '';
+                docs.forEach(({ id, data: s }) => {
+                    const status = s.status || 'upcoming';
+                    const isPast = s.date < today;
+                    const card = document.createElement('div');
+                    card.className = 'tch-lesson';
+                    card.innerHTML = `
+                        <div class="tch-lesson-top">
+                            <div>
+                                <strong>${new Date(s.date).toLocaleDateString((window.starthLocale ? window.starthLocale() : 'ru-RU'), { weekday: 'long', day: 'numeric', month: 'long' })}, ${s.time}</strong>
+                                <span class="tch-status-badge ${status}">${status === 'done' ? 'Проведён' : status === 'missed' ? 'Пропущен' : 'Предстоит'}</span>
+                                <div style="color: var(--ink-soft); font-size: 0.85rem; margin-top:0.25rem;">Ученик: @${escapeHtml(s.studentNickname)}${s.subject ? ' · ' + escapeHtml(s.subject) : ''}</div>
+                            </div>
+                            <a href="video-lesson.html?room=${s.room}" class="btn-outline" style="white-space:nowrap; padding:0.5rem 1rem; border-radius:8px;">Войти на урок</a>
+                        </div>
+                        ${isPast ? `
+                        <div class="tch-status-btns">
+                            <button type="button" data-status="done" class="${status === 'done' ? 'active' : ''}">✓ Урок проведён</button>
+                            <button type="button" data-status="missed" class="${status === 'missed' ? 'active' : ''}">✗ Ученик не пришёл</button>
+                        </div>` : ''}
+                        <textarea placeholder="Домашнее задание для этого урока…">${escapeHtml(s.homework || '')}</textarea>
+                        <div>
+                            <button type="button" class="btn-primary tch-hw-save">Сохранить задание</button>
+                            <span class="tch-hw-saved" style="display:none;">Сохранено ✓</span>
+                        </div>
+                    `;
+                    card.querySelectorAll('.tch-status-btns button').forEach(btn => {
+                        btn.addEventListener('click', async () => {
+                            const newStatus = btn.dataset.status === status ? firebase.firestore.FieldValue.delete() : btn.dataset.status;
+                            btn.disabled = true;
+                            try {
+                                await saveLessonField(id, { status: newStatus });
+                                loadTeacherSchedule(uid);
+                            } catch (err) { alert('Не удалось сохранить: ' + err.message); btn.disabled = false; }
+                        });
+                    });
+                    const textarea = card.querySelector('textarea');
+                    const saveBtn = card.querySelector('.tch-hw-save');
+                    const savedLabel = card.querySelector('.tch-hw-saved');
+                    saveBtn.addEventListener('click', async () => {
+                        saveBtn.disabled = true;
+                        try {
+                            await saveLessonField(id, { homework: textarea.value.trim() });
+                            savedLabel.style.display = 'inline';
+                            setTimeout(() => savedLabel.style.display = 'none', 2500);
+                        } catch (err) { alert('Не удалось сохранить: ' + err.message); }
+                        saveBtn.disabled = false;
+                    });
+                    wrap.appendChild(card);
+                });
+            } catch (err) {
+                wrap.innerHTML = '<p style="color: var(--ink-soft); font-size: 0.9rem;">Не удалось загрузить расписание.</p>';
+                console.warn(err);
+            }
+        }
+
+        function renderDashboard(user, profile) {
+            const loginRequired = document.getElementById('loginRequired');
+            const dashContent = document.getElementById('dashContent');
+
+            if (!user) {
+                loginRequired.style.display = 'block';
+                dashContent.style.display = 'none';
+                return;
+            }
+            loginRequired.style.display = 'none';
+            dashContent.style.display = 'block';
+
+            const firstName = (profile && profile.name) || 'Студент';
+            const surname = (profile && profile.surname) || '';
+            const name = [firstName, surname].filter(Boolean).join(' ');
+            const phone = profile && profile.phone;
+            const nickname = profile && profile.nickname;
+
+            document.getElementById('dashUserName').textContent = name;
+            document.getElementById('dashProfileName').textContent = name;
+            document.getElementById('dashProfileNickname').textContent = nickname ? '@' + nickname : '';
+            document.getElementById('dashProfileContact').textContent = [phone, user.email].filter(Boolean).join(' · ') || 'Контакты не указаны';
+            document.getElementById('dashAvatar').textContent = name.trim().charAt(0).toUpperCase() || 'S';
+
+            // Student ID (000001...). Old accounts without an ID get one here, once.
+            const idEl = document.getElementById('dashProfileId');
+            const payLink = document.getElementById('dashPayLink');
+            const showId = (sid) => {
+                if (!sid) return;
+                idEl.textContent = 'ID: ' + sid;
+                payLink.href = 'payment.html?id=' + encodeURIComponent(sid) + '&name=' + encodeURIComponent(firstName) + '&surname=' + encodeURIComponent(surname) + '&phone=' + encodeURIComponent(phone || '');
+            };
+            showId(profile && profile.studentId);
+            if (!(profile && profile.studentId) && window.starthEnsureStudentId) {
+                window.starthEnsureStudentId(user.uid, profile).then(showId).catch(() => {});
+            }
+
+            if (window.Messenger) window.Messenger.init(user, profile);
+            const isTeacher = !!(profile && profile.role === 'teacher');
+            document.getElementById('studentOnly').style.display = isTeacher ? 'none' : 'block';
+            document.getElementById('dashTeacherSection').style.display = isTeacher ? 'block' : 'none';
+
+            if (isTeacher) {
+                // Teacher cabinet: no payments, tests, bonuses or reviews — groups, students, grades, attendance
+                document.getElementById('dashSubtitle').textContent = 'Ваши группы, ученики, оценки и посещаемость.';
+                document.getElementById('dashPayLink').style.display = 'none';
+                document.getElementById('dashProfileId').style.display = 'none';
+                if (window.TeacherCabinet) window.TeacherCabinet.init(user, profile);
+                loadTeacherSchedule(user.uid);
+                return;
+            }
+
+            if (nickname) loadStudentSchedule(nickname);
+            else document.getElementById('dashSchedule').innerHTML = '<p style="color: var(--ink-soft); font-size: 0.9rem;">Никнейм не указан — обратитесь к куратору.</p>';
+            if (window.Gamification) window.Gamification.init(user, profile);
+            if (window.Reminders) window.Reminders.init(user, profile);
+            if (window.StudentExtras) {
+                window.StudentExtras.init(user, profile);
+                if (location.hash === '#referral') setTimeout(() => { const r = document.getElementById('referral'); if (r) r.scrollIntoView({ behavior: 'smooth' }); }, 700);
+            }
+
+            // English level test result
+            if (profile && profile.levelTestCompleted) {
+                document.getElementById('levelTestEmpty').style.display = 'none';
+                document.getElementById('levelTestResult').style.display = 'block';
+                document.getElementById('levelTestScoreEl').textContent = profile.levelTestScore || '—';
+                document.getElementById('levelTestLevelEl').textContent = profile.levelTestLevel || '';
+                document.getElementById('levelTestDateEl').textContent = profile.levelTestDate ? 'Пройден: ' + new Date(profile.levelTestDate).toLocaleDateString((window.starthLocale ? window.starthLocale() : 'ru-RU')) : '';
+                document.getElementById('levelTestBtn').textContent = 'Пройти ещё раз';
+            }
+
+            // SAT math test result
+            if (profile && profile.satTestCompleted) {
+                document.getElementById('satTestEmpty').style.display = 'none';
+                document.getElementById('satTestResult').style.display = 'block';
+                document.getElementById('satTestScoreEl').textContent = (profile.satScore || '—') + ' / 800';
+                document.getElementById('satTestCorrectEl').textContent = 'Верно: ' + (profile.satCorrectCount || '—') + ' из 5';
+                document.getElementById('satTestDateEl').textContent = profile.satTestDate ? 'Пройден: ' + new Date(profile.satTestDate).toLocaleDateString((window.starthLocale ? window.starthLocale() : 'ru-RU')) : '';
+                document.getElementById('satTestBtn').textContent = 'Пройти ещё раз';
+            }
+        }
+
+        document.querySelectorAll('[data-main]').forEach((b) => b.addEventListener('click', () => {
+            document.querySelectorAll('[data-main]').forEach((x) => x.classList.toggle('active', x === b));
+            document.getElementById('tcMainGroups').style.display = b.dataset.main === 'groups' ? 'block' : 'none';
+            document.getElementById('tcMainLessons').style.display = b.dataset.main === 'lessons' ? 'block' : 'none';
+        }));
+
+        // app.js dispatches this once Firebase has resolved the login state
+        window.addEventListener('starth-auth-ready', (e) => {
+            renderDashboard(e.detail.user, e.detail.profile);
+        });
+
+        // If Firebase isn't configured yet, or auth already resolved before
+        // this script ran, show the "please log in" state rather than
+        // hanging forever.
+        if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
+            renderDashboard(null, null);
+        }
+    </script>
+    
+</body>
+</html>

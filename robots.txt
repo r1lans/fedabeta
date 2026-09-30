@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard.html
+Disallow: /admin.html
+Disallow: /video-lesson.html
+Disallow: /teacher-schedule.html
+
+Sitemap: https://thestarth.com/sitemap.xml

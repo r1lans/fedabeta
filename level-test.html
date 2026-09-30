@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <script src="sheets-config.js"></script>
+    <title>Бесплатный тест на уровень английского — TheStarth</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+        .quiz-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: var(--paper-alt);
+            padding: 3rem;
+            border-radius: 12px;
+            border: 1px solid var(--rule);
+            box-shadow: 0 10px 30px rgba(24, 27, 32, 0.08);
+            position: relative;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--paper);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: var(--ink);
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        .option-btn {
+            background: var(--paper);
+            border: 1px solid var(--rule);
+            color: var(--ink);
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+        }
+        .option-btn:hover {
+            border-color: var(--accent);
+            background: var(--accent-tint);
+        }
+        .option-btn.selected {
+            background: var(--accent);
+            color: var(--on-accent);
+            border-color: var(--accent);
+        }
+        #lead-form {
+            display: none;
+            text-align: center;
+        }
+        #result-screen {
+            display: none;
+            text-align: center;
+        }
+        .level-badge {
+            display: inline-block;
+            background: rgba(212, 175, 55, 0.2);
+            color: var(--accent);
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin: 1rem 0;
+            border: 1px solid var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html">На главную</a>
+                <a href="results.html" data-i18n="nav.results">Результаты</a>
+                <a href="mock-exam.html" style="color: var(--accent); font-weight: bold; position: relative;">Mock Exam <span style="position: absolute; top: -12px; right: -15px; background: red; color: white; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; text-transform: uppercase;">New</span></a>
+                <a href="payment.html" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding: 100px 20px;">
+        <div class="quiz-container">
+            <!-- Quiz Screen -->
+            <div id="quiz-screen">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h1 style="font-size: 2rem; margin-bottom: 0.5rem;">Тест на уровень <span class="text-premium">Английского</span></h1>
+                    <p style="color: var(--ink-soft);">Пройдите тест из 10 вопросов, чтобы узнать свой точный уровень и получить персональные рекомендации.</p>
+                </div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                
+                <div id="question-container">
+                    <h2 class="question-text" id="question">1. I ___ from Uzbekistan.</h2>
+                    <div class="options-grid" id="options">
+                        <button class="option-btn">A) am</button>
+                        <button class="option-btn">B) is</button>
+                        <button class="option-btn">C) are</button>
+                        <button class="option-btn">D) be</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lead Capture Screen -->
+            <div id="lead-form">
+                <h2 style="font-size: 2rem; margin-bottom: 1rem;"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 21 8.5 9.5 14.5 15.5Z"/><path d="M13 8l1.3-3.3M17 10.3l3.3-1.3M9.7 5.3 8 2"/><circle cx="18.5" cy="5.5" r="1" fill="currentColor" stroke="none"/></svg> Ваш результат готов!</h2>
+                <p style="color: var(--ink-soft); margin-bottom: 2rem;">Оставьте ваши контакты, чтобы мы выслали детальный разбор ошибок и открыли доступ к результату.</p>
+                
+                <form id="contact-form" style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin: 0 auto;">
+                    <input type="text" id="lead-name" placeholder="Ваше имя" required style="padding: 1rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-size: 1rem;">
+                    <input type="tel" id="lead-phone" placeholder="Номер телефона / Telegram" required style="padding: 1rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-size: 1rem;">
+                    <button type="submit" class="btn-primary" style="padding: 1rem; font-size: 1.1rem; width: 100%;">Показать мой результат</button>
+                    <p style="font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.5rem;">
+                        Нажимая кнопку, вы соглашаетесь с <a href="privacy.html" target="_blank" style="color: var(--accent);">Политикой конфиденциальности</a>.
+                    </p>
+                </form>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="result-screen">
+                <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Поздравляем!</h2>
+                <p style="color: var(--ink-soft); font-size: 1.2rem;">Ваш ориентировочный уровень английского:</p>
+                
+                <div class="level-badge" id="level-result">B1 (Intermediate)</div>
+                
+                <p style="margin: 1.5rem 0; line-height: 1.6;" id="level-description">
+                    У вас хорошая база! Вы можете общаться на повседневные темы. Сейчас самое время начать курс IELTS Preparation, чтобы структурировать знания и сдать на 6.5+.
+                </p>
+                
+                <div style="background: var(--accent-tint); border: 1px solid var(--accent); padding: 1.5rem; border-radius: 12px; margin-top: 2rem;">
+                    <h3 style="color: var(--accent); margin-bottom: 1rem;"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><rect x="3.5" y="9.5" width="17" height="11" rx="1"/><path d="M3.5 9.5V13H20.5V9.5"/><path d="M12 9.5V21"/><path d="M12 9.5C10 6.2 6.5 4.5 5.3 6.4 4.2 8.2 6.9 9.5 12 9.5Z"/><path d="M12 9.5c2-3.3 5.5-5 6.7-3.1 1.1 1.8-1.6 3.1-6.7 3.1Z"/></svg> Ваш бонус</h3>
+                    <p style="margin-bottom: 1.5rem;">За прохождение теста мы дарим вам скидку 10% на первый месяц обучения!</p>
+                    <a href="index.html#courses" class="btn-primary">Выбрать курс со скидкой</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; color: var(--ink-soft); padding: 2rem;">
+        <p data-i18n="footer.copyright">© 2026 TheStarth. Все права защищены.</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin-nav.js"></script>
+    <script>
+        // logToSheet() comes from sheets-config.js (one shared Apps Script URL)
+
+        const questions = [
+            { q: "1. I ___ from Uzbekistan.", options: ["am", "is", "are", "be"], ans: 0 },
+            { q: "2. She ___ to the gym every day.", options: ["go", "goes", "going", "is go"], ans: 1 },
+            { q: "3. We ___ a great movie yesterday.", options: ["see", "saw", "seen", "seeing"], ans: 1 },
+            { q: "4. I have been living here ___ 5 years.", options: ["since", "for", "during", "from"], ans: 1 },
+            { q: "5. If I ___ rich, I would travel the world.", options: ["am", "was", "were", "will be"], ans: 2 },
+            { q: "6. She asked me where ___.", options: ["did I live", "I lived", "do I live", "I live"], ans: 1 },
+            { q: "7. By next year, I ___ my degree.", options: ["will finish", "will have finished", "am finishing", "finish"], ans: 1 },
+            { q: "8. Despite ___, we enjoyed the holiday.", options: ["the rain", "it rained", "of raining", "rain"], ans: 0 },
+            { q: "9. It's high time you ___ studying.", options: ["start", "started", "will start", "to start"], ans: 1 },
+            { q: "10. Scarcely ___ when the phone rang.", options: ["I had entered", "had I entered", "I entered", "entered I"], ans: 1 }
+        ];
+
+        let currentQ = 0;
+        let score = 0;
+
+        const questionEl = document.getElementById('question');
+        const optionsEl = document.getElementById('options');
+        const progressEl = document.getElementById('progress');
+        const quizScreen = document.getElementById('quiz-screen');
+        const leadForm = document.getElementById('lead-form');
+        const resultScreen = document.getElementById('result-screen');
+
+        function loadQuestion() {
+            const q = questions[currentQ];
+            questionEl.innerText = q.q;
+            optionsEl.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(index);
+                optionsEl.appendChild(btn);
+            });
+            
+            progressEl.style.width = `${(currentQ / questions.length) * 100}%`;
+        }
+
+        function selectOption(index) {
+            if (index === questions[currentQ].ans) {
+                score++;
+            }
+            
+            currentQ++;
+            
+            if (currentQ < questions.length) {
+                loadQuestion();
+            } else {
+                showLeadForm();
+            }
+        }
+
+        function showLeadForm() {
+            quizScreen.style.display = 'none';
+            leadForm.style.display = 'block';
+            progressEl.style.width = '100%';
+        }
+
+        document.getElementById('contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('lead-name').value;
+            const phone = document.getElementById('lead-phone').value;
+            
+            // Отправляем лид на Formspree
+            fetch('https://formspree.io/f/mqennban', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Type: "TEST_RESULT_LEAD",
+                    Name: name,
+                    Phone: phone,
+                    Score: `${score}/${questions.length}`
+                })
+            }).then(() => {
+                showResult();
+            }).catch(() => {
+                // В любом случае показываем результат (даже если блокировщик заблокировал fetch)
+                showResult();
+            });
+            logToSheet('log_test_lead', { name, phone, source: 'Level Test', score: `${score}/${questions.length}` });
+        });
+
+        function showResult() {
+            leadForm.style.display = 'none';
+            resultScreen.style.display = 'block';
+            
+            const lvlBadge = document.getElementById('level-result');
+            const lvlDesc = document.getElementById('level-description');
+            
+            if (score <= 3) {
+                lvlBadge.innerText = "A1-A2 (Beginner / Elementary)";
+                lvlDesc.innerText = "Вам нужно подтянуть грамматическую базу. Наши преподаватели Foundation English помогут вам заговорить и понять логику языка!";
+            } else if (score <= 7) {
+                lvlBadge.innerText = "B1-B2 (Intermediate / Upper-Intermediate)";
+                lvlDesc.innerText = "У вас хорошая база! Вы можете общаться на повседневные темы. Сейчас самое время начать курс IELTS Preparation, чтобы структурировать знания и сдать на 6.5+.";
+            } else {
+                lvlBadge.innerText = "C1 (Advanced)";
+                lvlDesc.innerText = "Ваш уровень очень высок! С такой базой мы быстро натренируем вас на специфику заданий IELTS, и вы легко возьмете 7.5 или даже 8.0.";
+            }
+
+            // Save result for the personal dashboard
+            const levelTestDate = new Date().toISOString();
+            localStorage.setItem('levelTestCompleted', 'true');
+            localStorage.setItem('levelTestScore', `${score}/${questions.length}`);
+            localStorage.setItem('levelTestLevel', lvlBadge.innerText);
+            localStorage.setItem('levelTestDate', levelTestDate);
+
+            if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
+                const user = auth.currentUser;
+                if (user) {
+                    db.collection('users').doc(user.uid).set({
+                        levelTestCompleted: true,
+                        levelTestScore: `${score}/${questions.length}`,
+                        levelTestLevel: lvlBadge.innerText,
+                        levelTestDate: levelTestDate
+                    }, { merge: true }).catch(err => console.warn('Could not save test result to profile:', err));
+                }
+            }
+        }
+
+        // Start Quiz
+        loadQuestion();
+    </script>
+    
+    <script src="translations.js"></script>
+</body>
+</html>
