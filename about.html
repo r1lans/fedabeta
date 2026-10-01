@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ru" data-title-i18n="about.title">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <title>О нас — TheStarth | Платформа развития навыков</title>
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+        /* ── Teacher Cards ── */
+        .teachers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .teacher-card {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .teacher-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .teacher-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--accent);
+        }
+
+        .teacher-card:hover::before {
+            opacity: 1;
+        }
+
+        .teacher-photo-wrap {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 1.25rem;
+        }
+
+        .teacher-photo-wrap img {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+        }
+
+        /* placeholder when no real photo */
+        .teacher-photo-wrap .photo-placeholder {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 3px solid var(--accent);
+            background: var(--accent-tint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: 1px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .score-badge {
+            position: absolute;
+            bottom: 0; right: 0;
+            background: var(--accent);
+            color: var(--on-accent);
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-family: var(--font-heading);
+            z-index: 10;
+        }
+
+        .teacher-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--ink);
+            transition: color 0.2s;
+        }
+        .teacher-name:hover { color: var(--accent); }
+
+        .teacher-role {
+            color: var(--accent);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 0.75rem;
+        }
+
+        .teacher-bio {
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+            line-height: 1.65;
+            margin-bottom: 1.25rem;
+        }
+
+        .teacher-cert-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            color: var(--accent);
+            border: 1px solid rgba(212,175,55,0.3);
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        .teacher-cert-link:hover {
+            background: rgba(212,175,55,0.1);
+            border-color: var(--accent);
+        }
+
+        /* ── Why Us strip ── */
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+            gap: 1.5rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .why-item {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 12px;
+            padding: 1.75rem;
+            transition: border-color 0.3s;
+        }
+
+        .why-item:hover { border-color: var(--accent); }
+
+        .why-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .why-item h4 {
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .why-item p {
+            color: var(--ink-soft);
+            font-size: 0.87rem;
+            line-height: 1.55;
+        }
+
+        /* ── Methodology timeline ── */
+        .method-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+            gap: 0;
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .method-step {
+            padding: 2rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .method-step:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -0.6rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 1.4rem;
+        }
+
+        .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 1.1rem;
+            font-family: var(--font-heading);
+            margin-bottom: 1rem;
+        }
+
+        .method-step h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .method-step p {
+            color: var(--ink-soft);
+            font-size: 0.83rem;
+            line-height: 1.5;
+        }
+
+        /* ── Story / founding ── */
+        .story-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .story-block { grid-template-columns: 1fr; gap: 2rem; }
+            .method-step:not(:last-child)::after { display: none; }
+            .method-steps { gap: 1rem; }
+        }
+
+        .story-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .story-stat-item {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .story-stat-num {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            min-width: 90px;
+        }
+
+        .story-stat-label {
+            color: var(--ink-soft);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* section spacing */
+        .page-section {
+            padding: 5rem 2rem;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.4rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-header p {
+            color: var(--ink-soft);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cert badge inside card */
+        .cert-badge-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .cert-tag {
+            font-size: 0.72rem;
+            background: rgba(212,175,55,0.08);
+            color: var(--accent);
+            border: 1px solid rgba(212,175,55,0.25);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        /* Mission banner */
+        .mission-banner {
+            background: var(--paper-alt);
+            border: 1px solid var(--rule);
+            border-radius: 16px;
+            padding: 3.5rem 3rem;
+            max-width: 860px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mission-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .mission-banner h2 {
+            color: var(--accent);
+            margin-bottom: 1.25rem;
+            font-size: 1.6rem;
+        }
+
+        .mission-banner p {
+            color: var(--ink-soft);
+            font-size: 1.1rem;
+            line-height: 1.85;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" data-i18n="nav.home">На главную</a>
+                <a href="index.html#courses" data-i18n="nav.courses">Курсы</a>
+                <a href="results.html" data-i18n="nav.results">Результаты</a>
+                <a href="careers.html" data-i18n="nav.careers">Вакансии</a>
+                <a href="mock-exam.html" style="color: var(--accent); font-weight: bold; position: relative;">Mock Exam <span style="position: absolute; top: -12px; right: -15px; background: red; color: white; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; text-transform: uppercase;">New</span></a>
+                <a href="payment.html" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding-top: 80px;">
+
+        <!-- ══ HERO ══ -->
+        <section class="page-section" style="text-align: center; padding-bottom: 2rem;">
+            <h1 style="font-size: 3rem; margin-bottom: 1rem;" data-i18n-html="about.hero_h1">
+                Команда, которая <span class="text-premium">доводит до результата</span>
+            </h1>
+            <p style="color: var(--ink-soft); font-size: 1.15rem; max-width: 680px; margin: 0 auto;" data-i18n="about.hero_lede">
+                Каждый преподаватель TheStarth — практикующий специалист с реальными сертификатами и сотнями успешных учеников за плечами.
+            </p>
+        </section>
+
+        <!-- ══ МИССИЯ ══ -->
+        <section class="page-section" style="padding-top: 1rem; padding-bottom: 4rem;">
+            <div class="mission-banner">
+                <h2 data-i18n="about.mission_title">Наша Миссия</h2>
+                <p data-i18n="about.mission_text">
+                    TheStarth — это платформа развития навыков с одной простой целью: каждый студент должен выйти с конкретным результатом.
+                    Не просто «пройти курс», а сдать IELTS на нужный балл, поступить в университет мечты, открыть для себя новые возможности.
+                    Мы работаем небольшой, но сильной командой — чтобы каждый ученик получал максимум внимания, а не терялся в потоке.
+                </p>
+            </div>
+        </section>
+
+        <!-- ══ ЦИФРЫ / ИСТОРИЯ ══ -->
+        <section class="page-section" style="background: var(--paper-alt); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+            <div class="story-block">
+                <div>
+                    <h2 style="font-size: 2.2rem; margin-bottom: 1.25rem;" data-i18n-html="about.story_title">
+                        Небольшая команда —<br><span class="text-premium">большие результаты</span>
+                    </h2>
+                    <p style="color: var(--ink-soft); line-height: 1.8; margin-bottom: 1.5rem;" data-i18n="about.story_p1">
+                        Мы сделали ставку на качество, а не масштаб. Маленькие группы, личный контакт с преподавателем и разбор каждой ошибки — вот почему наши ученики сдают с первой попытки.
+                    </p>
+                    <p style="color: var(--ink-soft); line-height: 1.8;" data-i18n="about.story_p2">
+                        Все курсы ведутся онлайн — без привязки к городу. Ташкент, Самарканд, Алматы, Москва — учитесь откуда угодно.
+                    </p>
+                </div>
+                <div class="story-stat">
+                    <div class="story-stat-item">
+                        <div class="story-stat-num">1200+</div>
+                        <div class="story-stat-label" data-i18n="about.stat_students">студентов прошли обучение с нами</div>
+                    </div>
+                    <div class="story-stat-item">
+                        <div class="story-stat-num">850+</div>
+                        <div class="story-stat-label" data-i18n="about.stat_certs">выданных сертификатов и успешных сдач</div>
+                    </div>
+                    <div class="story-stat-item">
+                        <div class="story-stat-num" id="teachers-total">5</div>
+                        <div class="story-stat-label" data-i18n="about.stat_teachers">сертифицированных преподавателей — каждый со своей специализацией</div>
+                    </div>
+                    <div class="story-stat-item">
+                        <div class="story-stat-num">100%</div>
+                        <div class="story-stat-label" data-i18n="about.stat_online">онлайн — учитесь из любой точки мира</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ МЕТОДОЛОГИЯ ══ -->
+        <section class="page-section">
+            <div class="section-header">
+                <h2 data-i18n-html="about.method_title">Как мы <span class="text-premium">учим</span></h2>
+                <p data-i18n="about.method_sub">Проверенный процесс, который даёт результат за 3–4 месяца</p>
+            </div>
+            <div class="method-steps">
+                <div class="method-step">
+                    <div class="step-num">1</div>
+                    <h4 data-i18n="about.m1_t">Тест на уровень</h4>
+                    <p data-i18n="about.m1_p">Бесплатный диагностический тест → определяем стартовую точку точно</p>
+                </div>
+                <div class="method-step">
+                    <div class="step-num">2</div>
+                    <h4 data-i18n="about.m2_t">Личный план</h4>
+                    <p data-i18n="about.m2_p">Преподаватель составляет индивидуальный план до целевого балла</p>
+                </div>
+                <div class="method-step">
+                    <div class="step-num">3</div>
+                    <h4 data-i18n="about.m3_t">Интенсив + ДЗ</h4>
+                    <p data-i18n="about.m3_p">Уроки + ежедневные задания с проверкой и разбором ошибок</p>
+                </div>
+                <div class="method-step">
+                    <div class="step-num">4</div>
+                    <h4 data-i18n="about.m4_t">Пробный экзамен</h4>
+                    <p data-i18n="about.m4_p">Mock tests в реальных условиях — никакого сюрприза на экзамене</p>
+                </div>
+                <div class="method-step">
+                    <div class="step-num">5</div>
+                    <h4 data-i18n="about.m5_t">Результат</h4>
+                    <p data-i18n="about.m5_p">Сдаёте экзамен. Получаете поддержку преподавателя даже после курса</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ ПОЧЕМУ МЫ ══ -->
+        <section class="page-section" style="background: var(--paper-alt); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);">
+            <div class="section-header">
+                <h2 data-i18n-html="about.why_title">Почему выбирают <span class="text-premium">TheStarth</span></h2>
+                <p data-i18n="about.why_sub">Не слоганы — конкретные отличия, которые влияют на ваш результат</p>
+            </div>
+            <div class="why-grid">
+                <div class="why-item">
+                    <div class="why-icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="8.2" r="3.4"/><path d="M5 20c0-3.6 3.1-6.3 7-6.3s7 2.7 7 6.3"/></svg></div>
+                    <h4 data-i18n="about.w1_t">Личный контакт с преподавателем</h4>
+                    <p data-i18n="about.w1_p">Маленькие группы — ваши ошибки не теряются. Каждое ДЗ проверяется и разбирается лично.</p>
+                </div>
+                <div class="why-item">
+                    <div class="why-icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M6 5H4.5A1.5 1.5 0 0 0 3 6.5 4 4 0 0 0 8 10"/><path d="M18 5h1.5A1.5 1.5 0 0 1 21 6.5 4 4 0 0 1 16 10"/><path d="M12 13v3"/><path d="M8.5 20.5 12 16l3.5 4.5"/></svg></div>
+                    <h4 data-i18n="about.w2_t">Реальные сертификаты учителей</h4>
+                    <p data-i18n="about.w2_p">Не просто «опытные преподаватели» — у каждого есть подтверждённые баллы IELTS и официальные сертификаты.</p>
+                </div>
+                <div class="why-item">
+                    <div class="why-icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/></svg></div>
+                    <h4 data-i18n="about.w3_t">Полностью онлайн</h4>
+                    <p data-i18n="about.w3_p">Учитесь из любого города и страны. Расписание под вас — утром, вечером, в выходные.</p>
+                </div>
+                <div class="why-item">
+                    <div class="why-icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><rect x="6.5" y="2.5" width="11" height="19" rx="2.2"/><path d="M11 18.3h2"/></svg></div>
+                    <h4 data-i18n="about.w4_t">Поддержка 7 дней в неделю</h4>
+                    <p data-i18n="about.w4_p">Telegram-чат с преподавателем всегда доступен. Вопрос между уроками — ответ в течение дня.</p>
+                </div>
+                <div class="why-item">
+                    <div class="why-icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg></div>
+                    <h4 data-i18n="about.w5_t">Цель — ваш балл, не «прохождение курса»</h4>
+                    <p data-i18n="about.w5_p">Мы ориентируемся на конкретный результат экзамена, а не на количество пройденных уроков.</p>
+                </div>
+                <div class="why-item">
+                    <div class="why-icon" style="color:var(--accent);"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M5 20V11"/><path d="M12 20V5"/><path d="M19 20v-7"/><path d="M3 20h18"/></svg></div>
+                    <h4 data-i18n="about.w6_t">Личный кабинет с прогрессом</h4>
+                    <p data-i18n="about.w6_p">Графики, оценки за ДЗ, динамика баллов — всё в одном месте. Видите рост каждую неделю.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══ ПРЕПОДАВАТЕЛИ ══ -->
+        <section class="page-section" id="teachers">
+            <div class="section-header">
+                <h2 data-i18n-html="about.team_title">Команда <span class="text-premium">Экспертов</span></h2>
+                <p data-i18n="about.team_sub">Каждый специализируется на своей области — вы учитесь у лучшего в своём направлении</p>
+            </div>
+
+            <div class="teachers-grid" id="teachers-grid">
+
+                <!-- Teacher 1: Firdavs -->
+                <div class="teacher-card">
+                    <div class="teacher-photo-wrap" style="position: relative;">
+                        <img src="images/firdavs.jpg" alt="Убайдуллоев Фирдавс" onerror="this.style.display='none';" style="position: relative; z-index: 2;">
+                        <div class="photo-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; align-items: center; justify-content: center;">У.Ф</div>
+                        <span class="score-badge">IELTS 7.5</span>
+                    </div>
+                    <a href="teacher.html?id=firdavs" style="text-decoration: none;"><div class="teacher-name" style="cursor: pointer;">Убайдуллоев Фирдавс</div></a>
+                    <div class="teacher-role">Основатель · IELTS Expert</div>
+                    <div class="cert-badge-row">
+                        <span class="cert-tag">3,000+ часов опыта</span>
+                        <span class="cert-tag">Уникальная методика</span>
+                    </div>
+                    <p class="teacher-bio">
+                        Разработал авторскую методику подготовки к IELTS Academic, которая позволяет выйти на 7.5+ за 3–4 месяца. Специализация: Writing Task 2, Reading strategies, Speaking Part 3.
+                    </p>
+                    <a href="images/firdavs_cert.jpg" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Сертификат IELTS (7.5)</a>
+                </div>
+
+                <!-- Teacher 2: Sadokat -->
+                <div class="teacher-card">
+                    <div class="teacher-photo-wrap" style="position: relative;">
+                        <img src="images/sadokat.jpg" alt="Убайдуллоева Садокат" onerror="this.style.display='none';" style="position: relative; z-index: 2;">
+                        <div class="photo-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; align-items: center; justify-content: center;">У.С</div>
+                        <span class="score-badge">IELTS 8.0</span>
+                    </div>
+                    <a href="teacher.html?id=sadokat" style="text-decoration: none;"><div class="teacher-name" style="cursor: pointer;">Убайдуллоева Садокат</div></a>
+                    <div class="teacher-role">Speaking Expert · IELTS Expert</div>
+                    <div class="cert-badge-row">
+                        <span class="cert-tag">Speaking Pro</span>
+                        <span class="cert-tag">Central Asian University</span>
+                    </div>
+                    <p class="teacher-bio">
+                        Лучший IELTS Speaking инструктор. Специализируется на скоростном разрушении языкового барьера и подготовке к разделу Speaking в IELTS. Её ученики начинают говорить без страха уже после первого месяца.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="images/sadokat_diploma.jpg" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.5V16c0 1.1 2.7 2 6 2s6-.9 6-2v-5.5"/><path d="M22 8v6"/></svg> Диплом CAU</a>
+                        <a href="images/sadokat_ielts.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Сертификат IELTS</a>
+                    </div>
+                </div>
+
+                <!-- Teacher 3: Javokhir -->
+                <div class="teacher-card">
+                    <div class="teacher-photo-wrap" style="position: relative;">
+                        <img src="images/javokhir.jpg" alt="Солиев Жавохир" onerror="this.style.display='none';" style="position: relative; z-index: 2;">
+                        <div class="photo-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; align-items: center; justify-content: center;">С.Ж</div>
+                        <span class="score-badge">IELTS 7.0</span>
+                    </div>
+                    <a href="teacher.html?id=javokhir" style="text-decoration: none;"><div class="teacher-name" style="cursor: pointer;">Солиев Жавохир</div></a>
+                    <div class="teacher-role">General English · CEFR Specialist</div>
+                    <div class="cert-badge-row">
+                        <span class="cert-tag">B2–C1 уровень</span>
+                        <span class="cert-tag">Westminster (WIUT)</span>
+                    </div>
+                    <p class="teacher-bio">
+                        Специализируется на разрушении языкового барьера и глубоком понимании грамматических структур. Закладывает прочный фундамент — от базовых структур до уверенной беседы на любую тему.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="images/javokhir_cert.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Сертификат IELTS</a>
+                        <a href="images/javokhir_foundation.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Foundation Level</a>
+                    </div>
+                </div>
+
+                <!-- Teacher 4: Behruz -->
+                <div class="teacher-card">
+                    <div class="teacher-photo-wrap" style="position: relative;">
+                        <img src="images/behruz.jpg" alt="Соатбоев Бехруз" onerror="this.style.display='none';" style="position: relative; z-index: 2;">
+                        <div class="photo-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; align-items: center; justify-content: center;">С.Б</div>
+                        <span class="score-badge">SAT Math 780</span>
+                    </div>
+                    <a href="teacher.html?id=behruz" style="text-decoration: none;"><div class="teacher-name" style="cursor: pointer;">Соатбоев Бехруз</div></a>
+                    <div class="teacher-role">SAT Math Expert</div>
+                    <div class="cert-badge-row">
+                        <span class="cert-tag">SAT 750+</span>
+                        <span class="cert-tag">Топ-вузы Европы</span>
+                    </div>
+                    <p class="teacher-bio">
+                        Специалист по математической части SAT. Его студенты поступают в университеты Европы и США. Делает из сложных задач систему — не зубрёжку, а логику.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="images/behruz_cert.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Сертификат IELTS/Math</a>
+                        <a href="images/behruz_foundation.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Foundation Level</a>
+                    </div>
+                </div>
+
+                <!-- Teacher 5: Azizbek -->
+                <div class="teacher-card">
+                    <div class="teacher-photo-wrap" style="position: relative;">
+                        <img src="images/azizbek.jpg" alt="Елмуратов Азизбек" onerror="this.style.display='none';" style="position: relative; z-index: 2;">
+                        <div class="photo-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; display: flex; align-items: center; justify-content: center;">Е.А</div>
+                        <span class="score-badge">IELTS 7.5</span>
+                    </div>
+                    <a href="teacher.html?id=azizbek" style="text-decoration: none;"><div class="teacher-name" style="cursor: pointer;">Елмуратов Азизбек</div></a>
+                    <div class="teacher-role">Foundation Math · Olympiad Coach</div>
+                    <div class="cert-badge-row">
+                        <span class="cert-tag">Олимпиадник</span>
+                        <span class="cert-tag">Индивидуальный подход</span>
+                    </div>
+                    <p class="teacher-bio">
+                        Готовит учеников к различным олимпиадам и школьным экзаменам. Объясняет сложную математику простым языком. Студенты перестают бояться математики уже на 2-й неделе.
+                    </p>
+                    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="images/azizbek_ielts.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Сертификат IELTS</a>
+                        <a href="images/azizbek_foundation.pdf" target="_blank" class="teacher-cert-link"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg> Foundation Level</a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer style="margin-top: 4rem;">
+        <div class="footer-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; max-width: 1200px; margin: 0 auto 2rem auto;">
+            <div class="footer-col" style="text-align: center;">
+                <h4 data-i18n="footer.contacts">Контакты</h4>
+                <div class="social-icons" style="justify-content: center; margin-top: 1rem;">
+                    <a href="https://www.instagram.com/starths.official/" target="_blank" aria-label="Instagram">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href="https://t.me/TheStarthChannel" target="_blank" aria-label="Telegram">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                    </a>
+                    <a href="#" target="_blank" aria-label="YouTube">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.5 12 3.5 12 3.5s-7.505 0-9.377.55a3.016 3.016 0 0 0-2.122 2.136C0 8.07 0 12 0 12s0 3.93.501 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.55 9.377.55 9.377.55s7.505 0 9.377-.55a3.016 3.016 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </a>
+                    <a href="#" target="_blank" aria-label="TikTok">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93v8.12c0 1.05-.15 2.12-.52 3.12-.66 1.77-2.11 3.16-3.88 3.73-1.84.58-3.92.48-5.65-.45-1.55-.83-2.65-2.26-3.15-3.92-.51-1.69-.42-3.56.24-5.18.73-1.78 2.21-3.2 4-3.79 1.18-.39 2.45-.48 3.68-.27.1-.01.21-.02.32-.02v4.04c-1.2-.1-2.43-.03-3.53.51-1.07.52-1.85 1.51-2.1 2.68-.24 1.14-.02 2.37.58 3.37.58.98 1.54 1.59 2.69 1.77 1.05.16 2.16-.01 3.05-.55.88-.53 1.48-1.39 1.72-2.38.25-.99.27-2.03.26-3.05V.02z"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p><span data-i18n="footer.copyright">&copy; 2026 TheStarth. Все права защищены.</span> | <a href="privacy.html" style="color: var(--ink-soft); text-decoration: underline;" data-i18n="footer.privacy">Политика конфиденциальности</a></p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin-nav.js"></script>
+    <script src="translations.js"></script>
+    <script src="content-i18n.js"></script>
+    <script src="icons.js"></script>
+    <script src="video-embed.js"></script>
+    <script src="video-lightbox.js"></script>
+    <script src="teachers-data.js"></script>
+    <script>
+        // "Команда Экспертов": teachers come from the database once the admin manages them
+        // (admin panel -> Учителя), otherwise from the built-in list (teachers-data.js).
+        // Every text is shown in the visitor's language (translations are stored with the teacher).
+        (function () {
+            var grid = document.getElementById('teachers-grid');
+            var total = document.getElementById('teachers-total');
+            if (!grid) return;
+            var list = null;
+
+            function esc(v) {
+                return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+                });
+            }
+            function safeUrl(u) {
+                u = String(u || '').trim();
+                return /^(https?:\/\/|images\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(u) ? u : '';
+            }
+            function initials(name) {
+                var p = String(name || '').trim().split(/\s+/);
+                return ((p[0] || '?')[0] + (p[1] ? '.' + p[1][0] : '')).toUpperCase();
+            }
+            function certLabel(t, i) {
+                var l = StarthI18n.lang(), src = t.srcLang || 'ru';
+                if (l !== src) {
+                    var a = t.i18n && t.i18n[l] && t.i18n[l].certs;
+                    if (a && a[i]) return a[i];
+                }
+                return t.certs[i].label;
+            }
+            var DOC_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M7 2.5h7l4 4V21a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1Z"/><path d="M14 2.5V7h4"/><path d="M9 12.5h6"/><path d="M9 16h6"/></svg>';
+
+            function card(t) {
+                var photo = safeUrl(t.photo);
+                var certs = (t.certs || []).map(function (c, i) { return { href: safeUrl(c.href), label: certLabel(t, i) }; })
+                    .filter(function (c) { return c.href && c.label; });
+                var tags = StarthI18n.pickList(t, 'tags');
+                var hasVideo = t.video && window.parseVideoLink && parseVideoLink(t.video);
+                return '' +
+                '<div class="tcard">' +
+                    '<div class="tcard-top"><div class="tcard-frame">' +
+                        '<a class="tcard-photo" href="teacher.html?id=' + encodeURIComponent(t.id) + '" aria-label="' + esc(t.name) + '">' +
+                            '<div class="tcard-ph">' + esc(t.initials || initials(t.name)) + '</div>' +
+                            (photo ? '<img src="' + esc(photo) + '" alt="' + esc(t.name) + '" loading="lazy" onerror="this.style.display=\'none\';">' : '') +
+                            (t.badge ? '<span class="tcard-score">' + esc(t.badge) + '</span>' : '') +
+                        '</a>' +
+                        (hasVideo ? '<button type="button" class="tcard-play" data-video="' + esc(t.video) + '" data-name="' + esc(t.name) + '" aria-label="' + esc(window.t('about.team_watch')) + '">' + Icons.svg('play') + '</button>' : '') +
+                    '</div></div>' +
+                    '<div class="tcard-body">' +
+                        '<a href="teacher.html?id=' + encodeURIComponent(t.id) + '" style="text-decoration: none;"><div class="teacher-name">' + esc(t.name) + '</div></a>' +
+                        '<div class="teacher-role">' + esc(StarthI18n.pick(t, 'role')) + '</div>' +
+                        (tags.length ? '<div class="cert-badge-row">' + tags.map(function (x) { return '<span class="cert-tag">' + esc(x) + '</span>'; }).join('') + '</div>' : '') +
+                        '<p class="teacher-bio">' + esc(StarthI18n.pick(t, 'bio')) + '</p>' +
+                        (certs.length ? '<div class="tcard-certs">' +
+                            certs.map(function (c) { return '<a href="' + esc(c.href) + '" target="_blank" rel="noopener" class="teacher-cert-link">' + DOC_ICON + ' ' + esc(c.label) + '</a>'; }).join('') + '</div>' : '') +
+                    '</div>' +
+                '</div>';
+            }
+
+            grid.addEventListener('click', function (e) {
+                var b = e.target.closest && e.target.closest('.tcard-play');
+                if (b) VideoBox.open(b.getAttribute('data-video'), b.getAttribute('data-name'));
+            });
+
+            function render() {
+                if (!list) return;
+                grid.innerHTML = list.length ? list.map(card).join('')
+                    : '<div class="empty-state" style="grid-column: 1 / -1;"><strong>' + esc(t('about.team_empty_t')) + '</strong>' + esc(t('about.team_empty_p')) + '</div>';
+                if (total) total.textContent = list.length;
+                grid.style.visibility = '';
+            }
+
+            window.addEventListener('starth-lang-changed', render);
+
+            grid.style.visibility = 'hidden';
+            var safety = setTimeout(function () { list = list || window.BUILTIN_TEACHERS; render(); }, 4000);
+
+            async function load() {
+                var builtin = window.BUILTIN_TEACHERS.slice();
+                if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) return builtin;
+                try {
+                    var flag = await db.collection('settings').doc('teachers').get();
+                    if (!(flag.exists && flag.data().managed)) return builtin;
+                    var snap = await db.collection('teachers').get();
+                    var arr = [];
+                    snap.forEach(function (d) { var x = d.data(); x.id = d.id; arr.push(x); });
+                    arr.sort(function (a, b) {
+                        return (a.order || 999) - (b.order || 999) || String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
+                    });
+                    return arr;
+                } catch (err) {
+                    console.warn('Teachers failed to load from Firestore, showing the built-in list.', err);
+                    return builtin;
+                }
+            }
+            load().then(function (l) { clearTimeout(safety); list = l; render(); });
+        })();
+    </script>
+</body>
+</html>
