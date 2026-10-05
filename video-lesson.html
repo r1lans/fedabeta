@@ -10,7 +10,7 @@
     <meta name="description" content="Онлайн видеоурок TheStarth.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=27">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         main.lesson-main {
@@ -270,7 +270,7 @@
         }
         function startJitsi(room) {
             if (window.LessonCall) LessonCall.stop();
-            currentMode = 'jitsi';
+            currentMode = 'jitsi'; if (window.StarthPresence) StarthPresence.setLesson(true);
             callBox().style.display = 'none'; jitsiBox().style.display = 'block';
             document.getElementById('mode-btn').textContent = 'Основной режим';
             if (jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
@@ -320,6 +320,7 @@
         }
 
         function leaveRoom() {
+            if (window.StarthPresence) StarthPresence.setLesson(false);
             if (jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
             if (window.LessonCall) LessonCall.stop();
             if (window.LessonBoard) LessonBoard.stop();
@@ -381,5 +382,6 @@
     <script src="app.js"></script>
     <script src="i18n-extra.js"></script>
     
+    <script src="back-btn.js"></script>
 </body>
 </html>

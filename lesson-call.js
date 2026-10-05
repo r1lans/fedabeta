@@ -514,6 +514,7 @@
         joined = false; sess = { sid: '', base: 0, seg: 0, first: 0 }; chatOpen = peopleOpen = false; unread = 0; chatMsgs = []; pinned = ''; sharing = false; handUp = false;
     }
     function leave(msg, final) {
+        if (window.StarthPresence) StarthPresence.setLesson(false);
         cleanup();
         if (root) {
             root.innerHTML = `<div class="call"><div class="call-pre"><div class="call-card"><h3>${esc(final ? X('Урок завершён') : X('Вы вышли из урока'))}</h3>${msg ? `<p>${esc(msg)}</p>` : ''}${final ? `<button class="btn-primary" type="button" id="call-rejoin">${esc(X('К списку уроков'))}</button>` : `<button class="btn-primary" type="button" id="call-rejoin">${esc(X('Войти снова'))}</button>`}</div></div></div>`;
@@ -550,7 +551,7 @@
     async function join() {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
         if (!camOn && local.video) { local.video.stop(); if (local.stream) local.stream.removeTrack(local.video); local.video = null; }
-        joinedAt = Date.now(); joined = true; $('#call-pre').hidden = true; $('#call-live').hidden = false;
+        joinedAt = Date.now(); joined = true; if (window.StarthPresence) StarthPresence.setLesson(true); $('#call-pre').hidden = true; $('#call-live').hidden = false;
         pinned = '';
         if (local.audio) local.audio.enabled = micOn;
         roomRef = db.collection('lessonCalls').doc(String(room).replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 100));

@@ -564,6 +564,13 @@ document.addEventListener('DOMContentLoaded', () => {
             updateAuthUI(user);
             syncDirectory(user, window.currentUserProfile);
             window.dispatchEvent(new CustomEvent('starth-auth-ready', { detail: { user, profile: window.currentUserProfile } }));
+            // notifications about new messages (badge, tab title, system notification) on every page
+            if (user && !window.StarthPresence && !document.querySelector('script[data-presence]')) {
+                const sp = document.createElement('script'); sp.src = 'presence.js'; sp.dataset.presence = '1'; document.head.appendChild(sp);
+            }
+            if (user && !window.StarthNotify && !document.querySelector('script[data-msg-notify]')) {
+                const sc = document.createElement('script'); sc.src = 'msg-notify.js'; sc.dataset.msgNotify = '1'; document.head.appendChild(sc);
+            }
         });
     } else {
         updateAuthUI(null);

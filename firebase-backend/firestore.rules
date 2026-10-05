@@ -40,7 +40,8 @@ service cloud.firestore {
     match /nicknames/{nickname} {
       allow read: if true;
       allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if false;
+      // the owner may release / re-point their own nickname (profile editor); an admin may clean up
+      allow update, delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
     }
 
     // Student ID counter (000001, 000002, ...). Any signed-in user may read it and
@@ -313,13 +314,61 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // IELTS mock tests (Admin panel -> Mock-тесты). Students read published tests only; admins write.
+    match /mockTests/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // What a student got on a mock test. A student can only add a result under their own uid
+    // (and read their own); admins and teachers read everything; only admins can edit or delete.
+    match /mockResults/{id} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'name', 'testId', 'title', 'skill', 'scope', 'parts', 'correct', 'total', 'band', 'bandEstimated', 'secs', 'ts', 'fullId', 'fullTitle']) &&
+        request.resource.data.skill in ['listening', 'reading'] &&
+        request.resource.data.scope in ['full', 'part'] &&
+        request.resource.data.name is string && request.resource.data.name.size() <= 80 &&
+        request.resource.data.title is string && request.resource.data.title.size() <= 120 &&
+        request.resource.data.correct is int && request.resource.data.total is int &&
+        request.resource.data.correct >= 0 && request.resource.data.correct <= request.resource.data.total &&
+        request.resource.data.total <= 40 &&
+        request.resource.data.parts is list && request.resource.data.parts.size() <= 4;
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin() || isTeacher());
+      allow update, delete: if isAdmin();
+    }
+
+    // Writing work written on the site. A student adds their own work (always as 'new') and reads their own;
+    // teachers and admins read all and add the evaluation (only the feedback fields can change); only admins delete.
+    match /mockWritings/{id} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'name', 'testId', 'testTitle', 'taskIdx', 'taskTitle', 'taskType', 'prompt', 'imageUrl', 'text', 'words', 'secs', 'ts', 'status', 'fullId', 'fullTitle']) &&
+        request.resource.data.status == 'new' &&
+        request.resource.data.taskType in ['task1', 'task2'] &&
+        request.resource.data.text is string && request.resource.data.text.size() <= 9500 &&
+        request.resource.data.prompt is string && request.resource.data.prompt.size() <= 3100 &&
+        request.resource.data.name is string && request.resource.data.name.size() <= 80;
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin() || isTeacher());
+      allow update: if (isAdmin() || isTeacher()) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback', 'status', 'checkedBy', 'checkedAt']);
+      allow delete: if isAdmin();
+    }
+
     // Admin allowlist: existing admins can promote/demote other admins
     // from the admin panel. The very first admin still has to be added
     // by hand in the Firebase console (see FIREBASE_SETUP.md, step 6) —
     // there has to be one admin before any admin-granted permission works.
+    // Admins are secret: a person can read only their own record; admins can read all. Only an admin writes.
     match /admins/{uid} {
-      allow read: if isSignedIn();
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
       allow write: if isAdmin();
+    }
+
+    // ── PRESENCE (online / in a lesson). Heartbeat document, one per person.
+    match /presence/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == uid;
     }
   }
 }

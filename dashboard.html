@@ -10,7 +10,7 @@
     <meta name="description" content="Личный кабинет TheStarth: ваши результаты тестов, реферальная программа и бонусы.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=27">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         main.dash-main {
@@ -287,7 +287,10 @@
                 <div class="p-contact" id="dashProfileId" style="font-weight: 600;"></div>
                 <div class="p-contact" id="dashProfileContact">—</div>
             </div>
-            <a href="payment.html" id="dashPayLink" class="btn-primary" style="white-space: nowrap;">Оплатить курс</a>
+            <div class="profile-actions">
+                <button type="button" class="btn-outline" id="dashEditProfile" onclick="window.ProfileEditor && ProfileEditor.open()">✏️ Редактировать профиль</button>
+                <a href="payment.html" id="dashPayLink" class="btn-primary" style="white-space: nowrap;">Оплатить курс</a>
+            </div>
         </div>
 
         <!-- ═══ STUDENT VIEW (hidden for teachers) ═══ -->
@@ -387,10 +390,15 @@
             <div class="tc-tabs" role="tablist">
                 <button class="tc-tab active" type="button" data-main="groups">Мои группы</button>
                 <button class="tc-tab" type="button" data-main="lessons">Уроки по расписанию</button>
+                <button class="tc-tab" type="button" data-main="writing">Проверка Writing</button>
             </div>
             <div id="tcMainGroups">
                 <p style="color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1.25rem;">Создавайте группы, добавляйте учеников по никнейму, отмечайте посещаемость, ставьте оценки и проводите урок с общей доской — писать на ней смогут только те, кому вы разрешите.</p>
                 <div id="tcGroupsRoot"></div>
+            </div>
+            <div id="tcMainWriting" style="display:none;">
+                <p style="color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1.25rem;">Работы Writing, которые ученики написали в Mock-тестах. Прочитайте работу, поставьте оценку по критериям IELTS, добавьте комментарий и отправьте разбор ученику.</p>
+                <div id="tcWritingRoot"></div>
             </div>
             <div id="tcMainLessons" style="display:none;">
                 <p style="color: var(--ink-soft); font-size: 0.85rem; margin: 0 0 1.25rem;">Индивидуальные уроки, которые назначил куратор. Отмечайте урок после занятия и оставляйте домашнее задание — ученик увидит его в своём кабинете.</p>
@@ -535,7 +543,11 @@
     <script src="content-i18n.js"></script>
     <script src="icons.js"></script>
     <script src="app.js"></script>
+    <script src="mock-engine.js"></script>
+    <script src="mock-feedback.js"></script>
     <script src="teacher-cabinet.js"></script>
+    <script src="teacher-writing.js"></script>
+    <script src="profile-editor.js"></script>
     <script src="cert-art.js"></script>
     <script src="gamification.js"></script>
     <script src="i18n-extra.js"></script>
@@ -726,6 +738,7 @@
                 document.getElementById('dashPayLink').style.display = 'none';
                 document.getElementById('dashProfileId').style.display = 'none';
                 if (window.TeacherCabinet) window.TeacherCabinet.init(user, profile);
+                if (window.TeacherWriting) window.TeacherWriting.init(user, profile);
                 loadTeacherSchedule(user.uid);
                 return;
             }
@@ -764,11 +777,17 @@
             document.querySelectorAll('[data-main]').forEach((x) => x.classList.toggle('active', x === b));
             document.getElementById('tcMainGroups').style.display = b.dataset.main === 'groups' ? 'block' : 'none';
             document.getElementById('tcMainLessons').style.display = b.dataset.main === 'lessons' ? 'block' : 'none';
+            document.getElementById('tcMainWriting').style.display = b.dataset.main === 'writing' ? 'block' : 'none';
         }));
 
         // app.js dispatches this once Firebase has resolved the login state
         window.addEventListener('starth-auth-ready', (e) => {
             renderDashboard(e.detail.user, e.detail.profile);
+        });
+
+        window.addEventListener('starth-profile-changed', (e) => {
+            const u = (typeof auth !== 'undefined' && auth.currentUser) || window.currentAuthUser;
+            if (u) renderDashboard(u, e.detail.profile);
         });
 
         // If Firebase isn't configured yet, or auth already resolved before
@@ -779,5 +798,6 @@
         }
     </script>
     
+    <script src="back-btn.js"></script>
 </body>
 </html>

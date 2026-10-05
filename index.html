@@ -17,7 +17,7 @@
       console.log("Analytics loaded");
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=27">
 </head>
 <body>
     <!-- Navbar -->
@@ -48,6 +48,27 @@
         </div>
     </nav>
 
+    <!-- Intro video stage: the video plays on entry; in its last seconds the buttons drawn in the video become real, clickable buttons -->
+    <section class="intro-stage" id="introStage" aria-label="TheStarth">
+        <div class="intro-frame" id="introFrame">
+            <video id="introVideo" muted playsinline preload="auto" poster="video/stage-poster.jpg" data-src-hd="video/stage-1080.mp4" data-src-sd="video/stage-720.mp4"></video>
+            <video id="introLoop" class="intro-loop" muted loop playsinline preload="auto" hidden data-src-hd="video/stage-loop-1080.mp4" data-src-sd="video/stage-loop-720.mp4"></video>
+            <img class="intro-end" id="introEnd" src="video/stage-end.jpg" alt="" hidden>
+            <div class="intro-hot" id="introHot">
+                <button type="button" class="ih ih-main" data-act="trial" data-from="22.3" data-i18n-aria="stage.trial" aria-label="Записаться на пробный урок"></button>
+                <button type="button" class="ih ih-chip ih-ielts" data-act="ielts" data-from="22.6" aria-label="IELTS"></button>
+                <button type="button" class="ih ih-chip ih-sat" data-act="sat" data-from="22.6" aria-label="SAT"></button>
+                <button type="button" class="ih ih-chip ih-math" data-act="math" data-from="22.6" data-i18n-aria="stage.math" aria-label="Математика"></button>
+                <button type="button" class="ih ih-chip ih-german" data-act="german" data-from="22.6" data-i18n-aria="stage.german" aria-label="Немецкий"></button>
+            </div>
+            <button type="button" class="intro-play" id="introPlay" hidden aria-label="Смотреть видео" data-i18n-aria="stage.play"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+            <div class="intro-ctrl">
+                <button type="button" id="introSound" class="intro-btn" aria-pressed="false" data-i18n="stage.sound_on">Включить звук</button>
+                <button type="button" id="introSkip" class="intro-btn" data-i18n="stage.skip">Пропустить</button>
+            </div>
+        </div>
+    </section>
+
     <!-- Hero -->
     <header class="hero">
         <div class="hero-inner">
@@ -55,8 +76,7 @@
                 <h1><span data-i18n="hero.title_pre">Подготовка к</span> <span class="text-premium" data-i18n="hero.title_highlight">IELTS</span><span data-i18n="hero.title_post">, SAT и математике</span></h1>
                 <p class="hero-lede" data-i18n="hero.lede">Небольшие группы, преподаватели с собственным баллом IELTS 8.0+ и понятный план до результата — обычно 3–4 месяца до нужного балла.</p>
                 <div class="hero-actions">
-                    <button class="btn-primary hero-btn open-modal-btn" data-i18n="hero.cta_primary">Записаться на бесплатный урок</button>
-                    <a href="level-test.html" class="btn-outline hero-btn" data-i18n="hero.cta_secondary">Пройти тест уровня</a>
+                    <button type="button" class="btn-primary hero-btn" id="heroTestBtn" data-i18n="hero.cta_test">Пройти тест</button>
                 </div>
                 <div class="hero-trust">
                     <span><strong id="students-count">1,200+</strong> <span data-i18n="hero.trust_students">учеников</span></span>
@@ -474,7 +494,7 @@
             <!-- Card 1 -->
             <div class="blog-card">
                 <div class="blog-img-container">
-                    <span class="blog-img-placeholder"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/></svg></span>
+                    <img class="blog-photo" src="images/blog-ielts.jpg" alt="IELTS" width="1200" height="632" loading="lazy" decoding="async">
                     <span class="blog-badge">IELTS</span>
                 </div>
                 <div class="blog-body">
@@ -488,7 +508,7 @@
             <!-- Card 2 -->
             <div class="blog-card">
                 <div class="blog-img-container">
-                    <span class="blog-img-placeholder"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M9 3.5 7 20.5"/><path d="M17 3.5 15 20.5"/><path d="M4 8.5h17"/><path d="M3 15.5h17"/></svg></span>
+                    <img class="blog-photo" src="images/blog-sat-math.jpg" alt="SAT MATH" width="1200" height="632" loading="lazy" decoding="async">
                     <span class="blog-badge">SAT Math</span>
                 </div>
                 <div class="blog-body">
@@ -502,7 +522,7 @@
             <!-- Card 3 -->
             <div class="blog-card">
                 <div class="blog-img-container">
-                    <span class="blog-img-placeholder"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M6 5H4.5A1.5 1.5 0 0 0 3 6.5 4 4 0 0 0 8 10"/><path d="M18 5h1.5A1.5 1.5 0 0 1 21 6.5 4 4 0 0 1 16 10"/><path d="M12 13v3"/><path d="M8.5 20.5 12 16l3.5 4.5"/></svg></span>
+                    <img class="blog-photo" src="images/blog-math.jpg" alt="Математика" width="1200" height="632" loading="lazy" decoding="async">
                     <span class="blog-badge" data-i18n="tag.math">Математика</span>
                 </div>
                 <div class="blog-body">
@@ -598,6 +618,27 @@
         <button class="cookie-btn" id="acceptCookiesBtn" data-i18n="cookie.accept">Согласиться</button>
     </div>
 
+    <!-- Test chooser: one "Take the test" button on the hero opens this -->
+    <div id="testPick" class="modal" aria-hidden="true">
+        <div class="modal-content tp-content" role="dialog" aria-modal="true" aria-labelledby="tpTitle">
+            <span class="tp-close" id="tpClose" aria-label="Закрыть">&times;</span>
+            <h2 id="tpTitle" data-i18n="tp.title">Какой тест пройти?</h2>
+            <p data-i18n="tp.sub">Выберите предмет. После теста вы сможете записаться на бесплатный пробный урок.</p>
+            <div class="tp-grid">
+                <a class="tp-card" href="level-test.html" id="tpEnglish">
+                    <span class="tp-ic">EN</span>
+                    <strong data-i18n="tp.en_t">Английский</strong>
+                    <small data-i18n="tp.en_d">Тест уровня: от A1 до C1</small>
+                </a>
+                <a class="tp-card" href="math-test.html" id="tpSat">
+                    <span class="tp-ic">∑</span>
+                    <strong data-i18n="tp.sat_t">SAT Математика</strong>
+                    <small data-i18n="tp.sat_d">5 вопросов и примерный балл</small>
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Auth Modal -->
         <div id="authModal" class="modal">
         <div class="modal-content">
@@ -669,6 +710,8 @@
                     <option value="" disabled selected data-i18n="app.course_ph">Выберите курс</option>
                     <option value="ielts">IELTS Preparation</option>
                     <option value="sat">SAT Math</option>
+                    <option value="math" data-i18n="app.opt_math">Математика</option>
+                    <option value="german" data-i18n="app.opt_german">Немецкий язык</option>
                     <option value="ege" data-i18n="app.opt_oge">ОГЭ / ЕГЭ</option>
                 </select>
                 <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="app.submit">Отправить заявку</button>
@@ -1599,7 +1642,10 @@
     <script src="translations.js"></script>
     <script src="content-i18n.js"></script>
     <script src="icons.js"></script>
+    <script src="catalog-defaults.js"></script>
     <script src="app.js"></script>
+    <script src="catalog.js"></script>
+    <script src="intro-stage.js?v=27"></script>
     
 </body>
 </html>

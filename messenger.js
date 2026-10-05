@@ -19,7 +19,21 @@
 
     let box = null, me = null, myName = '', myNick = '', myRole = 'student', chats = [], openId = '', unsubs = [], msgUnsub = null, msgs = [], firstLoad = true, mobileChat = false;
 
-    const other = (c) => { const uid = (c.members || []).find((u) => u !== me.uid) || ''; return { uid, name: (c.names || {})[uid] || '', nick: (c.nicks || {})[uid] || '', role: (c.roles || {})[uid] || '' }; };
+    // live data about the other people: directory/<uid> (name, nickname, role) and presence/<uid> (online / in a lesson)
+    let liveDir = {}, presDoc = {}, liveUn = {};
+    const other = (c) => { const uid = (c.members || []).find((u) => u !== me.uid) || ''; const L = liveDir[uid];
+        return { uid, name: L ? [L.name, L.surname].filter(Boolean).join(' ') || (c.names || {})[uid] || '' : (c.names || {})[uid] || '', nick: L ? (L.nickname || (c.nicks || {})[uid] || '') : (c.nicks || {})[uid] || '', role: L ? (L.role || '') : (c.roles || {})[uid] || '' }; };
+    const presOf = (uid) => (window.StarthPresence ? window.StarthPresence.status(presDoc[uid]) : '');
+    const presDot = (uid) => (window.StarthPresence ? window.StarthPresence.dot(presOf(uid)) : '');
+    function watchPeople() {
+        chats.forEach((c) => { const uid = (c.members || []).find((u) => u !== me.uid); if (!uid || liveUn[uid]) return;
+            const u1 = db.collection('directory').doc(uid).onSnapshot((d) => { if (d.exists) { liveDir[uid] = d.data(); refreshUI(); } }, () => {});
+            let u2 = () => {}; const tryP = () => { if (window.StarthPresence) u2 = window.StarthPresence.watch(uid, (p) => { presDoc[uid] = p; refreshUI(); }); else setTimeout(tryP, 400); }; tryP();
+            liveUn[uid] = () => { u1(); u2(); }; });
+    }
+    function refreshUI() { if (!box || !box.querySelector('#msgRoot')) return; renderList(); const h = document.getElementById('msgHeadInfo'); const c = chats.find((x) => x.id === openId); if (h && c) h.innerHTML = headInfo(c); }
+    function headInfo(c) { const o = other(c), st = presOf(o.uid), lb = window.StarthPresence ? window.StarthPresence.label(st) : '';
+        return `<strong>${esc(title(c))}</strong> ${roleTag(o.role)}<div class="tc-meta">${o.nick ? '@' + esc(o.nick) : ''}${st ? `${o.nick ? ' · ' : ''}${presDot(o.uid)}<span class="pres-txt">${esc(lb)}</span>` : ''}</div>`; }
     const title = (c) => { const o = other(c); return o.name || (o.nick ? '@' + o.nick : '…'); };
     const isUnread = (c) => c.lastFrom && c.lastFrom !== me.uid && (c.lastTs || 0) > ((c.reads || {})[me.uid] || 0);
     const totalUnread = () => chats.filter(isUnread).length;
@@ -38,6 +52,7 @@
                     <div class="msg-sug" id="msgSug" role="listbox" hidden></div>
                 </div>
                 <div class="msg-find-note" id="msgFindNote"></div>
+                <div id="msgNotifyBox"></div>
                 <div class="msg-list" id="msgList"></div>
             </aside>
             <div class="msg-main" id="msgMain"></div>
@@ -124,7 +139,7 @@
         const shown = chats.filter((c) => c.lastTs || c.id === openId).sort((a, b) => (b.lastTs || 0) - (a.lastTs || 0));
         l.innerHTML = shown.length ? shown.map((c) => `<button type="button" class="msg-row ${c.id === openId ? 'active' : ''} ${isUnread(c) ? 'unread' : ''}" data-id="${esc(c.id)}">
             <span class="msg-av">${esc(initials(title(c)))}</span>
-            <span class="msg-rb"><span class="msg-rt"><strong>${esc(title(c))}</strong>${roleTag(other(c).role)}<time>${esc(listTime(c.lastTs))}</time></span>
+            <span class="msg-rb"><span class="msg-rt"><strong>${esc(title(c))}</strong>${presDot(other(c).uid)}${roleTag(other(c).role)}<time>${esc(listTime(c.lastTs))}</time></span>
             <span class="msg-rl">${c.lastFrom === me.uid ? '<em>Вы: </em>' : ''}${esc(c.lastText || 'Новый чат')}</span></span>${isUnread(c) ? '<i class="msg-dot"></i>' : ''}</button>`).join('')
             : '<div class="tc-empty" style="padding:1rem 0;">Пока нет переписок. Найдите человека по никнейму и напишите ему.</div>';
         l.querySelectorAll('[data-id]').forEach((b) => b.onclick = () => openChat(b.dataset.id));
@@ -136,7 +151,7 @@
         if (!c) { m.innerHTML = `<div class="msg-empty">${ic('message')}<p>Выберите переписку слева<br>или найдите человека по никнейму.</p></div>`; return; }
         const o = other(c);
         m.innerHTML = `<header class="msg-head"><button type="button" class="msg-back" id="msgBack" aria-label="Назад">${ic('arrow-left')}</button>
-            <span class="msg-av">${esc(initials(title(c)))}</span><div><strong>${esc(title(c))}</strong> ${roleTag(o.role)}${o.nick ? `<div class="tc-meta">@${esc(o.nick)}</div>` : ''}</div></header>
+            <span class="msg-av">${esc(initials(title(c)))}</span><div id="msgHeadInfo">${headInfo(c)}</div></header>
             <div class="msg-thread" id="msgThread"></div>
             <form class="msg-compose" id="msgCompose"><button type="button" class="msg-attach" id="msgAttach" aria-label="Фото" title="Фото">${ic('image')}</button><input type="file" id="msgFile" accept="image/*" hidden><textarea id="msgText" rows="1" maxlength="2000" placeholder="Сообщение…"></textarea><button type="submit" class="msg-send" aria-label="Отправить">${ic('send')}</button></form>`;
         document.getElementById('msgBack').onclick = () => { mobileChat = false; document.getElementById('msgRoot').classList.remove('show-chat'); };
@@ -236,11 +251,8 @@
 
     function listen() {
         unsubs.push(db.collection('chats').where('members', 'array-contains', me.uid).onSnapshot((snap) => {
-            const before = new Map(chats.map((c) => [c.id, c.lastTs || 0]));
-            chats = []; snap.forEach((d) => chats.push(Object.assign({ id: d.id }, d.data())));
-            // toast for a new incoming message in a chat that is not open
-            if (!firstSnap) chats.forEach((c) => { if (c.lastFrom && c.lastFrom !== me.uid && (c.lastTs || 0) > (before.get(c.id) || 0) && c.id !== openId && window.showToast) window.showToast((window.X ? window.X('Новое сообщение от ') : 'Новое сообщение от ') + title(c), 'message'); });
-            firstSnap = false;
+                        chats = []; snap.forEach((d) => chats.push(Object.assign({ id: d.id }, d.data())));
+            firstSnap = false; watchPeople();
             if (!box.querySelector('#msgRoot')) return;
             renderList(); if (openId) markRead(openId);
             if (openId) { const head = document.querySelector('#msgMain .msg-head'); if (head && !chats.find((c) => c.id === openId)) { openId = ''; renderMain(); } }
@@ -249,14 +261,17 @@
     let firstSnap = true;
 
     window.Messenger = {
+        openId() { return openId; },
+        openById(id) { if (chats.find((c) => c.id === id)) openChat(id); },
         init(user, profile) {
             box = document.getElementById('messengerSection'); if (!box) return;
             unsubs.forEach((u) => { try { u(); } catch (e) {} }); unsubs = []; if (msgUnsub) { msgUnsub(); msgUnsub = null; }
+            Object.keys(liveUn).forEach((k) => { try { liveUn[k](); } catch (e) {} }); liveUn = {}; liveDir = {}; presDoc = {};
             me = user; profile = profile || {}; myNick = profile.nickname || ''; myRole = profile.role === 'teacher' ? 'teacher' : 'student';
             myName = [profile.name, profile.surname].filter(Boolean).join(' ') || (myNick ? '@' + myNick : '');
             if (!myNick) { box.innerHTML = box.dataset.page === '1' ? '<div class="tc-empty" style="padding:2rem;text-align:center;">Для мессенджера нужен никнейм. Он указывается при регистрации.</div>' : ''; return; }
             chats = []; openId = ''; msgs = []; firstSnap = true; mobileChat = false;
-            shell(); listen();
+            shell(); listen(); window.dispatchEvent(new Event('starth-msg-shell'));
             if (/[?&#]chat=([^&]+)/.test(location.href)) { const n = decodeURIComponent(RegExp.$1).toLowerCase().replace(/^@/, ''); setTimeout(async () => { const r = await searchUsers(n); const u = r.find((x) => norm(x.nick) === n) || r[0]; if (u) openWith(u.uid, u.name, u.nick, u.role); }, 600); }
         }
     };

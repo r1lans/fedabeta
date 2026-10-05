@@ -8,13 +8,17 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=27">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         body { background: var(--paper-alt); }
         .admin-wrap { max-width: 1240px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
         .admin-header { padding-right: 56px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
         .admin-header h1 { font-size: 1.6rem; }
+        .admin-hd-left { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; min-width: 0; }
+        .admin-back { text-decoration: none; white-space: nowrap; display: inline-block; }
+        .admin-hint { color: var(--ink-soft); font-size: .88rem; line-height: 1.5; margin: -.4rem 0 1.1rem; max-width: 70ch; }
+        @media (max-width: 560px) { .admin-header { flex-wrap: wrap; gap: .6rem; } .admin-header h1 { font-size: 1.25rem; } }
 
         #login-screen { max-width: 380px; margin: 6rem auto; text-align: center; }
         #login-screen input {
@@ -40,6 +44,9 @@
         .admin-row { display: flex; align-items: center; gap: 1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
         .admin-row .ar-av { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; }
         .admin-row .ar-main { flex: 1 1 260px; min-width: 0; }
+        .admin-row .ar-actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
+        .ar-admin.on { background: var(--accent); color: var(--on-accent); }
+        .ar-badge { background: var(--accent); color: var(--on-accent); font-size: .68rem; padding: .1rem .45rem; border-radius: 99px; vertical-align: middle; font-weight: 700; }
         .admin-row .ar-main strong { display: block; font-size: 0.98rem; }
         .admin-row .ar-main small { color: var(--ink-soft); font-size: 0.8rem; word-break: break-word; }
         .admin-row .ar-extra { font-size: 0.8rem; color: var(--ink-soft); }
@@ -118,6 +125,7 @@
         </div>
 
         <div id="login-screen">
+            <a class="btn-small" href="index.html" style="text-decoration:none;display:inline-block;margin-bottom:1rem">← Назад на сайт</a>
             <h1 style="font-size: 1.8rem;">Вход в админ-панель</h1>
             <p style="color: var(--ink-soft); margin-top: 0.5rem;">TheStarth · CMS</p>
             <input type="email" id="login-email" placeholder="Email администратора" autocomplete="username">
@@ -132,7 +140,8 @@
 
         <div id="dashboard">
             <div class="admin-header">
-                <h1>Админ-панель <span class="text-premium">TheStarth</span></h1>
+                <div class="admin-hd-left"><a class="btn-small admin-back" href="index.html" onclick="if(history.length>1&&document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();return false}">← Назад на сайт</a>
+                <h1>Админ-панель <span class="text-premium">TheStarth</span></h1></div>
                 <button class="btn-small" onclick="logout()">Выйти</button>
             </div>
 
@@ -144,18 +153,22 @@
                 <button class="admin-tab" data-tab="teachers" onclick="switchTab('teachers')">Учителя на сайте</button>
                 <div class="admin-grp">Обучение</div>
                 <button class="admin-tab" data-tab="lessons" onclick="switchTab('lessons')">Журнал уроков</button>
+                <button class="admin-tab" data-tab="mocks" onclick="switchTab('mocks')">Mock-тесты</button>
                 <button class="admin-tab" data-tab="schedule" onclick="switchTab('schedule')">Расписание</button>
                 <button class="admin-tab" data-tab="referrals" onclick="switchTab('referrals')">Рефералы</button>
-                <div class="admin-grp">Сайт</div>
+                <div class="admin-grp">Что видят посетители</div>
                 <button class="admin-tab active" data-tab="news" onclick="switchTab('news')">Новости</button>
+                <button class="admin-tab" data-tab="announcement" onclick="switchTab('announcement')">Баннер сверху</button>
+                <button class="admin-tab" data-tab="catalog" onclick="switchTab('catalog')">Курсы и цены</button>
                 <button class="admin-tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</button>
                 <button class="admin-tab" data-tab="results" onclick="switchTab('results')">Результаты</button>
                 <button class="admin-tab" data-tab="videos" onclick="switchTab('videos')">Видео на главной</button>
-                <button class="admin-tab" data-tab="announcement" onclick="switchTab('announcement')">Объявление</button>
+                <div class="admin-grp">Вид сайта</div>
                 <button class="admin-tab" data-tab="design" onclick="switchTab('design')">Оформление</button>
             </nav>
             <div class="admin-content">
             <h2 class="admin-ptitle" id="admin-ptitle">Новости</h2>
+            <p class="admin-hint" id="admin-phint">Записи на странице «Новости» (news.html): заголовок, текст, дата. Остаются в списке, пока вы их не удалите.</p>
 
             <!-- NEWS -->
             <div class="admin-panel active" id="panel-news">
@@ -174,6 +187,9 @@
                 </div>
                 <div id="news-items"><div class="empty-state">Загрузка…</div></div>
             </div>
+
+            <!-- COURSES & PRICES -->
+            <div class="admin-panel" id="panel-catalog"><div id="cat-root"><div class="empty-state">Загрузка…</div></div></div>
 
             <!-- REVIEWS -->
             <div class="admin-panel" id="panel-reviews">
@@ -323,6 +339,30 @@
             </div>
 
             <!-- SCHEDULE -->
+            <div class="admin-panel" id="panel-mocks">
+                <div class="mk-vtabs">
+                    <button class="mk-vtab active" data-v="tests" onclick="MockAdmin.setView('tests')">Тесты</button>
+                    <button class="mk-vtab" data-v="results" onclick="MockAdmin.setView('results')">Результаты учеников</button>
+                </div>
+                <div id="mk-tests">
+                    <div class="mk-bar">
+                        <button class="btn-primary" onclick="MockAdmin.newTest('listening')">+ Listening</button>
+                        <button class="btn-primary" onclick="MockAdmin.newTest('reading')">+ Reading</button>
+                        <button class="btn-primary" onclick="MockAdmin.newTest('writing')">+ Writing</button>
+                        <button class="btn-primary" onclick="MockAdmin.newTest('full')">+ Полный мок</button>
+                    </div>
+                    <div id="mk-list"><div class="empty-state">Загружаю…</div></div>
+                </div>
+                <div id="mk-results" style="display:none">
+                    <div class="mk-bar">
+                        <input type="search" id="mk-res-q" placeholder="Поиск по имени" oninput="MockAdmin.renderResults()" style="max-width:220px">
+                        <select id="mk-res-test" onchange="MockAdmin.renderResults()" style="max-width:260px"><option value="">Все тесты</option></select>
+                        <button class="btn-small" onclick="MockAdmin.exportCsv()">Скачать CSV</button>
+                    </div>
+                    <div id="mk-res-list"></div>
+                </div>
+                <div id="mk-editor" style="display:none"></div>
+            </div>
             <div class="admin-panel" id="panel-schedule">
                 <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
                     Найдите ученика по его никнейму (это и есть его логин — он его выбирал при регистрации). Ученик увидит урок в своём личном кабинете, преподаватель — на своей странице расписания.
@@ -452,9 +492,9 @@
                 <div class="admin-form">
                     <div class="toggle-row">
                         <input type="checkbox" id="ann-active" style="width: auto;">
-                        <label style="margin: 0;">Показывать баннер объявления на сайте</label>
+                        <label style="margin: 0;">Показывать баннер сверху на сайте</label>
                     </div>
-                    <label>Текст объявления</label>
+                    <label>Текст баннера</label>
                     <input type="text" id="ann-text" placeholder="Например: Набор на зимний интенсив открыт — осталось 5 мест">
                     <label>Ссылка (необязательно)</label>
                     <input type="text" id="ann-link" placeholder="payment.html">
@@ -473,6 +513,8 @@
     <script src="firebase-config.js"></script>
     <script src="video-embed.js"></script>
     <script src="csv-export.js"></script>
+    <script src="mock-config.js"></script>
+    <script src="mock-engine.js"></script>
     <script src="content-i18n.js"></script>
     <script src="teachers-data.js"></script>
     <script>
@@ -533,13 +575,15 @@
             loadReferrals();
             loadAdminGroups();
             loadLessons();
+            if (window.loadMocks) loadMocks();
             loadDesign();
         }
 
         function switchTab(tab) {
             document.querySelectorAll('.admin-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
             document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
-            const act = document.querySelector('.admin-tab.active'); const pt = document.getElementById('admin-ptitle'); if (pt && act) pt.textContent = act.textContent;
+            if (tab === 'catalog' && window.loadCatalog) window.loadCatalog();
+            const act = document.querySelector('.admin-tab.active'); const pt = document.getElementById('admin-ptitle'); if (pt && act) pt.textContent = act.textContent; const ph = document.getElementById('admin-phint'); if (ph) { const H = { news: 'Записи на странице «Новости» (news.html): заголовок, текст, дата. Остаются в списке, пока вы их не удалите.', announcement: 'Одна короткая строка-баннер СВЕРХУ на каждой странице сайта (например: «Набор открыт — осталось 5 мест»). Можно добавить ссылку и в любой момент выключить.', catalog: 'Курсы, цены и описания на главной. Сохраните — и всё сразу обновится на сайте.' }; ph.textContent = H[tab] || ''; ph.style.display = H[tab] ? '' : 'none'; }
         }
 
         if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
@@ -1316,11 +1360,16 @@
         function deleteSchedule(id) { if (confirm('Удалить урок из расписания?')) db.collection('schedule').doc(id).delete().then(loadSchedule).catch(err => alert('Ошибка: ' + err.message)); }
 
         // ── Students ──
-        let allStudents = [];
+        let allStudents = [], adminIds = new Set();
         function loadStudents() {
-            db.collection('users').orderBy('createdAt', 'desc').get().then(snap => {
-                allStudents = [];
-                snap.forEach(doc => allStudents.push({ id: doc.id, ...doc.data() }));
+            Promise.all([
+                db.collection('users').orderBy('createdAt', 'desc').get(),
+                db.collection('admins').get().catch(() => null),
+                db.collection('presence').get().catch(() => null)
+            ]).then(([snap, adm, pres]) => {
+                allStudents = []; adminIds = new Set(); window.__pres = {}; if (pres) pres.forEach(d => { window.__pres[d.id] = d.data(); });
+                if (adm) adm.forEach(d => adminIds.add(d.id));
+                snap.forEach(doc => { const u = { id: doc.id, ...doc.data() }; if (u.role === 'admin') adminIds.add(u.id); u.isAdmin = adminIds.has(u.id); allStudents.push(u); });
                 renderStudents(allStudents);
                 if (allGroups.length) renderAdminGroups();
                 populateTeacherAccountOptions();
@@ -1350,14 +1399,17 @@
                 const extra = [s.course ? 'Курс: ' + s.course : '', s.levelTestCompleted ? 'IELTS: ' + (s.levelTestLevel || '') : '', s.satTestCompleted ? 'SAT Math: ' + (s.satScore || '') : ''].filter(Boolean).join(' · ');
                 card.innerHTML = `
                     <span class="ar-av">${escapeHtml(nm.charAt(0).toUpperCase())}</span>
-                    <div class="ar-main"><strong>${escapeHtml(nm)} <span style="color:var(--accent);font-weight:600">@${escapeHtml(s.nickname) || '—'}</span>${s.studentId ? ' <small>· ID ' + escapeHtml(s.studentId) + '</small>' : ''}</strong>
+                    <div class="ar-main"><strong>${escapeHtml(nm)}${window.StarthPresence ? window.StarthPresence.dot(window.StarthPresence.status((window.__pres || {})[s.id])) : ''} <span style="color:var(--accent);font-weight:600">@${escapeHtml(s.nickname) || '—'}</span>${s.studentId ? ' <small>· ID ' + escapeHtml(s.studentId) + '</small>' : ''}</strong>
                         <small>${escapeHtml(s.phone) || 'нет телефона'} · ${escapeHtml(s.email) || 'нет email'} · с ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('ru-RU') : '—'}</small>
                         ${extra ? `<div class="ar-extra">${escapeHtml(extra)}</div>` : ''}</div>
-                    <select onchange="changeStudentRole('${s.id}', this.value)" aria-label="Роль">
-                        <option value="student" ${role === 'student' ? 'selected' : ''}>Ученик</option>
-                        <option value="teacher" ${role === 'teacher' ? 'selected' : ''}>Преподаватель</option>
-                        <option value="admin" ${role === 'admin' ? 'selected' : ''}>Администратор</option>
-                    </select>`;
+                    <div class="ar-actions">
+                        <select onchange="changeStudentRole('${s.id}', this.value)" aria-label="Роль">
+                            <option value="student" ${role !== 'teacher' ? 'selected' : ''}>Ученик</option>
+                            <option value="teacher" ${role === 'teacher' ? 'selected' : ''}>Преподаватель</option>
+                        </select>
+                        <button type="button" class="btn-small ar-admin ${s.isAdmin ? 'on' : ''}" onclick="toggleAdmin('${s.id}', ${s.isAdmin ? 'false' : 'true'})" title="Доступ к админ-панели. Об этом знают только администраторы.">${s.isAdmin ? '🛡 Снять админа' : '🛡 Дать админа'}</button>
+                    </div>`;
+                if (s.isAdmin) card.querySelector('.ar-main strong').insertAdjacentHTML('beforeend', ' <span class="ar-badge">админ</span>');
                 wrap.appendChild(card);
             });
         }
@@ -1377,7 +1429,7 @@
         function filterStudents() {
             const q = document.getElementById('student-search').value.trim().toLowerCase();
             const rf = (document.getElementById('student-role') || {}).value || 'all';
-            const byRole = allStudents.filter(s => rf === 'all' || (s.role || 'student') === rf);
+            const byRole = allStudents.filter(s => rf === 'all' || (rf === 'admin' ? s.isAdmin : rf === 'teacher' ? s.role === 'teacher' : (s.role || 'student') !== 'teacher'));
             if (!q) { renderStudents(byRole); return; }
             renderStudents(byRole.filter(s =>
                 (s.name || '').toLowerCase().includes(q) ||
@@ -1388,24 +1440,27 @@
         }
 
         async function changeStudentRole(uid, newRole) {
-            if (uid === auth.currentUser.uid && newRole !== 'admin') {
-                alert('Нельзя снять права администратора с самого себя — попросите другого админа сделать это.');
-                loadStudents();
-                return;
-            }
+            if (newRole !== 'teacher') newRole = 'student';
             try {
-                await db.collection('users').doc(uid).update({ role: newRole });
-                db.collection('directory').doc(uid).set({ role: newRole === 'teacher' ? 'teacher' : 'student' }, { merge: true }).catch(() => {});
-                if (newRole === 'admin') {
-                    await db.collection('admins').doc(uid).set({ grantedAt: new Date().toISOString() });
-                } else {
-                    await db.collection('admins').doc(uid).delete().catch(() => {});
+                await db.collection('users').doc(uid).update({ role: newRole, roleChangedAt: Date.now() });
+                db.collection('directory').doc(uid).set({ role: newRole }, { merge: true }).catch(() => {});
+                loadStudents();
+            } catch (err) { alert('Ошибка: ' + err.message); loadStudents(); }
+        }
+        // Admin access is separate from the teacher/student role, so one person can be admin AND teacher.
+        // It is stored in admins/<uid>, which only admins can read: nobody else ever sees who is an admin.
+        async function toggleAdmin(uid, on) {
+            if (!on && uid === auth.currentUser.uid) { alert('Нельзя снять права администратора с самого себя — попросите другого админа.'); return; }
+            if (!confirm(on ? 'Дать этому человеку доступ к админ-панели?' : 'Забрать доступ к админ-панели?')) return;
+            try {
+                if (on) await db.collection('admins').doc(uid).set({ grantedAt: new Date().toISOString(), grantedBy: auth.currentUser.uid });
+                else {
+                    await db.collection('admins').doc(uid).delete();
+                    const u = allStudents.find(x => x.id === uid);
+                    if (u && u.role === 'admin') await db.collection('users').doc(uid).update({ role: 'student' }).catch(() => {});
                 }
                 loadStudents();
-            } catch (err) {
-                alert('Ошибка: ' + err.message);
-                loadStudents();
-            }
+            } catch (err) { alert('Ошибка: ' + err.message); }
         }
 
 
@@ -1671,5 +1726,9 @@
             } catch (err) { statusEl.textContent = 'Ошибка: ' + err.message; statusEl.className = 'status-msg error'; }
         }
     </script>
+    <script src="catalog-defaults.js"></script>
+    <script src="presence.js"></script>
+    <script src="admin-catalog.js"></script>
+    <script src="admin-mock.js"></script>
 </body>
 </html>
