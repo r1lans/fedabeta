@@ -90,7 +90,7 @@ window.StarthCatalogDefaults = {
    "tagClass": "tag-olympiad",
    "price": 15,
    "priceUnit": "lesson",
-   "featured": true,
+   "featured": false,
    "active": true,
    "srcLang": "ru",
    "i18n": {

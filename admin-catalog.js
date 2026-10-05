@@ -41,7 +41,7 @@
             return '<div class="admin-card cat-card" data-i="' + i + '"><div class="cat-head"><strong>' + esc(c.title || 'Новый курс') + '</strong><span class="cat-btns">' +
                 '<button type="button" class="btn-small" data-act="up" data-i="' + i + '" ' + (i === 0 ? 'disabled' : '') + '>↑</button><button type="button" class="btn-small" data-act="down" data-i="' + i + '" ' + (i === cs.length - 1 ? 'disabled' : '') + '>↓</button>' +
                 '<button type="button" class="btn-small danger" data-act="del" data-i="' + i + '">Удалить</button></span></div>' +
-                '<div class="cat-checks">' + checkField(b + '.active', 'Показывать на сайте') + checkField(b + '.featured', 'Выделить рамкой') + '</div>' +
+                '<div class="cat-checks">' + checkField(b + '.active', 'Показывать на сайте') + '</div>' +
                 '<div class="cat-grid">' + selField(b + '.tagClass', 'Цвет метки', TAGS) + numField(b + '.price', 'Цена, $') + selField(b + '.priceUnit', 'Подпись цены', UNITS) + '</div>' +
                 CF.map((s) => field(b, s, 'ru')).join('') + trBlock(b, CF) + '</div>';
         }).join('');

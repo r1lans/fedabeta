@@ -21,7 +21,7 @@
     function courseCard(c, i) {
         const feats = pickL(c, 'features').map((f) => '<li>' + esc(f) + '</li>').join('');
         const price = Number(c.price) > 0 ? '<div class="price">' + money(c.price) + (c.priceUnit ? ' <span>' + esc(perText(c.priceUnit)) + '</span>' : '') + '</div>' : '';
-        return '<div class="card" data-course="' + esc(c.id) + '"' + (c.featured ? ' style="border-color: var(--accent);"' : '') + '>' +
+        return '<div class="card" data-course="' + esc(c.id) + '">' +
             '<span class="card-badge ' + esc(c.tagClass || 'tag-ielts') + '">' + esc(pick(c, 'badge')) + '</span>' +
             '<h3>' + esc(pick(c, 'title')) + '</h3><p>' + esc(pick(c, 'desc')) + '</p>' +
             (feats ? '<ul class="card-features">' + feats + '</ul>' : '') + price +
