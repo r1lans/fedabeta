@@ -10,9 +10,13 @@
     <meta name="description" content="Личный кабинет TheStarth: ваши результаты тестов, реферальная программа и бонусы.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=38">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
+        body.dash-wait footer { display: none; }
+        .dash-loading { min-height: 70vh; display: flex; align-items: center; justify-content: center; gap: .8rem; color: var(--ink-soft); padding-top: 90px; }
+        .dash-spin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--rule); border-top-color: var(--accent); animation: dashSpin .8s linear infinite; }
+        @keyframes dashSpin { to { transform: rotate(360deg); } }
         main.dash-main {
             padding: 6.5rem 1.5rem 4rem;
             max-width: 1100px;
@@ -232,7 +236,7 @@
         .tch-hw-saved { color: var(--ink-soft); font-size: 0.8rem; margin-left: 0.75rem; }
     </style>
 </head>
-<body>
+<body class="dash-wait">
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
@@ -258,6 +262,9 @@
             </div>
         </div>
     </nav>
+
+    <!-- Shown for a moment while the login state is being checked (so the footer does not jump up) -->
+    <div id="dashLoading" class="dash-loading" role="status" aria-live="polite"><span class="dash-spin" aria-hidden="true"></span><span>Загрузка…</span></div>
 
     <!-- Shown when the visitor is NOT logged in -->
     <div class="login-required" id="loginRequired" style="display: none;">
@@ -473,6 +480,8 @@
                     <input type="text" name="surname" data-i18n-placeholder="form.surname_ph" placeholder="Ваша фамилия" required>
                     <input type="tel" name="phone" data-i18n-placeholder="form.phone_ph" placeholder="Номер телефона" required>
                     <input type="text" name="nickname" data-i18n-placeholder="auth.nickname_ph" placeholder="Никнейм (латиницей, напр. aziz_2010)" required pattern="[a-zA-Z0-9_]{3,20}">
+                    <input type="text" name="telegram" data-i18n-placeholder="auth.tg_ph" placeholder="Telegram: @username (для напоминаний об уроках)" required pattern="@?[A-Za-z0-9_]{5,32}" autocapitalize="none" autocomplete="off" spellcheck="false" data-nophone>
+                    <small class="tg-hint" data-i18n="auth.tg_hint">После регистрации откройте нашего Telegram-бота и нажмите «Start», чтобы получать напоминания об уроках.</small>
                     <select name="course" required>
                         <option value="" disabled selected data-i18n="auth.course_ph">Какой курс интересует?</option>
                         <option value="Общий английский" data-i18n="auth.opt_general">Общий английский</option>
@@ -694,6 +703,7 @@
         function renderDashboard(user, profile) {
             const loginRequired = document.getElementById('loginRequired');
             const dashContent = document.getElementById('dashContent');
+            const dl = document.getElementById('dashLoading'); if (dl) dl.style.display = 'none'; document.body.classList.remove('dash-wait');
 
             if (!user) {
                 loginRequired.style.display = 'block';
@@ -712,7 +722,7 @@
             document.getElementById('dashUserName').textContent = name;
             document.getElementById('dashProfileName').textContent = name;
             document.getElementById('dashProfileNickname').textContent = nickname ? '@' + nickname : '';
-            document.getElementById('dashProfileContact').textContent = [phone, user.email].filter(Boolean).join(' · ') || 'Контакты не указаны';
+            document.getElementById('dashProfileContact').textContent = [phone, profile && profile.telegram ? '@' + profile.telegram : '', user.email].filter(Boolean).join(' · ') || 'Контакты не указаны';
             document.getElementById('dashAvatar').textContent = name.trim().charAt(0).toUpperCase() || 'S';
 
             // Student ID (000001...). Old accounts without an ID get one here, once.
@@ -796,8 +806,11 @@
         if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) {
             renderDashboard(null, null);
         }
+        // if the login check never answers (offline, blocked), do not spin forever
+        setTimeout(() => { const dl = document.getElementById('dashLoading'); if (dl && dl.style.display !== 'none') renderDashboard(null, null); }, 10000);
     </script>
     
     <script src="back-btn.js"></script>
+    <script src="phone-prefix.js"></script>
 </body>
 </html>

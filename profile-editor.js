@@ -23,6 +23,7 @@
             '<form id="peForm" autocomplete="off">' +
             '<div class="pe-row"><div><label for="peName">Имя</label><input id="peName" maxlength="40" required></div><div><label for="peSurname">Фамилия</label><input id="peSurname" maxlength="40"></div></div>' +
             '<label for="pePhone">Телефон</label><input id="pePhone" type="tel" maxlength="24">' +
+            '<label for="peTg">Telegram</label><input id="peTg" maxlength="33" autocapitalize="none" autocomplete="off" spellcheck="false" placeholder="@username" data-nophone><small class="pe-hint">Нужен для напоминаний об уроках (за час, за 30 и за 5 минут). Откройте нашего бота и нажмите Start' + (window.STARTH_TG_BOT ? ': <a href="https://t.me/' + String(window.STARTH_TG_BOT).replace(/^@/, '') + '" target="_blank" rel="noopener">@' + String(window.STARTH_TG_BOT).replace(/^@/, '') + '</a>' : '') + '.</small>' +
             '<label for="peNick">Никнейм</label><input id="peNick" maxlength="20" autocapitalize="none" spellcheck="false"><small class="pe-hint">Латинские буквы, цифры и _ (3–20 символов). Его используют в мессенджере и реферальной ссылке.</small>' +
             '<label class="pe-check"><input type="checkbox" id="peShow"> Показывать мой статус (онлайн / в уроке) другим людям</label>' +
             '<div class="status-msg" id="peStatus"></div>' +
@@ -46,7 +47,7 @@
     function open() {
         const user = window.currentAuthUser || (typeof auth !== 'undefined' && auth.currentUser); if (!user) return;
         const p = window.currentUserProfile || {}; ensure();
-        $('peName').value = p.name || ''; $('peSurname').value = p.surname || ''; $('pePhone').value = p.phone || ''; $('peNick').value = p.nickname || '';
+        $('peName').value = p.name || ''; $('peSurname').value = p.surname || ''; $('pePhone').value = p.phone || ''; $('peTg').value = p.telegram ? '@' + p.telegram : ''; $('peNick').value = p.nickname || '';
         $('peShow').checked = p.showStatus !== false; $('peEmailNow').textContent = user.email || '—'; $('peEmail').value = ''; $('pePw').value = ''; $('peEmailPw').hidden = true;
         say('peStatus', '', true); say('peEmailStatus', '', true);
         box.classList.add('show'); setTimeout(() => $('peName').focus(), 50);
@@ -58,6 +59,8 @@
         const name = $('peName').value.trim().replace(/\s+/g, ' '), surname = $('peSurname').value.trim().replace(/\s+/g, ' '), phone = $('pePhone').value.trim(), nick = $('peNick').value.trim().toLowerCase();
         if (!name) return say('peStatus', 'Введите имя.', false);
         if (phone && !/^[0-9+()\-\s]{5,24}$/.test(phone)) return say('peStatus', 'Телефон: только цифры, + ( ) и дефис.', false);
+        const tg = $('peTg').value.trim().replace(/^@/, '').toLowerCase();
+        if (tg && !/^[a-z0-9_]{5,32}$/.test(tg)) return say('peStatus', 'Telegram: латинские буквы, цифры и _, 5–32 символа.', false);
         const oldNick = old.nickname || '';
         if (nick !== oldNick && !NICK.test(nick)) return say('peStatus', 'Никнейм: 3–20 символов, латинские буквы, цифры и _.', false);
         busy = true; $('peSave').disabled = true; say('peStatus', 'Сохраняю…', true);
@@ -74,7 +77,7 @@
             } else if (nick) {
                 db.collection('nicknames').doc(nick).set({ uid: user.uid, displayName: dn }).catch(() => {});
             }
-            const patch = { name, surname, phone, nickname: nick || oldNick, showStatus: $('peShow').checked, profileUpdatedAt: Date.now() };
+            const patch = { name, surname, phone, telegram: tg, nickname: nick || oldNick, showStatus: $('peShow').checked, profileUpdatedAt: Date.now() };
             await db.collection('users').doc(user.uid).set(patch, { merge: true });
             const prof = Object.assign({}, old, patch); window.currentUserProfile = prof;
             // public directory entry (messenger search)

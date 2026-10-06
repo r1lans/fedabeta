@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=38">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         body { background: var(--paper-alt); }
@@ -1400,7 +1400,7 @@
                 card.innerHTML = `
                     <span class="ar-av">${escapeHtml(nm.charAt(0).toUpperCase())}</span>
                     <div class="ar-main"><strong>${escapeHtml(nm)}${window.StarthPresence ? window.StarthPresence.dot(window.StarthPresence.status((window.__pres || {})[s.id])) : ''} <span style="color:var(--accent);font-weight:600">@${escapeHtml(s.nickname) || '—'}</span>${s.studentId ? ' <small>· ID ' + escapeHtml(s.studentId) + '</small>' : ''}</strong>
-                        <small>${escapeHtml(s.phone) || 'нет телефона'} · ${escapeHtml(s.email) || 'нет email'} · с ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('ru-RU') : '—'}</small>
+                        <small>${escapeHtml(s.phone) || 'нет телефона'} · ${s.telegram ? '@' + escapeHtml(s.telegram) + ' · ' : ''}${escapeHtml(s.email) || 'нет email'} · с ${s.createdAt ? new Date(s.createdAt).toLocaleDateString('ru-RU') : '—'}</small>
                         ${extra ? `<div class="ar-extra">${escapeHtml(extra)}</div>` : ''}</div>
                     <div class="ar-actions">
                         <select onchange="changeStudentRole('${s.id}', this.value)" aria-label="Роль">

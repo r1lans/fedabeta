@@ -8,7 +8,7 @@
     <title>Бесплатный тест на уровень английского — TheStarth</title>
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=38">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         .quiz-container {
@@ -139,7 +139,7 @@
                 
                 <form id="contact-form" style="display: flex; flex-direction: column; gap: 1rem; max-width: 400px; margin: 0 auto;">
                     <input type="text" id="lead-name" placeholder="Ваше имя" required style="padding: 1rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-size: 1rem;">
-                    <input type="tel" id="lead-phone" placeholder="Номер телефона / Telegram" required style="padding: 1rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-size: 1rem;">
+                    <input type="tel" data-nophone id="lead-phone" placeholder="Номер телефона / Telegram" required style="padding: 1rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-size: 1rem;">
                     <button type="submit" class="btn-primary" style="padding: 1rem; font-size: 1.1rem; width: 100%;">Показать мой результат</button>
                     <p style="font-size: 0.75rem; color: var(--ink-soft); margin-top: 0.5rem;">
                         Нажимая кнопку, вы соглашаетесь с <a href="privacy.html" target="_blank" style="color: var(--accent);">Политикой конфиденциальности</a>.
@@ -307,5 +307,6 @@
     
     <script src="translations.js"></script>
     <script src="back-btn.js"></script>
+    <script src="phone-prefix.js"></script>
 </body>
 </html>

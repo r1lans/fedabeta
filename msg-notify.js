@@ -19,7 +19,7 @@
     let me = null, unsub = null, chats = [], baseline = new Map(), first = true, seen = new Set(), titleBase = '', audio = null;
 
     const other = (c) => { const uid = (c.members || []).find((u) => u !== me.uid) || ''; return { uid, name: (c.names || {})[uid] || '', nick: (c.nicks || {})[uid] || '' }; };
-    const who = (c) => { const o = other(c); return o.name || (o.nick ? '@' + o.nick : X('Новое сообщение')); };
+    const who = (c) => { if (c.group) return (c.title || '') + (c.lastName ? ' · ' + c.lastName : ''); const o = other(c); return o.name || (o.nick ? '@' + o.nick : X('Новое сообщение')); };
     const isUnread = (c) => c.lastFrom && c.lastFrom !== me.uid && (c.lastTs || 0) > ((c.reads || {})[me.uid] || 0);
     const onMessengerPage = () => /messenger\.html/.test(location.pathname);
     const openChatId = () => (window.Messenger && window.Messenger.openId ? window.Messenger.openId() : '');
@@ -54,7 +54,7 @@
     function openFromNotification(c) {
         try { window.focus(); } catch (e) {}
         if (onMessengerPage() && window.Messenger && window.Messenger.openById) { window.Messenger.openById(c.id); return; }
-        const o = other(c); location.href = 'messenger.html' + (o.nick ? '?chat=' + encodeURIComponent(o.nick) : '');
+        if (c.group) { location.href = 'messenger.html?gid=' + encodeURIComponent(c.id); return; } const o = other(c); location.href = 'messenger.html' + (o.nick ? '?chat=' + encodeURIComponent(o.nick) : '');
     }
 
     function system(c) {

@@ -24,6 +24,19 @@
     v.src = small ? v.dataset.srcSd : v.dataset.srcHd;
     if (loopV) loopV.src = small ? loopV.dataset.srcSd : loopV.dataset.srcHd;
 
+    // Do not decode video nobody can see: pause while the stage is scrolled out of view, continue when it is back.
+    let visible = true;
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver((es) => {
+            visible = es[0].isIntersecting;
+            if (!visible) { try { v.pause(); if (loopV) loopV.pause(); } catch (e) {} }
+            else if (phase === 'play' && v.paused && !v.ended && (v.currentTime || 0) > 0 && (v.currentTime || 0) < STILL_AT) { const p = v.play(); if (p && p.catch) p.catch(() => {}); }
+            else if (phase === 'end' && loopV && !loopV.hidden) { const p = loopV.play(); if (p && p.catch) p.catch(() => {}); }
+        }, { threshold: 0.05 }).observe(frame);
+        const hv = document.getElementById('hero-intro-video');
+        if (hv) new IntersectionObserver((es) => { if (es[0].isIntersecting) { const p = hv.play(); if (p && p.catch) p.catch(() => {}); } else hv.pause(); }, { threshold: 0.1 }).observe(hv);
+    }
+
     // phase 'play': the intro is running. phase 'end': the last scene is on screen (it moves in a soft loop) until the intro starts again.
     // Safari (and slow devices) can fire "ended" before a timeupdate reaches STILL_AT and the video is already paused by then,
     // so entering the end phase must not depend on the video still playing: it is idempotent and called from every event.
@@ -43,10 +56,11 @@
         frame.classList.toggle('is-live', t >= MAIN_AT || atEnd);
         frame.classList.toggle('is-chips', t >= CHIPS_AT || atEnd);
         frame.classList.toggle('is-end', atEnd);
+        if (loopV && phase === 'play' && t >= 15 && t < STILL_AT - 1 && loopV.preload !== 'auto') { loopV.preload = 'auto'; try { loopV.load(); } catch (e) {} }   // fetch the end-scene loop shortly before it is needed
         skipBtn.hidden = t >= MAIN_AT || atEnd;
         if (atEnd && !holdTimer) holdTimer = setTimeout(restart, HOLD_MS);   // safety net
     }
-    setInterval(sync, 100);                                // cheap and does not depend on how often the browser sends timeupdate
+    setInterval(() => { if (!document.hidden) sync(); }, 100);                                // cheap and does not depend on how often the browser sends timeupdate
     // The last scene is not frozen: a short back-and-forth loop of it (starts exactly on the last frame) plays until the intro restarts.
     function startLoop() {
         if (!loopV) return;
@@ -74,6 +88,7 @@
         stopLoop(); if (phase === 'end' && (v.currentTime || 0) < STILL_AT) phase = 'play';
         if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
         hideStill(); playBtn.hidden = true;
+        if (!visible) return;                       // it will start when the stage is back on screen
         const p = v.play(); if (p && p.catch) p.catch(() => { playBtn.hidden = false; });
     }
 

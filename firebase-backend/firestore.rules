@@ -225,18 +225,30 @@ service cloud.firestore {
 
     // ── MESSENGER (personal cabinet) ────────────────────────────────────────
     // chats/<uidA_uidB> — a private chat between exactly two people (uids sorted, joined with "_").
-    // Only the two members can read it or write in it. A member may update the "last message" summary and their
-    // own read marker, but can never change who is in the chat.
+    // chats/<autoId> with group:true — a group (2..50 members). Only the creator can add/remove people or rename it;
+    // any member can leave. Members read and write messages; a message author can edit/delete their own message
+    // (the group creator can also delete messages in the group). Pinned message = field "pinned" on the chat doc.
     match /chats/{chatId} {
       allow read: if isSignedIn() && request.auth.uid in resource.data.members;
-      allow create: if isSignedIn() &&
-        request.resource.data.members.size() == 2 &&
-        request.auth.uid in request.resource.data.members &&
-        chatId == request.resource.data.members[0] + '_' + request.resource.data.members[1] &&
-        request.resource.data.members[0] < request.resource.data.members[1];
-      allow update: if isSignedIn() && request.auth.uid in resource.data.members &&
-        request.resource.data.members == resource.data.members;
-      allow delete: if isAdmin();
+      allow create: if isSignedIn() && request.auth.uid in request.resource.data.members && (
+        (!('group' in request.resource.data) &&
+          request.resource.data.members.size() == 2 &&
+          chatId == request.resource.data.members[0] + '_' + request.resource.data.members[1] &&
+          request.resource.data.members[0] < request.resource.data.members[1]) ||
+        (request.resource.data.group == true &&
+          request.resource.data.createdBy == request.auth.uid &&
+          request.resource.data.members.size() >= 2 && request.resource.data.members.size() <= 50 &&
+          request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 60));
+      allow update: if isSignedIn() && request.auth.uid in resource.data.members && (
+        request.resource.data.members == resource.data.members ||
+        (resource.data.get('group', false) == true && request.resource.data.group == true &&
+          request.resource.data.createdBy == resource.data.createdBy &&
+          ((resource.data.createdBy == request.auth.uid &&
+              request.resource.data.members.size() >= 1 && request.resource.data.members.size() <= 50 &&
+              request.auth.uid in request.resource.data.members) ||
+           (request.resource.data.members.size() == resource.data.members.size() - 1 &&
+              request.resource.data.members.hasAll(resource.data.members.removeAll([request.auth.uid]))))));
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.get('group', false) == true && resource.data.createdBy == request.auth.uid);
 
       match /messages/{mid} {
         allow read: if isSignedIn() &&
@@ -247,7 +259,14 @@ service cloud.firestore {
             (request.resource.data.img is string && request.resource.data.img.size() <= 260000 &&
              request.resource.data.img.matches('data:image/(jpeg|png|webp);base64,.*'))) &&
           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
-        allow delete: if isSignedIn() && (resource.data.from == request.auth.uid || isAdmin());
+        // edit: only the author, only the text (plus the "edited" marks)
+        allow update: if isSignedIn() && resource.data.from == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited', 'editedAt']) &&
+          request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 2000 &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+        allow delete: if isSignedIn() && (resource.data.from == request.auth.uid || isAdmin() ||
+          (get(/databases/$(database)/documents/chats/$(chatId)).data.get('group', false) == true &&
+           get(/databases/$(database)/documents/chats/$(chatId)).data.createdBy == request.auth.uid));
       }
     }
 

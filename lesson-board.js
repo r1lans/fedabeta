@@ -88,7 +88,7 @@
         ref.set(st).catch((err) => { console.warn('Board write failed', err); setStatus('Не удалось отправить штрих — возможно, доступ к доске отозван.', ''); });
     }
     function pointerDown(e) {
-        if (!canWrite()) return;
+        if (!canWrite() || pickMode) { e.preventDefault(); return pickAt(e); }
         if (textMode) return textDown(e);
         e.preventDefault();
         try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
@@ -244,6 +244,7 @@
         canvas.classList.toggle('can-write', w);
         $('bd-tools').style.display = w ? 'flex' : 'none';
         $('bd-clear').style.display = owner ? '' : 'none';
+        $('bd-pt').style.display = w ? '' : 'none'; $('bd-last').style.display = owner ? 'none' : ''; $('bd-follow').style.display = owner ? 'none' : ''; $('bd-follow-note').style.display = owner ? 'none' : '';
         $('bd-people').style.display = owner ? 'block' : 'none';
         $('bd-lock').style.display = w ? 'none' : 'block';
         if (!board) setStatus(isTeacher() ? 'Открываю доску…' : 'Учитель ещё не открыл доску.', '');
@@ -259,7 +260,7 @@
     function heartbeat() {
         if (!me || !boardRef) return;
         const name = [myProfile && myProfile.name, myProfile && myProfile.surname].filter(Boolean).join(' ') || (myProfile && myProfile.nickname) || me.email || 'Участник';
-        boardRef.collection('people').doc(me.uid).set({ name, nickname: (myProfile && myProfile.nickname) || '', role: (myProfile && myProfile.role) || 'student', lastSeen: Date.now() })
+        boardRef.collection('people').doc(me.uid).set({ name, nickname: (myProfile && myProfile.nickname) || '', role: (myProfile && myProfile.role) || 'student', lastSeen: Date.now() }, { merge: true })
             .catch((e) => console.warn('presence', e));
     }
     const onlinePeople = () => people.filter((p) => Date.now() - (p.lastSeen || 0) < ONLINE_MS);
@@ -332,6 +333,98 @@
         } catch (e) { console.warn('group', e); }
     }
 
+
+    // ── coordinates: a grid of 16 × 10 cells (A1 … P10). Click → copy / send to chat; a code in the chat → shows the spot ──
+    const COLS = 16, ROWS = 10, LETTERS = 'ABCDEFGHIJKLMNOP';
+    const cellOf = (x, y) => LETTERS[Math.min(COLS - 1, Math.max(0, Math.floor(x * COLS)))] + (Math.min(ROWS - 1, Math.max(0, Math.floor(y * ROWS))) + 1);
+    const cellCenter = (code) => { const m = /^([A-P])(10|[1-9])$/i.exec(String(code || '')); return m ? [(LETTERS.indexOf(m[1].toUpperCase()) + 0.5) / COLS, (+m[2] - 0.5) / ROWS] : null; };
+    const coordText = (code) => 'доска:' + code;
+    let ov = null, pickMode = false, gridOn = false, follow = false, popEl = null, markTimer = 0, curTimer = 0, lastCur = 0;
+    function buildOverlay() {
+        const wrap = canvas.parentElement; if (ov) ov.remove();
+        ov = document.createElement('div'); ov.className = 'bd-ov';
+        let lab = '<div class="bd-grid" hidden>';
+        for (let i = 0; i < COLS; i++) lab += `<span class="bd-gl" style="left:${(i + 0.5) * 100 / COLS}%">${LETTERS[i]}</span>`;
+        for (let j = 0; j < ROWS; j++) lab += `<span class="bd-gn" style="top:${(j + 0.5) * 100 / ROWS}%">${j + 1}</span>`;
+        ov.innerHTML = lab + '</div><div class="bd-tdot" hidden></div>';
+        wrap.appendChild(ov);
+    }
+    function mark(x, y, label, ms, cls) {
+        if (!ov) return;
+        ov.querySelectorAll('.bd-mark').forEach((m) => m.remove());
+        const m = document.createElement('div'); m.className = 'bd-mark ' + (cls || ''); m.style.left = (x * 100) + '%'; m.style.top = (y * 100) + '%';
+        m.innerHTML = `<i></i>${label ? '<b>' + esc(label) + '</b>' : ''}`; ov.appendChild(m);
+        clearTimeout(markTimer); markTimer = setTimeout(() => m.remove(), ms || 5000);
+    }
+    function rectMark(x0, y0, x1, y1, label, ms) {
+        if (!ov) return;
+        ov.querySelectorAll('.bd-mark').forEach((m) => m.remove());
+        const m = document.createElement('div'); m.className = 'bd-mark rect';
+        m.style.cssText = `left:${x0 * 100}%;top:${y0 * 100}%;width:${(x1 - x0) * 100}%;height:${(y1 - y0) * 100}%`;
+        m.innerHTML = `<b>${esc(label)}</b>`; ov.appendChild(m);
+        clearTimeout(markTimer); markTimer = setTimeout(() => m.remove(), ms || 6000);
+    }
+    function closePop() { if (popEl) { popEl.remove(); popEl = null; } }
+    function pickAt(e) {
+        const [x, y] = pos(e), code = cellOf(x, y);
+        closePop(); mark(x, y, code, 8000);
+        const wrap = canvas.parentElement; const pop = document.createElement('div'); pop.className = 'bd-pop';
+        pop.innerHTML = `<strong>${code}</strong><button type="button" data-a="copy">${esc(X('Скопировать'))}</button><button type="button" data-a="say">${esc(X('В чат'))}</button><button type="button" data-a="x" aria-label="${esc(X('Закрыть'))}">×</button>`;
+        pop.style.left = Math.min(Math.max(x * 100, 4), 70) + '%'; pop.style.top = Math.min(y * 100 + 3, 82) + '%';
+        pop.addEventListener('pointerdown', (ev) => ev.stopPropagation());
+        pop.addEventListener('click', async (ev) => {
+            const a = ev.target.closest('button'); if (!a) return;
+            if (a.dataset.a === 'copy') {
+                try { await navigator.clipboard.writeText(coordText(code)); } catch (er) { const t = document.createElement('textarea'); t.value = coordText(code); document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e2) {} t.remove(); }
+                a.textContent = X('Скопировано'); setTimeout(closePop, 900);
+            } else if (a.dataset.a === 'say') { window.dispatchEvent(new CustomEvent('starth-board-say', { detail: { text: coordText(code) } })); a.textContent = X('Отправлено'); setTimeout(closePop, 900); }
+            else closePop();
+        });
+        wrap.appendChild(pop); popEl = pop;
+    }
+    function bboxOf(st) {
+        const p = st.pts || []; let x0 = 1, y0 = 1, x1 = 0, y1 = 0;
+        for (let i = 0; i + 1 < p.length; i += 2) { x0 = Math.min(x0, p[i]); x1 = Math.max(x1, p[i]); y0 = Math.min(y0, p[i + 1]); y1 = Math.max(y1, p[i + 1]); }
+        if (st.text) { const fs = (st.fs || 52) / canvas.height, lines = String(st.text).split('\n'); x1 = Math.min(1, x0 + Math.max(...lines.map((l) => l.length)) * fs * 0.6 * (canvas.height / canvas.width)); y1 = Math.min(1, y0 + lines.length * fs * 1.25); }
+        const padX = 0.012, padY = 0.02; return [Math.max(0, x0 - padX), Math.max(0, y0 - padY), Math.min(1, x1 + padX), Math.min(1, y1 + padY)];
+    }
+    function showPanel() { const p = $('board-panel'); if (p && p.style.display !== 'block' && window.toggleBoard) window.toggleBoard(); }
+    function showCode(code) {
+        const c = cellCenter(code); if (!c || !ov) return false;
+        showPanel(); mark(c[0], c[1], String(code).toUpperCase(), 6000, 'pulse');
+        const w = $('board-panel'); if (w) w.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return true;
+    }
+    function showLast() {
+        if (!board) return;
+        const arr = Array.from(strokes.values()).filter((st) => st.uid === board.teacherUid && st.pts && st.pts.length >= 2).sort((a, b) => (b.ts || 0) - (a.ts || 0));
+        if (!arr.length) { setStatus('Учитель пока ничего не писал на доске.', ''); return; }
+        const [x0, y0, x1, y1] = bboxOf(arr[0]); const a = cellOf(x0, y0), b = cellOf(x1, y1);
+        showPanel(); rectMark(x0, y0, x1, y1, X('Здесь писал учитель') + ' · ' + (a === b ? a : a + '–' + b), 7000);
+    }
+    const teacherCur = () => { const t = people.find((p) => board && p.uid === board.teacherUid); return t && t.cur && Date.now() - (t.cur.ts || 0) < 15000 ? t.cur : null; };
+    function paintTeacherDot() {
+        if (!ov) return; const d = ov.querySelector('.bd-tdot'); const c = follow ? teacherCur() : null;
+        if (!c) { d.hidden = true; if (follow) setFollowLabel(X('учитель сейчас не на доске')); return; }
+        d.hidden = false; d.style.left = (c.x * 100) + '%'; d.style.top = (c.y * 100) + '%'; d.innerHTML = `<i></i><b>${esc(X('Учитель'))} · ${cellOf(c.x, c.y)}</b>`; setFollowLabel('');
+    }
+    function setFollowLabel(t) { const l = $('bd-follow-note'); if (l) l.textContent = t; }
+    function sendCursor(e, gone) {
+        if (!isOwner() || !boardRef) return; const now = Date.now(); if (!gone && now - lastCur < 350) return; lastCur = now;
+        const c = gone ? null : (() => { const [x, y] = pos(e); return { x: r4(x), y: r4(y), ts: now }; })();
+        boardRef.collection('people').doc(me.uid).set({ cur: c }, { merge: true }).catch(() => {});
+    }
+    function bindCoordUI() {
+        buildOverlay();
+        $('bd-grid').onclick = () => { gridOn = !gridOn; $('bd-grid').classList.toggle('sel', gridOn); ov.querySelector('.bd-grid').hidden = !gridOn; };
+        $('bd-pt').onclick = () => { pickMode = !pickMode; $('bd-pt').classList.toggle('sel', pickMode); canvas.classList.toggle('pick-mode', pickMode); if (pickMode) { gridOn = true; $('bd-grid').classList.add('sel'); ov.querySelector('.bd-grid').hidden = false; } };
+        $('bd-last').onclick = showLast;
+        $('bd-follow').onclick = () => { follow = !follow; $('bd-follow').classList.toggle('sel', follow); paintTeacherDot(); };
+        document.addEventListener('pointerdown', (ev) => { if (popEl && !popEl.contains(ev.target) && ev.target !== canvas) closePop(); });
+        canvas.addEventListener('pointermove', (e) => sendCursor(e, false));
+        canvas.addEventListener('pointerleave', (e) => sendCursor(e, true));
+        curTimer = setInterval(paintTeacherDot, 4000);
+    }
+
     // ── start / stop ────────────────────────────────────────────────────────
     async function init() {
         canvas = $('bd-canvas'); ctx = canvas.getContext('2d');
@@ -362,9 +455,10 @@
 
         if (me) {
             heartbeat(); hbTimer = setInterval(heartbeat, 25000);
-            unsubs.push(boardRef.collection('people').onSnapshot((snap) => { people = []; snap.forEach((d) => people.push(Object.assign({ uid: d.id }, d.data()))); renderPeople(); }, () => {}));
+            unsubs.push(boardRef.collection('people').onSnapshot((snap) => { people = []; snap.forEach((d) => people.push(Object.assign({ uid: d.id }, d.data()))); renderPeople(); paintTeacherDot(); }, () => {}));
             uiTimer = setInterval(renderPeople, 20000);
         }
+        bindCoordUI();
         canvas.addEventListener('pointerdown', pointerDown);
         canvas.addEventListener('pointermove', pointerMove);
         canvas.addEventListener('pointerup', pointerUp);
@@ -407,7 +501,7 @@
     function stop() {
         started = false;
         unsubs.forEach((u) => { try { u(); } catch (e) {} }); unsubs = [];
-        clearInterval(hbTimer); clearInterval(uiTimer); clearInterval(flushTimer);
+        clearInterval(hbTimer); clearInterval(uiTimer); clearInterval(flushTimer); clearInterval(curTimer); closePop(); follow = false; pickMode = false; gridOn = false; if (ov) { ov.remove(); ov = null; }
         if (me && boardRef) boardRef.collection('people').doc(me.uid).delete().catch(() => {});
         closeTextBox(false); strokes.clear(); tb.clear(); localIds.clear(); myGestures = []; people = []; board = null; groupDoc = null; attMarks = {};
         if (ctx) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
@@ -428,7 +522,7 @@
         } catch (err) { console.warn('board reset', err); }
         strokes.clear(); tb.clear(); redraw();
     }
-    window.LessonBoard = { start, stop, reset };
+    window.LessonBoard = { start, stop, reset, show: showCode, cellOf };
     window.toggleBoard = function () {
         const p = $('board-panel'), open = p.style.display !== 'block';
         p.style.display = open ? 'block' : 'none';

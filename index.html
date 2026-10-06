@@ -17,7 +17,7 @@
       console.log("Analytics loaded");
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=38">
 </head>
 <body>
     <!-- Navbar -->
@@ -51,11 +51,11 @@
     <!-- Intro video stage: the video plays on entry; in its last seconds the buttons drawn in the video become real, clickable buttons -->
     <section class="intro-stage" id="introStage" aria-label="TheStarth">
         <div class="intro-frame" id="introFrame">
-            <video id="introVideo" muted playsinline preload="auto" poster="video/stage-poster.jpg" data-src-hd="video/stage-1080.mp4" data-src-sd="video/stage-720.mp4"></video>
-            <video id="introLoop" class="intro-loop" muted loop playsinline preload="auto" hidden data-src-hd="video/stage-loop-1080.mp4" data-src-sd="video/stage-loop-720.mp4"></video>
-            <img class="intro-end" id="introEnd" src="video/stage-end.jpg" alt="" hidden>
+            <video id="introVideo" muted playsinline preload="auto" poster="video/stage-poster.jpg" data-src-hd="video/stage-1080.mp4?v=38" data-src-sd="video/stage-720.mp4?v=38"></video>
+            <video id="introLoop" class="intro-loop" muted loop playsinline preload="none" hidden data-src-hd="video/stage-loop-1080.mp4?v=38" data-src-sd="video/stage-loop-720.mp4?v=38"></video>
+            <img class="intro-end" id="introEnd" src="video/stage-end.jpg?v=38" alt="" hidden>
             <div class="intro-hot" id="introHot">
-                <button type="button" class="ih ih-main" data-act="trial" data-from="22.3" data-i18n-aria="stage.trial" aria-label="Записаться на пробный урок"></button>
+                <button type="button" class="ih ih-main" data-act="trial" data-from="22.3" data-i18n-aria="stage.trial" aria-label="Нажмите, чтобы записаться на бесплатный урок"></button>
                 <button type="button" class="ih ih-chip ih-ielts" data-act="ielts" data-from="22.6" aria-label="IELTS"></button>
                 <button type="button" class="ih ih-chip ih-sat" data-act="sat" data-from="22.6" aria-label="SAT"></button>
                 <button type="button" class="ih ih-chip ih-math" data-act="math" data-from="22.6" data-i18n-aria="stage.math" aria-label="Математика"></button>
@@ -87,7 +87,7 @@
                     <div class="hero-carousel-viewport" id="heroCarouselViewport">
                         <div class="hero-carousel-track" id="heroCarouselTrack">
                             <div class="hero-slide is-active" data-src="video/hero-intro.mp4">
-                                <video id="hero-intro-video" autoplay muted loop playsinline preload="auto" poster="video/hero-intro-poster.jpg">
+                                <video id="hero-intro-video" autoplay muted loop playsinline preload="metadata" poster="video/hero-intro-poster.jpg">
                                     <source src="video/hero-intro.mp4" type="video/mp4">
                                 </video>
                                 <button class="hero-video-mute-btn" id="heroVideoMuteBtn" aria-label="Включить звук" title="Включить звук">
@@ -117,19 +117,28 @@
         <div class="partners-title" data-i18n="partners.title">Официальные форматы и признанные стандарты обучения</div>
         <div class="marquee-container">
             <div class="marquee-content">
-                <div class="partner-logo">British Council</div>
-                <div class="partner-logo">Cambridge Assessment</div>
-                <div class="partner-logo">IDP IELTS Partner</div>
-                <div class="partner-logo">College Board (SAT)</div>
-                <div class="partner-logo">Pearson PTE</div>
-                <!-- Duplicate for smooth seamless carousel scrolling -->
-                <div class="partner-logo">British Council</div>
-                <div class="partner-logo">Cambridge Assessment</div>
-                <div class="partner-logo">IDP IELTS Partner</div>
-                <div class="partner-logo">College Board (SAT)</div>
-                <div class="partner-logo">Pearson PTE</div>
+                <div class="partner-logo">IELTS</div>
+                <div class="partner-logo">SAT</div>
+                <div class="partner-logo">PTE Academic</div>
+                <div class="partner-logo">Cambridge English</div>
+                <!-- seamless carousel: the set is repeated -->
+                <div class="partner-logo">IELTS</div>
+                <div class="partner-logo">SAT</div>
+                <div class="partner-logo">PTE Academic</div>
+                <div class="partner-logo">Cambridge English</div>
+                <!-- seamless carousel: the set is repeated -->
+                <div class="partner-logo">IELTS</div>
+                <div class="partner-logo">SAT</div>
+                <div class="partner-logo">PTE Academic</div>
+                <div class="partner-logo">Cambridge English</div>
+                <!-- seamless carousel: the set is repeated -->
+                <div class="partner-logo">IELTS</div>
+                <div class="partner-logo">SAT</div>
+                <div class="partner-logo">PTE Academic</div>
+                <div class="partner-logo">Cambridge English</div>
             </div>
         </div>
+        <p class="partners-note" data-i18n="partners.note">Названия экзаменов принадлежат их владельцам. TheStarth — независимый учебный центр, не является официальным партнёром или представителем этих организаций.</p>
     </section>
 
     <!-- How we work Section Stepper (Point 15) -->
@@ -665,6 +674,8 @@
                     <input type="text" name="surname" data-i18n-placeholder="form.surname_ph" placeholder="Ваша фамилия" required>
                     <input type="tel" name="phone" data-i18n-placeholder="form.phone_ph" placeholder="Номер телефона" required>
                     <input type="text" name="nickname" data-i18n-placeholder="auth.nickname_ph" placeholder="Никнейм (латиницей, напр. aziz_2010)" required pattern="[a-zA-Z0-9_]{3,20}">
+                    <input type="text" name="telegram" data-i18n-placeholder="auth.tg_ph" placeholder="Telegram: @username (для напоминаний об уроках)" required pattern="@?[A-Za-z0-9_]{5,32}" autocapitalize="none" autocomplete="off" spellcheck="false" data-nophone>
+                    <small class="tg-hint" data-i18n="auth.tg_hint">После регистрации откройте нашего Telegram-бота и нажмите «Start», чтобы получать напоминания об уроках.</small>
                     <select name="course" required>
                         <option value="" disabled selected data-i18n="auth.course_ph">Какой курс интересует?</option>
                         <option value="Общий английский" data-i18n="auth.opt_general">Общий английский</option>
@@ -1645,7 +1656,8 @@
     <script src="catalog-defaults.js"></script>
     <script src="app.js"></script>
     <script src="catalog.js"></script>
-    <script src="intro-stage.js?v=27"></script>
+    <script src="intro-stage.js?v=38"></script>
     
+    <script src="phone-prefix.js"></script>
 </body>
 </html>

@@ -22,3 +22,6 @@ if (FIREBASE_READY) {
 } else {
     console.warn('Firebase not configured yet — see firebase-backend/FIREBASE_SETUP.md. Accounts and admin panel will not work until it is.');
 }
+
+// Имя Telegram-бота для напоминаний об уроках (без токена!). Например: 'TheStarthBot'. Токен хранится ТОЛЬКО в секретах Cloudflare Worker.
+window.STARTH_TG_BOT = 'TheStarth_bot';

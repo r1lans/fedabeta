@@ -9,7 +9,7 @@
     <meta name="description" id="page-desc" content="Профиль преподавателя TheStarth.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=38">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         main.profile-main {
@@ -257,6 +257,8 @@
                     <input type="text" name="surname" data-i18n-placeholder="form.surname_ph" placeholder="Ваша фамилия" required>
                     <input type="tel" name="phone" data-i18n-placeholder="form.phone_ph" placeholder="Номер телефона" required>
                     <input type="text" name="nickname" data-i18n-placeholder="auth.nickname_ph" placeholder="Никнейм (латиницей, напр. aziz_2010)" required pattern="[a-zA-Z0-9_]{3,20}">
+                    <input type="text" name="telegram" data-i18n-placeholder="auth.tg_ph" placeholder="Telegram: @username (для напоминаний об уроках)" required pattern="@?[A-Za-z0-9_]{5,32}" autocapitalize="none" autocomplete="off" spellcheck="false" data-nophone>
+                    <small class="tg-hint" data-i18n="auth.tg_hint">После регистрации откройте нашего Telegram-бота и нажмите «Start», чтобы получать напоминания об уроках.</small>
                     <select name="course" required>
                         <option value="" disabled selected data-i18n="auth.course_ph">Какой курс интересует?</option>
                         <option value="Общий английский" data-i18n="auth.opt_general">Общий английский</option>
@@ -466,5 +468,6 @@
         })();
     </script>
     <script src="back-btn.js"></script>
+    <script src="phone-prefix.js"></script>
 </body>
 </html>

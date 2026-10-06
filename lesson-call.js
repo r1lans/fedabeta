@@ -24,6 +24,7 @@
     let roomRef = null, joinedAt = 0;
     let local = { stream: null, audio: null, video: null, screen: null };
     let micOn = true, camOn = true, sharing = false, handUp = false;
+    let att = { away: 0, gaze: '', gazeAt: 0, consent: false }, awayNoted = {};
     let peers = new Map();            // uid -> { uid, pc, sid, init, stream, pendingIce[], remoteSet }
     let docs = new Map();             // uid -> presence doc data
     let unsubs = [], timers = [], joined = false, pinned = '';
@@ -136,7 +137,7 @@
 
     // ── presence & peers ────────────────────────────────────────────────────
     const online = (d) => d && Date.now() - (d.lastSeen || 0) < ONLINE_MS;
-    function myDoc() { return { name: myName, role: myRole, mic: micOn && !!local.audio, cam: sharing || (camOn && !!local.video), hand: handUp, sharing, rec: !!rec, lastSeen: Date.now(), joinedAt }; }
+    function myDoc() { return { name: myName, role: myRole, mic: micOn && !!local.audio, cam: sharing || (camOn && !!local.video), hand: handUp, sharing, rec: !!rec, lastSeen: Date.now(), joinedAt, away: att.away || 0, gaze: att.gaze || '', gazeAt: att.gazeAt || 0 }; }
     function pushPresence() { if (!joined) return; roomRef.collection('peers').doc(me.uid).set(myDoc(), { merge: true }).catch(() => {}); }
     function reconcile() {
         docs.forEach((d, uid) => {
@@ -218,12 +219,50 @@
             </div>
         </div>`;
     }
+    function tagsHTML(d, isMe) {
+        if (!d) return '';
+        return (d.hand ? `<span class="ct-hand">${ic('hand')}</span>` : '') + (d.role === 'teacher' ? `<span class="ct-role">${esc(X('Учитель'))}</span>` : '') + awayHTML(d, isMe);
+    }
+    function awayText(d) {
+        if (d.away) return X('Отвлёкся (другая вкладка)');
+        if (d.gaze === 'off') return X('Не смотрит в экран');
+        return '';
+    }
+    function awayHTML(d, isMe) {
+        if (!isHost || isMe || d.role === 'teacher' || d.role === 'admin') return '';
+        const t = awayText(d); if (!t) return '';
+        return `<span class="ct-away" data-since="${d.away || d.gazeAt || 0}">${esc(t)} · <i></i></span>`;
+    }
+    const fmtMin = (ms) => { const s = Math.max(0, Math.floor(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+    function tickAway() {
+        document.querySelectorAll('.ct-away[data-since]').forEach((e) => { const i = e.querySelector('i'); if (i) i.textContent = fmtMin(Date.now() - (+e.dataset.since || Date.now())); });
+        if (!isHost) return;
+        docs.forEach((d, uid) => {
+            if (uid === me.uid || !online(d) || d.role === 'teacher' || d.role === 'admin') return;
+            [['away', d.away, 25000, 'отвлёкся — открыл другую вкладку или окно'], ['gaze', d.gaze === 'off' ? d.gazeAt : 0, 20000, 'не смотрит в экран']].forEach(([k, since, lim, msg]) => {
+                const key = uid + k + since;
+                if (since && Date.now() - since >= lim && !awayNoted[key]) { awayNoted[key] = 1; toastMsg((d.name || '…') + ': ' + X(msg)); }
+            });
+        });
+    }
+    // ── attention: the student switched tab / window (always) and the camera check (only with consent) ──
+    function awayNow() { return document.hidden || !document.hasFocus(); }
+    let awayCand = 0;
+    function attTick() {
+        if (isHost || !joined) return;
+        if (awayNow()) { if (!awayCand) awayCand = Date.now(); if (!att.away && Date.now() - awayCand >= 5000) { att.away = awayCand; pushPresence(); } }
+        else { awayCand = 0; if (att.away) { att.away = 0; pushPresence(); } }
+    }
+    function startGaze() {
+        if (isHost || !att.consent || !window.LessonAttention || !local.video) return;
+        window.LessonAttention.start(local.video, (st) => { att.gaze = st; att.gazeAt = st === 'off' ? Date.now() : 0; pushPresence(); }).then((okk) => { if (!okk) att.consent = false; });
+    }
     function tileHTML(uid, d, isMe) {
         const name = (d && d.name) || '…';
         return `<div class="ct ${isMe ? 'me' : ''}" data-uid="${esc(uid)}">
             <video autoplay playsinline ${isMe ? 'muted' : ''}></video>
             <div class="ct-av"><span>${esc(initials(name))}</span></div>
-            <div class="ct-tags">${d && d.hand ? `<span class="ct-hand">${ic('hand')}</span>` : ''}${d && d.role === 'teacher' ? `<span class="ct-role">${esc(X('Учитель'))}</span>` : ''}</div>
+            <div class="ct-tags">${tagsHTML(d, isMe)}</div>
             <div class="ct-name">${d && d.mic === false ? ic('mic-off') : ''}<span>${esc(name)}${isMe ? ' (' + esc(X('вы')) + ')' : ''}</span></div>
             ${isHost && !isMe ? `<div class="ct-ctl"><button type="button" data-act="mic" title="${esc(X('Выкл. микрофон'))}">${ic('mic-off')}</button><button type="button" data-act="cam" title="${esc(X('Выкл. камеру'))}">${ic('video-off')}</button><button type="button" data-act="kick" class="danger" title="${esc(X('Удалить из урока'))}">${ic('logout')}</button></div>` : ''}
             <button class="ct-pin" type="button" title="${esc(X('Закрепить'))}" aria-label="${esc(X('Закрепить'))}">${ic('pin')}</button>
@@ -255,7 +294,7 @@
             el.classList.toggle('no-video', !showVideo);
             el.classList.toggle('is-share', !!d.sharing);
             el.classList.toggle('focus', uid === focus);
-            el.querySelector('.ct-tags').innerHTML = (d.hand ? `<span class="ct-hand">${ic('hand')}</span>` : '') + (d.role === 'teacher' ? `<span class="ct-role">${esc(X('Учитель'))}</span>` : '');
+            el.querySelector('.ct-tags').innerHTML = tagsHTML(d, isMe);
             el.querySelector('.ct-name').innerHTML = (d.mic === false ? ic('mic-off') : '') + `<span>${esc(d.name || '…')}${isMe ? ' (' + esc(X('вы')) + ')' : ''}</span>`;
             const st = el.querySelector('.ct-state'); const P = peers.get(uid);
             if (!isMe && P && P.pc.connectionState !== 'connected' && P.pc.connectionState !== 'completed') { st.hidden = false; st.textContent = X('Подключение…'); }
@@ -303,16 +342,20 @@
         } else if (peopleOpen) { side.innerHTML = `<div class="cs-head"><strong>${esc(X('Участники'))}</strong><button type="button" class="cs-x" aria-label="${esc(X('Закрыть'))}">${ic('x')}</button></div><div class="cs-list" id="cs-people"></div>`; renderPeople(); }
         const x = side.querySelector('.cs-x'); if (x) x.onclick = () => { chatOpen = peopleOpen = false; renderSide(); renderBar(); };
     }
+    // a board coordinate in a message ("доска:D5") becomes a button that shows the spot on the whiteboard
+    const linkCoords = (h) => h.replace(/(?:доска|board|doska)[:\s]\s?([A-Pa-p](?:10|[1-9]))(?![0-9A-Za-z])/gi, (m, c) => `<button type="button" class="cm-coord" data-c="${c.toUpperCase()}">доска:${c.toUpperCase()}</button>`);
+    window.addEventListener('starth-board-say', (e) => { try { if (roomRef && me && e.detail && e.detail.text) roomRef.collection('chat').add({ uid: me.uid, name: myName, text: String(e.detail.text).slice(0, 500), ts: Date.now() }).catch(() => {}); } catch (er) {} });
+    document.addEventListener('click', (e) => { const b = e.target.closest && e.target.closest('.cm-coord'); if (b && window.LessonBoard) window.LessonBoard.show(b.dataset.c); });
     function renderChat() {
         const l = $('#cs-list'); if (!l) return;
-        l.innerHTML = chatMsgs.length ? chatMsgs.map((m) => `<div class="cm ${m.uid === me.uid ? 'mine' : ''}"><b>${esc(m.name)}</b><span>${esc(m.text)}</span></div>`).join('') : `<div class="cs-empty">${esc(X('Сообщений пока нет.'))}</div>`;
+        l.innerHTML = chatMsgs.length ? chatMsgs.map((m) => `<div class="cm ${m.uid === me.uid ? 'mine' : ''}"><b>${esc(m.name)}</b><span>${linkCoords(esc(m.text))}</span></div>`).join('') : `<div class="cs-empty">${esc(X('Сообщений пока нет.'))}</div>`;
         l.scrollTop = l.scrollHeight;
     }
     function renderPeople() {
         const l = $('#cs-people'); if (!l) return;
         const rows = [[me.uid, myDoc(), true]]; docs.forEach((d, uid) => { if (uid !== me.uid && online(d)) rows.push([uid, d, false]); });
         l.innerHTML = rows.map(([uid, d, isMe]) => `<div class="cp"><span class="cp-av">${esc(initials(d.name || myName))}</span><span class="cp-name">${esc(isMe ? myName : d.name)}${isMe ? ' (' + esc(X('вы')) + ')' : ''}${d.role === 'teacher' ? ' · ' + esc(X('Учитель')) : ''}</span>
-            ${d.hand ? `<span class="cp-ic">${ic('hand')}</span>` : ''}<span class="cp-ic ${d.mic === false ? 'off' : ''}">${ic(d.mic === false ? 'mic-off' : 'mic')}</span><span class="cp-ic ${d.cam ? '' : 'off'}">${ic(d.cam ? 'video' : 'video-off')}</span>
+            ${d.hand ? `<span class="cp-ic">${ic('hand')}</span>` : ''}${awayHTML(d, isMe)}<span class="cp-ic ${d.mic === false ? 'off' : ''}">${ic(d.mic === false ? 'mic-off' : 'mic')}</span><span class="cp-ic ${d.cam ? '' : 'off'}">${ic(d.cam ? 'video' : 'video-off')}</span>
             ${isHost && !isMe ? `<button type="button" class="cp-btn" data-mute="${esc(uid)}">${esc(X('Выкл. микрофон'))}</button><button type="button" class="cp-btn" data-cam="${esc(uid)}">${esc(X('Выкл. камеру'))}</button><button type="button" class="cp-btn danger" data-kick="${esc(uid)}">${esc(X('Удалить'))}</button>` : ''}</div>`).join('') +
             (isHost ? `<div class="cp-foot"><button type="button" class="cp-btn" id="cp-lower">${esc(X('Опустить все руки'))}</button><button type="button" class="cp-btn" id="cp-camall">${esc(X('Выключить все камеры'))}</button></div>` : '');
         l.querySelectorAll('[data-mute]').forEach((b) => b.onclick = () => hostSet({ ['forceMute']: Object.assign({}, { [b.dataset.mute]: Date.now() }) }));
@@ -507,6 +550,7 @@
     function cleanup() {
         if (rec) stopRec();
         writeAtt();
+        if (window.LessonAttention) window.LessonAttention.stop(); document.removeEventListener('visibilitychange', attTick); att = { away: 0, gaze: '', gazeAt: 0, consent: att.consent }; awayNoted = {};
         unsubs.forEach((u) => { try { u(); } catch (e) {} }); unsubs = []; timers.forEach(clearInterval); timers = [];
         peers.forEach((P) => { try { P.pc.close(); } catch (e) {} }); peers = new Map(); docs = new Map(); analysers = new Map(); handled = {};
         if (joined && roomRef && me) roomRef.collection('peers').doc(me.uid).delete().catch(() => {});
@@ -532,6 +576,7 @@
             ${opts.title ? `<p class="call-sub">${esc(opts.title)}</p>` : ''}
             <div class="call-preview"><video id="pre-video" autoplay playsinline muted></video><div class="call-preview-av" id="pre-av"><span>${esc(initials(myName))}</span></div></div>
             <div class="call-pre-toggles"><button type="button" class="cb" id="pre-mic">${ic('mic')}<span>${esc(X('Микрофон'))}</span></button><button type="button" class="cb" id="pre-cam">${ic('video')}<span>${esc(X('Камера'))}</span></button></div>
+            ${isT || myRole === 'admin' ? '' : `<label class="call-consent"><input type="checkbox" id="pre-att"><span>${esc(X('Разрешить показывать учителю, смотрю ли я в экран. Видео никуда не отправляется — анализ идёт на вашем устройстве.'))}</span></label><p class="call-consent-note">${esc(X('Учитель увидит отметку, если вы перейдёте на другую вкладку во время урока.'))}</p>`}
             <p class="call-hint" id="pre-hint">${esc(X('Проверяем камеру и микрофон…'))}</p>
             <button class="btn-primary call-join" type="button" id="pre-join">${esc(X(isT ? 'Начать урок' : 'Войти в урок'))}</button>
             <button class="call-alt" type="button" id="pre-alt">${esc(X('Не получается? Запасной режим'))}</button></div>`;
@@ -543,9 +588,11 @@
         micOn = !!local.audio; camOn = !!local.video;
         const syncPre = () => { $('#pre-mic').classList.toggle('on', !micOn || !local.audio); $('#pre-cam').classList.toggle('on', !camOn || !local.video); $('#pre-av').style.display = (camOn && local.video) ? 'none' : 'flex'; $('#pre-mic').innerHTML = ic(micOn && local.audio ? 'mic' : 'mic-off') + '<span>' + esc(X('Микрофон')) + '</span>'; $('#pre-cam').innerHTML = ic(camOn && local.video ? 'video' : 'video-off') + '<span>' + esc(X('Камера')) + '</span>'; };
         syncPre();
+        { const ca = $('#pre-att'); if (ca) { try { ca.checked = localStorage.getItem('starthAttConsent') === '1'; } catch (e) {} } }
         $('#pre-mic').onclick = () => { if (local.audio) { micOn = !micOn; local.audio.enabled = micOn; syncPre(); } };
         $('#pre-cam').onclick = () => { if (local.video) { camOn = !camOn; local.video.enabled = camOn; syncPre(); } };
-        $('#pre-join').onclick = () => { if (local.video) local.video.enabled = true; if (local.audio) local.audio.enabled = micOn; join(); };
+        $('#pre-join').onclick = () => { const ca = $('#pre-att'); att.consent = !!(ca && ca.checked); try { if (ca) localStorage.setItem('starthAttConsent', ca.checked ? '1' : '0'); } catch (e) {}
+             if (local.video) local.video.enabled = true; if (local.audio) local.audio.enabled = micOn; join(); };
         $('#pre-alt').onclick = () => { stopLocal(); if (opts.onFallback) opts.onFallback(); };
     }
     async function join() {
@@ -559,6 +606,8 @@
         await roomRef.collection('peers').doc(me.uid).set(myDoc()).catch((e) => toastMsg(X('Не удалось подключиться: ') + e.message));
         renderBar(); renderStage(); listenPeers(); listenSignals(); listenRoom(); listenChat();
         timers.push(setInterval(tickSpeaking, 300));
+        timers.push(setInterval(() => { attTick(); tickAway(); }, 1000)); document.addEventListener('visibilitychange', attTick);
+        if (!isHost) startGaze();
         timers.push(setInterval(sessionBeat, 60000));
         openSession();
         root.addEventListener('click', enableAudioPlayback, { once: true });

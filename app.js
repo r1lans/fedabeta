@@ -544,7 +544,8 @@ document.addEventListener('DOMContentLoaded', () => {
             'auth/too-many-requests': t('err.too_many'),
             'permission-denied': t('err.permission'),
             'custom/nickname-taken': t('err.nick_taken'),
-            'custom/bad-nickname': t('err.bad_nick')
+            'custom/bad-nickname': t('err.bad_nick'),
+            'custom/bad-telegram': t('err.bad_tg')
         };
         return map[code] || (message ? `${t('js.error_prefix')}${message} (${code || t('err.no_code')})` : t('err.generic'));
     }
@@ -567,6 +568,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // notifications about new messages (badge, tab title, system notification) on every page
             if (user && !window.StarthPresence && !document.querySelector('script[data-presence]')) {
                 const sp = document.createElement('script'); sp.src = 'presence.js'; sp.dataset.presence = '1'; document.head.appendChild(sp);
+            }
+            if (user && !window.__tgNudge && !document.querySelector('script[data-tg-nudge]')) {
+                const sn = document.createElement('script'); sn.src = 'tg-nudge.js'; sn.dataset.tgNudge = '1'; document.head.appendChild(sn);
             }
             if (user && !window.StarthNotify && !document.querySelector('script[data-msg-notify]')) {
                 const sc = document.createElement('script'); sc.src = 'msg-notify.js'; sc.dataset.msgNotify = '1'; document.head.appendChild(sc);
@@ -719,6 +723,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const surname = registerForm.surname.value.trim();
             const phone = registerForm.phone.value.trim();
             const nickname = registerForm.nickname.value.trim().toLowerCase();
+            const telegram = (registerForm.telegram ? registerForm.telegram.value : '').trim().replace(/^@/, '').toLowerCase();
             const course = registerForm.course.value;
             const email = registerForm.email.value.trim();
             const password = registerForm.password.value;
@@ -726,6 +731,9 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 if (!/^[a-z0-9_]{3,20}$/.test(nickname)) {
                     throw { code: 'custom/bad-nickname' };
+                }
+                if (registerForm.telegram && !/^[a-z0-9_]{5,32}$/.test(telegram)) {
+                    throw { code: 'custom/bad-telegram' };
                 }
                 const nickDoc = await db.collection('nicknames').doc(nickname).get();
                 if (nickDoc.exists) {
@@ -738,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Sequential student ID (000001, 000002, ...) taken from a counter in Firestore.
                 // A transaction guarantees two people can never get the same number.
                 const studentId = await nextStudentId_(uid, {
-                    name, surname, phone, nickname, course, email,
+                    name, surname, phone, nickname, telegram, course, email,
                     createdAt: new Date().toISOString()
                 }, nickname);
 

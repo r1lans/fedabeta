@@ -10,7 +10,7 @@
     <meta name="description" content="Онлайн видеоурок TheStarth.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=27">
+    <link rel="stylesheet" href="styles.css?v=38">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         main.lesson-main {
@@ -83,6 +83,29 @@
         .bd-btn { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 0.4rem 0.7rem; font: inherit; font-size: 0.82rem; cursor: pointer; color: var(--ink); min-height: 34px; }
         .bd-btn.sel { border-color: var(--accent); color: var(--accent); }
         .bd-btn:hover { border-color: var(--accent); }
+        .bd-nav { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+        .bd-ov { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+        .bd-grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(31,95,191,.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(31,95,191,.25) 1px, transparent 1px); background-size: 6.25% 10%; }
+        .bd-grid[hidden], .bd-tdot[hidden] { display: none; }
+        .bd-gl, .bd-gn { position: absolute; font-size: 10px; font-weight: 700; color: #1f5fbf; background: rgba(255,255,255,.8); border-radius: 4px; padding: 0 3px; line-height: 14px; }
+        .bd-gl { top: 2px; transform: translateX(-50%); } .bd-gn { left: 2px; transform: translateY(-50%); }
+        #bd-canvas.pick-mode { cursor: crosshair !important; }
+        .bd-mark { position: absolute; transform: translate(-50%, -50%); }
+        .bd-mark i { display: block; width: 26px; height: 26px; border: 3px solid #e67e22; border-radius: 50%; background: rgba(230,126,34,.18); }
+        .bd-mark.pulse i { animation: bdPulse 1s ease-out infinite; }
+        @keyframes bdPulse { 0% { box-shadow: 0 0 0 0 rgba(230,126,34,.7); } 100% { box-shadow: 0 0 0 22px rgba(230,126,34,0); } }
+        .bd-mark b { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; background: #e67e22; color: #fff; font-size: 12px; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+        .bd-mark.rect { transform: none; border: 3px solid #e67e22; border-radius: 8px; background: rgba(230,126,34,.14); animation: bdPulse 1.2s ease-out 3; }
+        .bd-mark.rect b { left: 0; top: auto; bottom: 100%; transform: none; margin: 0 0 3px; }
+        .bd-tdot { position: absolute; transform: translate(-50%, -50%); transition: left .35s linear, top .35s linear; }
+        .bd-tdot i { display: block; width: 16px; height: 16px; border-radius: 50%; background: #c0392b; border: 2px solid #fff; box-shadow: 0 0 0 2px #c0392b; }
+        .bd-tdot b { position: absolute; left: 14px; top: 10px; background: #c0392b; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+        .bd-pop { position: absolute; z-index: 6; display: flex; align-items: center; gap: .3rem; background: var(--paper, #fff); border: 1px solid var(--rule, #ccc); border-radius: 10px; padding: .3rem .4rem; box-shadow: 0 8px 22px rgba(0,0,0,.22); font-size: .82rem; }
+        .bd-pop strong { padding: 0 .3rem; font-size: .95rem; }
+        .bd-pop button { border: 1px solid var(--rule, #ccc); background: var(--paper-alt, #f4f4f4); color: var(--ink, #111); border-radius: 7px; padding: .25rem .55rem; font: inherit; font-size: .8rem; cursor: pointer; }
+        .bd-pop button:hover { border-color: var(--accent); }
+        .cm-coord { border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; padding: 0 .35rem; font: inherit; font-weight: 700; cursor: pointer; }
+        .cm.mine .cm-coord { color: inherit; border-color: currentColor; }
         .bd-canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid var(--rule); }
         #bd-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
         #bd-canvas.text-mode { cursor: text !important; }
@@ -190,6 +213,13 @@
                         <button class="bd-btn" id="bd-clear" style="display:none;">Очистить всё</button>
                     </div>
                 </div>
+                <div class="bd-nav" id="bd-nav">
+                    <button class="bd-btn" id="bd-grid" type="button" title="Сетка с координатами">Сетка</button>
+                    <button class="bd-btn" id="bd-pt" type="button" title="Нажмите на доску, чтобы узнать и скопировать координаты" style="display:none;">Координаты</button>
+                    <button class="bd-btn" id="bd-last" type="button" title="Показать, где учитель писал последний раз">Где писал учитель</button>
+                    <button class="bd-btn" id="bd-follow" type="button" title="Показывать, где сейчас курсор учителя">Следить за учителем</button>
+                    <span class="bd-status" id="bd-follow-note"></span>
+                </div>
                 <div class="bd-canvas-wrap">
                     <canvas id="bd-canvas" width="1600" height="1000"></canvas>
                     <div class="bd-lock" id="bd-lock" style="display:none;">Только просмотр</div>
@@ -222,6 +252,7 @@
     <script src="https://meet.jit.si/external_api.js"></script>
     <script src="icons.js"></script>
     <script src="call-config.js"></script>
+    <script src="lesson-attention.js"></script>
     <script src="lesson-call.js"></script>
     <script src="lesson-board.js"></script>
     <script>
