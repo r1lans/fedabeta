@@ -17,7 +17,7 @@
       console.log("Analytics loaded");
     </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=38">
+    <link rel="stylesheet" href="styles.css?v=42">
 </head>
 <body>
     <!-- Navbar -->
@@ -51,9 +51,9 @@
     <!-- Intro video stage: the video plays on entry; in its last seconds the buttons drawn in the video become real, clickable buttons -->
     <section class="intro-stage" id="introStage" aria-label="TheStarth">
         <div class="intro-frame" id="introFrame">
-            <video id="introVideo" muted playsinline preload="auto" poster="video/stage-poster.jpg" data-src-hd="video/stage-1080.mp4?v=38" data-src-sd="video/stage-720.mp4?v=38"></video>
-            <video id="introLoop" class="intro-loop" muted loop playsinline preload="none" hidden data-src-hd="video/stage-loop-1080.mp4?v=38" data-src-sd="video/stage-loop-720.mp4?v=38"></video>
-            <img class="intro-end" id="introEnd" src="video/stage-end.jpg?v=38" alt="" hidden>
+            <video id="introVideo" muted playsinline preload="auto" poster="video/stage-poster.jpg" data-src-hd="video/stage-1080.mp4?v=42" data-src-sd="video/stage-720.mp4?v=42"></video>
+            <video id="introLoop" class="intro-loop" muted loop playsinline preload="none" hidden data-src-hd="video/stage-loop-1080.mp4?v=42" data-src-sd="video/stage-loop-720.mp4?v=42"></video>
+            <img class="intro-end" id="introEnd" src="video/stage-end.jpg?v=42" alt="" hidden>
             <div class="intro-hot" id="introHot">
                 <button type="button" class="ih ih-main" data-act="trial" data-from="22.3" data-i18n-aria="stage.trial" aria-label="Нажмите, чтобы записаться на бесплатный урок"></button>
                 <button type="button" class="ih ih-chip ih-ielts" data-act="ielts" data-from="22.6" aria-label="IELTS"></button>
@@ -343,13 +343,6 @@
                             <div>
                                 <strong style="display:block; color: var(--ink);" data-i18n="loyalty.quest1">Пройти тест на уровень</strong>
                                 <span style="color: var(--accent);" data-i18n="loyalty.quest1_reward">Награда: скидка 10% на первый месяц</span>
-                            </div>
-                        </a>
-                        <a href="https://t.me/TheStarthChannel" target="_blank" class="quest-item" id="quest-telegram" onclick="completeTelegramQuest(event)" style="text-decoration: none; color: inherit;">
-                            <div class="quest-checkbox" id="chk-telegram"><svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="m5 12.5 4.5 4.5L19 7"/></svg></div>
-                            <div>
-                                <strong style="display:block; color: var(--ink);" data-i18n="loyalty.quest2">Подписка на Telegram-канал</strong>
-                                <span style="color: var(--accent);" data-i18n="loyalty.quest2_reward">Награда: Книга IELTS Writing & Speaking PDF</span>
                             </div>
                         </a>
                     </div>
@@ -1656,7 +1649,7 @@
     <script src="catalog-defaults.js"></script>
     <script src="app.js"></script>
     <script src="catalog.js"></script>
-    <script src="intro-stage.js?v=38"></script>
+    <script src="intro-stage.js?v=42"></script>
     
     <script src="phone-prefix.js"></script>
 </body>

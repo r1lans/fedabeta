@@ -1308,14 +1308,17 @@ body {
   border: 1px solid var(--rule) !important;
 }
 
-#courses .grid-container {
+#courses .grid-container, #pricing .grid-container {
     align-items: stretch;
 }
-#courses .card {
+#courses .card, #pricing .card {
     display: flex;
     flex-direction: column;
 }
-#courses .card > a.btn-outline {
+#pricing .card > button.btn-outline, #pricing .card > button.btn-primary, #pricing .card > a.btn-outline, #pricing .card > a.btn-primary {
+    margin-top: auto;
+}
+#courses .card > a.btn-outline, #courses .card > button.btn-outline {
     margin-top: auto;
 }
 
@@ -1877,6 +1880,8 @@ html.nav-is-open .chat-popup { display: none !important; }
 
 /* Long Russian words in headings must never push the page wider than the screen */
 h1, h2, h3, h4 { overflow-wrap: anywhere; hyphens: auto; }
+/* ...except short card/plan titles: auto-hyphenation mid-word ("Матема-тика") reads as broken. Wrap on spaces instead. */
+.card h3, .cm-content h2 { hyphens: none; }
 @media (max-width: 480px) {
   .privacy-content h1 { font-size: 1.7rem !important; }
   .privacy-content { padding-left: 16px !important; padding-right: 16px !important; }

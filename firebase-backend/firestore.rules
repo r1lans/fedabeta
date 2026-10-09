@@ -389,5 +389,12 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow write: if isSignedIn() && request.auth.uid == uid;
     }
+
+    // Promo codes (Admin panel -> «Промокоды»): % discount or fully-free, with an optional expiry date.
+    // Public read so the pricing block and the payment page can check a code; only an admin can write.
+    match /promoCodes/{code} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
   }
 }

@@ -328,7 +328,9 @@
         on('cb-mic', () => setMic(!(micOn && local.audio))); on('cb-cam', () => setCam(!(camOn && local.video)));
         on('cb-share', toggleShare); on('cb-hand', () => { handUp = !handUp; pushPresence(); renderBar(); renderStage(); });
         on('cb-chat', () => { chatOpen = !chatOpen; peopleOpen = false; if (chatOpen) unread = 0; renderSide(); renderBar(); }); on('cb-people', () => { peopleOpen = !peopleOpen; chatOpen = false; renderSide(); renderBar(); });
-        on('cb-muteall', () => hostSet({ muteAllAt: Date.now() })); on('cb-rec', () => (rec ? stopRec() : startRec())); on('cb-leave', () => leave()); on('cb-end', endLesson);
+        on('cb-muteall', () => hostSet({ muteAllAt: Date.now() })); on('cb-rec', () => (rec ? stopRec() : startRec()));
+        on('cb-leave', () => { if (confirm(X('Выйти из урока? Видео и микрофон отключатся.'))) leave(); });
+        on('cb-end', endLesson);
     }
     function renderSide() {
         const side = $('#call-side'); if (!side) return;

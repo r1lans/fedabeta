@@ -10,7 +10,7 @@
     <meta name="description" content="Онлайн видеоурок TheStarth.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=38">
+    <link rel="stylesheet" href="styles.css?v=42">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         main.lesson-main {
@@ -106,12 +106,40 @@
         .bd-pop button:hover { border-color: var(--accent); }
         .cm-coord { border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; padding: 0 .35rem; font: inherit; font-weight: 700; cursor: pointer; }
         .cm.mine .cm-coord { color: inherit; border-color: currentColor; }
-        .bd-canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid var(--rule); }
+        .bd-zoom-outer { overflow: auto; border-radius: 8px; border: 1px solid var(--rule); background: #d8d9dc; max-height: 64vh; touch-action: pan-x pan-y; }
+        .bd-canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #fff; overflow: hidden; transform-origin: 0 0; }
         #bd-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        .bd-zoom-ctl { display: flex; align-items: center; gap: .4rem; margin-top: .5rem; }
+        .bd-zoom-ctl .bd-btn { min-width: 2.2rem; text-align: center; padding: .35rem .6rem; }
+        .bd-zoom-pct { font-size: .82rem; color: var(--ink-soft, #777); min-width: 3.2rem; text-align: center; }
         #bd-canvas.text-mode { cursor: text !important; }
         .bd-textbox { position: absolute; z-index: 5; min-width: 80px; background: rgba(255,255,255,.92); border: 1px dashed #1f5fbf; outline: none; resize: none; overflow: hidden; padding: 0 2px; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 600; line-height: 1.25; }
         #bd-canvas.can-write { cursor: crosshair; touch-action: none; }
         .bd-lock { position: absolute; right: 10px; bottom: 8px; font-size: 0.78rem; color: #666; background: rgba(255,255,255,0.85); padding: 0.2rem 0.6rem; border-radius: 999px; pointer-events: none; }
+
+        /* Picture-in-picture: when the board is open, the video call shrinks to a small corner window
+           next to the board (or the other way round) — click the small one to swap, like Discord's stage. */
+        #call-container.lesson-pip, #bd-zoom-outer.lesson-pip {
+            position: fixed; right: 16px; bottom: 92px; width: 240px; max-width: 42vw;
+            aspect-ratio: 16 / 10; height: auto; max-height: none; z-index: 70;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+            border: 2px solid var(--accent); cursor: pointer; background: #14171c;
+        }
+        #call-container.lesson-pip *, #bd-zoom-outer.lesson-pip * { pointer-events: none; }
+        #call-container.lesson-pip:hover, #bd-zoom-outer.lesson-pip:hover { outline: 3px solid var(--accent); }
+        #call-container.lesson-pip::after, #bd-zoom-outer.lesson-pip::after {
+            content: 'На весь экран'; position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 8px;
+            font-size: 0.72rem; color: #fff; background: rgba(0,0,0,.55); text-align: center;
+        }
+        #call-container.lesson-pip .call-live { height: 100%; min-height: 0; border-radius: 0; border: 0; }
+        #call-container.lesson-pip .call-bar, #call-container.lesson-pip .call-side,
+        #call-container.lesson-pip .call-warn, #call-container.lesson-pip .call-wait, #call-container.lesson-pip .call-rec { display: none; }
+        #call-container.lesson-pip .call-stage { padding: 3px; gap: 3px; }
+        #bd-zoom-outer.lesson-pip { overflow: hidden; }
+        #bd-zoom-outer.lesson-pip .bd-canvas-wrap { transform: none !important; width: 100% !important; height: 100% !important; }
+        @media (max-width: 640px) {
+            #call-container.lesson-pip, #bd-zoom-outer.lesson-pip { width: 160px; bottom: 76px; right: 10px; }
+        }
         #bd-people, #lesson-att { margin-top: 0.9rem; border-top: 1px dashed var(--rule); padding-top: 0.8rem; }
         .bd-person { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0; flex-wrap: wrap; }
         .bd-switch { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; }
@@ -179,14 +207,15 @@
             <div class="lesson-topbar">
                 <h2><span>Урок</span> <span id="room-name-label" style="color: var(--accent);"></span></h2>
                 <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
-                    <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="toggleBoard()" id="board-toggle-btn">Открыть доску</button>
+                    <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="onBoardToggleClick()" id="board-toggle-btn">Открыть доску</button>
                     <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem; display:none;" onclick="toggleAttendance()" id="att-toggle-btn">Посещаемость</button>
-                    <details class="more-menu">
+                    <details class="more-menu" id="more-menu">
                         <summary class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ещё</summary>
                         <div class="more-pop">
                             <button type="button" onclick="copyLink()">Скопировать ссылку</button>
                             <button type="button" onclick="switchMode()" id="mode-btn">Запасной режим (Jitsi)</button>
-                            <button type="button" onclick="leaveRoom()">Выйти из комнаты</button>
+                            <hr style="border:0;border-top:1px solid var(--rule);margin:0.3rem 0;">
+                            <button type="button" onclick="leaveRoom()" style="color:#c0392b;">Выйти из комнаты</button>
                         </div>
                     </details>
                 </div>
@@ -220,9 +249,17 @@
                     <button class="bd-btn" id="bd-follow" type="button" title="Показывать, где сейчас курсор учителя">Следить за учителем</button>
                     <span class="bd-status" id="bd-follow-note"></span>
                 </div>
-                <div class="bd-canvas-wrap">
-                    <canvas id="bd-canvas" width="1600" height="1000"></canvas>
-                    <div class="bd-lock" id="bd-lock" style="display:none;">Только просмотр</div>
+                <div class="bd-zoom-outer" id="bd-zoom-outer">
+                    <div class="bd-canvas-wrap" id="bd-canvas-wrap">
+                        <canvas id="bd-canvas" width="1600" height="1000"></canvas>
+                        <div class="bd-lock" id="bd-lock" style="display:none;">Только просмотр</div>
+                    </div>
+                </div>
+                <div class="bd-zoom-ctl">
+                    <button class="bd-btn" id="bd-zoom-out" type="button" title="Уменьшить">−</button>
+                    <span class="bd-zoom-pct" id="bd-zoom-pct">100%</span>
+                    <button class="bd-btn" id="bd-zoom-in" type="button" title="Увеличить">+</button>
+                    <button class="bd-btn" id="bd-zoom-reset" type="button" title="Сбросить масштаб">1:1</button>
                 </div>
                 <div id="bd-people" style="display:none;">
                     <strong style="font-size:0.9rem;">Кто может писать на доске</strong>
@@ -294,7 +331,7 @@
                     groupId: g.id, groupName: g.name, title: g.name,
                     onFallback: () => startJitsi(room),
                     onBeforeEnd: async () => { if (window.LessonBoard) await LessonBoard.reset(); },
-                    onEnded: () => { if (window.LessonBoard) LessonBoard.stop(); document.getElementById('board-panel').style.display = 'none'; document.getElementById('lesson-att').style.display = 'none'; document.querySelector('.lesson-topbar').style.display = 'none'; }
+                    onEnded: () => { if (window.LessonBoard) LessonBoard.stop(); document.getElementById('board-panel').style.display = 'none'; document.getElementById('lesson-att').style.display = 'none'; document.querySelector('.lesson-topbar').style.display = 'none'; setStagePip(''); }
                 });
             };
             if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
@@ -325,7 +362,11 @@
                 interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
             });
         }
-        function switchMode() { if (currentMode === 'native') startJitsi(currentRoom); else startNative(currentRoom); }
+        function switchMode() {
+            // Switching away from the main call drops it immediately (camera/mic, everyone's video) — confirm so a stray tap in the "Ещё" menu doesn't knock someone out of the lesson.
+            if (currentMode === 'native') { if (confirm('Переключиться в запасной режим (Jitsi)? Текущий видеозвонок отключится.')) startJitsi(currentRoom); }
+            else startNative(currentRoom);
+        }
 
         function startMeeting(room) {
             currentRoom = room;
@@ -351,6 +392,7 @@
         }
 
         function leaveRoom() {
+            if (!confirm('Выйти из комнаты? Видео и микрофон отключатся.')) return;
             if (window.StarthPresence) StarthPresence.setLesson(false);
             if (jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
             if (window.LessonCall) LessonCall.stop();
@@ -362,17 +404,45 @@
             document.getElementById('meeting-screen').style.display = 'none';
             document.getElementById('join-screen').style.display = 'block';
             document.querySelector('.lesson-topbar').style.display = '';
+            setStagePip('');
             loadMyLessons();
             const url = new URL(window.location);
             url.searchParams.delete('room');
             window.history.replaceState({}, '', url);
         }
 
+        // Picture-in-picture: opening the board shrinks the video call into a small corner window next to it
+        // (and vice versa) — click the small one to swap which is the "main" view, like Discord's stage view.
+        function setStagePip(which) {
+            const call = document.getElementById('call-container'), board = document.getElementById('bd-zoom-outer');
+            if (!call || !board) return;
+            call.classList.toggle('lesson-pip', which === 'call');
+            board.classList.toggle('lesson-pip', which === 'board');
+        }
+        function onBoardToggleClick() {
+            toggleBoard();
+            const open = document.getElementById('board-panel').style.display === 'block';
+            // Only shrink the call when a live native call is actually showing (not the pre-join screen, not Jitsi).
+            const live = document.querySelector('#call-container .call-live');
+            setStagePip(open && live && live.offsetParent ? 'call' : '');
+        }
+        (function () {
+            const call = document.getElementById('call-container'), board = document.getElementById('bd-zoom-outer');
+            if (call) call.addEventListener('click', () => { if (call.classList.contains('lesson-pip')) setStagePip('board'); });
+            if (board) board.addEventListener('click', () => { if (board.classList.contains('lesson-pip')) setStagePip('call'); });
+        })();
+
         function copyLink() {
             navigator.clipboard.writeText(window.location.href).then(() => {
                 alert('Ссылка скопирована!');
             });
+            const m = document.getElementById('more-menu'); if (m) m.open = false;
         }
+        // close the "Ещё" menu after any action inside it, so it never sits open over the page
+        document.addEventListener('click', (e) => {
+            const m = document.getElementById('more-menu');
+            if (m && m.open && e.target.closest('.more-pop button')) setTimeout(() => { m.open = false; }, 0);
+        });
 
         // "Your lessons": one big button per group, no room codes to type
         async function loadMyLessons() {

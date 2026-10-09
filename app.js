@@ -684,6 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const userRef = db.collection('users').doc(uid);
         return db.runTransaction(async (tx) => {
             const cSnap = await tx.get(counterRef);
+            // Never take a second number for someone who already has one (dashboard opened twice,
+            // two tabs, a slow reload…) — that used to burn a number and leave a gap in the IDs.
+            const uSnap = await tx.get(userRef);
+            const have = uSnap.exists && uSnap.data().studentId;
+            if (have && !nickname) return have;
             const next = (cSnap.exists ? (cSnap.data().last || 0) : 0) + 1;
             const id = formatStudentId_(next);
             if (cSnap.exists) tx.update(counterRef, { last: next });
@@ -701,6 +706,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Used by the dashboard: gives an ID to students who registered before IDs existed.
     window.starthEnsureStudentId = async function (uid, profile) {
         if (profile && profile.studentId) return profile.studentId;
+        // IDs are for students only — teacher/admin accounts must not use up numbers.
+        if (profile && profile.role && profile.role !== 'student') return '';
         if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) return '';
         return nextStudentId_(uid, null, null);
     };
@@ -718,6 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalText = btn.textContent;
             btn.textContent = t('js.creating');
             btn.disabled = true;
+            if (window.showToast) window.showToast(t('js.creating_toast'), 'clock');
 
             const name = registerForm.name.value.trim();
             const surname = registerForm.surname.value.trim();
@@ -1007,13 +1015,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Interactive Promo Code dynamic calculation box
+    // Interactive Promo Code dynamic calculation box.
+    // Admin-created codes (Admin panel -> «Промокоды», Firestore promoCodes/{code}) are checked first;
+    // a few hardcoded demo codes below keep working as a fallback.
     window.currentActivePromo = null;
+    let adminPromoCache = null, adminPromoLoading = null;
+    function loadAdminPromoCodes() {
+        if (adminPromoCache) return Promise.resolve(adminPromoCache);
+        if (adminPromoLoading) return adminPromoLoading;
+        if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) return Promise.resolve({});
+        adminPromoLoading = db.collection('promoCodes').get().then((snap) => {
+            const map = {};
+            snap.forEach((d) => { map[d.id] = d.data(); });
+            adminPromoCache = map;
+            return map;
+        }).catch(() => ({}));
+        return adminPromoLoading;
+    }
+    function isPromoExpired(p) {
+        if (!p || !p.expires) return false;
+        const today = todayDateStr();
+        return String(p.expires) < today;
+    }
+    function todayDateStr() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
     window.applyPromoCode = function(silent = false) {
         const promoInput = document.getElementById('promo-code-input');
         const feedback = document.getElementById('promo-feedback');
         if (!promoInput || !feedback) return;
-        
+
         const code = promoInput.value.trim().toUpperCase();
         if (!code) {
             if (!silent) {
@@ -1023,21 +1052,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return;
         }
-        
+
+        loadAdminPromoCodes().then((admin) => {
         let discountPct = 0;
         let description = '';
-        
-        if (code === 'FRIEND20') {
-            discountPct = 20;
-            description = t('promo.desc_friend');
-        } else if (code === 'START10' || code === 'QUEST10') {
-            discountPct = 10;
-            description = t('promo.desc_quest');
-        } else if (code === 'GEMINI') {
-            discountPct = 15;
-            description = t('promo.desc_dev');
+        let isFree = false;
+
+        const ap = admin[code];
+        if (ap && ap.active !== false && !isPromoExpired(ap)) {
+            if (ap.free) { discountPct = 100; isFree = true; description = t('promo.desc_free'); }
+            else { discountPct = Math.max(0, Math.min(100, Number(ap.pct) || 0)); description = ''; }
         }
-        
+
+        if (discountPct <= 0) {
+            if (code === 'FRIEND20') {
+                discountPct = 20;
+                description = t('promo.desc_friend');
+            } else if (code === 'START10' || code === 'QUEST10') {
+                discountPct = 10;
+                description = t('promo.desc_quest');
+            } else if (code === 'GEMINI') {
+                discountPct = 15;
+                description = t('promo.desc_dev');
+            }
+        }
+
         if (discountPct > 0) {
             window.currentActivePromo = { code, discountPct };
             feedback.className = 'promo-feedback success';
@@ -1045,7 +1084,8 @@ document.addEventListener('DOMContentLoaded', () => {
             feedback.style.display = 'block';
             
             if (!silent) {
-                window.showToast(t('promo.toast').replace('{code}', code).replace('{pct}', discountPct), 'ticket');
+                const msg = isFree ? t('promo.toast_free').replace('{code}', code) : t('promo.toast').replace('{code}', code).replace('{pct}', discountPct);
+                window.showToast(msg, 'ticket');
             }
             
             // Recompute values
@@ -1080,5 +1120,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeMode = document.getElementById('btn-pricing-grp').classList.contains('active') ? 'grp' : 'ind';
             window.setPricingMode(activeMode);
         }
+        });
     };
 });

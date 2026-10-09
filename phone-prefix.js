@@ -25,7 +25,7 @@
     let dn = {}; const names = () => { const lg = lang(); if (!dn[lg]) { try { dn[lg] = new Intl.DisplayNames([lg === 'uz' ? 'uz-Latn' : lg], { type: 'region' }); } catch (e) { dn[lg] = null; } } return dn[lg]; };
     const cname = (iso) => { try { const n = names(); return (n && n.of(iso)) || iso; } catch (e) { return iso; } };
 
-    const isPhone = (el) => el && el.tagName === 'INPUT' && !el.hasAttribute('data-nophone') && (el.type === 'tel' || el.name === 'phone' || /phone$/i.test(el.id || ''));
+    const isPhone = (el) => el && el.tagName === 'INPUT' && el.type !== 'hidden' && !el.__owner && (el.__phone === true || (!el.hasAttribute('data-nophone') && (el.type === 'tel' || el.name === 'phone' || /phone$/i.test(el.id || ''))));
     const isTg = (el) => el && el.tagName === 'INPUT' && (el.name === 'telegram' || el.id === 'peTg' || el.hasAttribute('data-tg'));
 
     // ── number formatting ──
@@ -55,13 +55,24 @@
 
     const dialOf = (el) => el.__dial || DEFAULT;
     function validity(el) {
-        const v = el.value.trim(), d = v.replace(/\D/g, ''), dial = dialOf(el);
+        const d = el.value.replace(/\D/g, ''), dial = dialOf(el);
         let ok = true;
-        if (d && d !== dial) ok = dial === '998' ? d.length === 12 : (d.length - dial.length >= 5 && d.length <= 15);
+        if (d) ok = dial === '998' ? d.length === 9 : (d.length >= 5 && d.length <= Math.max(4, 15 - dial.length));
         const lg = L[lang()] || L.ru;
         el.setCustomValidity(ok ? '' : (lg.full + (dial === '998' ? ': +998 XX XXX XX XX' : '')));
     }
-    function setValue(el, text) { if (el.value !== text) el.value = text; syncBtn(el); validity(el); try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {} }
+    // the visible field shows only the national part ("90 123 45 67"); the dial code lives in the country button
+    // and the full E.164-ish value ("+998 90 123 45 67") is kept on a hidden twin input that carries the field's
+    // original name/id, so existing code that reads form.phone.value / getElementById(...).value keeps working.
+    function setValue(el, full) {
+        const nat = full.replace(/^\+\d+\s*/, '');
+        if (el.value !== nat) el.value = nat;
+        const tw = nat ? full : '';                                   // nothing typed -> the twin is fully empty too (not just "+dial ")
+        if (el.__twin && el.__twin.value !== tw) el.__twin.value = tw;
+        el.__last = el.value;
+        syncBtn(el); validity(el);
+        try { el.setSelectionRange(el.value.length, el.value.length); } catch (e) {}
+    }
     function apply(el) { const p = parse(el.value, dialOf(el)); el.__dial = p.dial; setValue(el, p.text); }
 
     // ── country button + wrapper ──
@@ -70,7 +81,6 @@
         const b = el.__ppBtn; if (!b) return;
         b.querySelector('.pp-dial').textContent = '+' + dialOf(el);
         b.title = (L[lang()] || L.ru).code + ': ' + cname(isoFor(el));
-        el.__last = el.value;
     }
     function wrap(el) {
         if (el.__ppBtn || !el.parentNode) return;
@@ -82,7 +92,13 @@
         const b = document.createElement('button'); b.type = 'button'; b.className = 'pp-btn';
         b.innerHTML = '<span class="pp-dial">+998</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
         b.style.borderRadius = cs.borderRadius; b.style.borderColor = cs.borderTopColor; b.style.background = cs.backgroundColor; b.style.color = cs.color; b.style.fontSize = cs.fontSize; b.style.fontFamily = cs.fontFamily;
-        w.appendChild(b); w.appendChild(el); el.__ppBtn = b; el.__wrap = w;
+        // hidden twin: carries the field's original name/id and the full "+<dial> <number>" value, so existing
+        // code that reads it (form.phone.value, getElementById('leadPhone').value, …) keeps working unchanged.
+        const twin = document.createElement('input'); twin.type = 'hidden';
+        if (el.name) { twin.name = el.name; el.removeAttribute('name'); }
+        if (el.id) { twin.id = el.id; el.removeAttribute('id'); }
+        el.__twin = twin; twin.__owner = el;
+        w.appendChild(b); w.appendChild(el); w.appendChild(twin); el.__ppBtn = b; el.__wrap = w;
         b.addEventListener('click', () => openPicker(el));
         // keep the wrapper hidden/shown together with the field
         try { new MutationObserver(() => { w.style.display = getComputedStyle(el).display === 'none' ? 'none' : ''; }).observe(el, { attributes: true, attributeFilter: ['style', 'class', 'hidden'] }); } catch (e) {}
@@ -126,13 +142,15 @@
         if (el.__phone) return; el.__phone = true;
         el.setAttribute('inputmode', 'tel'); el.setAttribute('autocomplete', el.getAttribute('autocomplete') || 'tel');
         el.removeAttribute('maxlength');
-        el.setAttribute('placeholder', '+998 90 123 45 67');
-        if (el.value) { const p = parse(el.value, DEFAULT); el.__dial = p.dial; el.value = p.text; }
-        wrap(el); syncBtn(el); validity(el);
+        el.setAttribute('placeholder', '90 123 45 67');
+        const initial = el.value;
+        wrap(el);
+        if (initial) { const p = parse(initial, DEFAULT); el.__dial = p.dial; setValue(el, p.text); }
+        else { syncBtn(el); validity(el); }
     }
     document.addEventListener('focusin', (e) => {
         const el = e.target;
-        if (isPhone(el)) { prep(el); if (!el.value) { el.value = '+' + dialOf(el) + ' '; setTimeout(() => { try { el.setSelectionRange(el.value.length, el.value.length); } catch (er) {} }, 0); } }
+        if (isPhone(el)) prep(el);
         else if (isTg(el)) { if (!el.value) { el.value = '@'; setTimeout(() => { try { el.setSelectionRange(1, 1); } catch (er) {} }, 0); } }
     });
     document.addEventListener('input', (e) => {
@@ -142,20 +160,30 @@
     }, true);
     document.addEventListener('keydown', (e) => {
         const el = e.target;
-        if (isPhone(el) && (e.key === 'Backspace' || e.key === 'Delete') && el.value.length <= dialOf(el).length + 2 && el.selectionStart === el.selectionEnd) e.preventDefault();   // keep "+998 "
-        else if (isTg(el) && e.key === 'Backspace' && el.value === '@') e.preventDefault();
+        if (isTg(el) && e.key === 'Backspace' && el.value === '@') e.preventDefault();
     });
     document.addEventListener('blur', (e) => {
         const el = e.target;
-        if (isPhone(el)) { if (el.value.replace(/\D/g, '') === dialOf(el)) { el.value = ''; syncBtn(el); } validity(el); }   // nothing typed: leave the field empty (so "required" works)
+        if (isPhone(el)) validity(el);
         else if (isTg(el) && el.value === '@') el.value = '';
     }, true);
     function scan() {
         document.querySelectorAll('input[type="tel"], input[name="phone"], input[id$="hone"]').forEach((el) => { if (isPhone(el)) prep(el); });
-        // values set from code (profile editor, autofill) → keep the button in step
-        document.querySelectorAll('input').forEach((el) => { if (el.__ppBtn && el.value !== el.__last) { const p = parse(el.value, dialOf(el)); if (el.value && p.text !== el.value) { el.__dial = p.dial; el.value = p.text; } else if (el.value) el.__dial = p.dial; syncBtn(el); } });
+        // values set from code (profile editor, autofill, payment.html prefilling by id, …) → keep button + field in step
+        document.querySelectorAll('input').forEach((el) => {
+            if (!el.__ppBtn) return;
+            const tw = el.__twin;
+            if (tw && tw.value !== (tw.__sval || '')) {                         // someone wrote the hidden twin (the full "+dial number" value)
+                tw.__sval = tw.value;
+                if (tw.value) { const p = parse(tw.value, dialOf(el)); el.__dial = p.dial; setValue(el, p.text); }
+                else { el.value = ''; tw.value = ''; syncBtn(el); validity(el); }
+                el.__last = el.value;
+            } else if (el.value !== el.__last) apply(el);                       // someone wrote the visible field directly
+        });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan); else scan();
     setInterval(scan, 800);
-    window.StarthPhone = { format: fmt, countries: COUNTRIES };
+    // Code that just wrote a phone field's value by id (profile editor's open(), payment.html prefilling, …)
+    // can call this to show it immediately instead of waiting up to 800ms for the next scan().
+    window.StarthPhone = { format: fmt, countries: COUNTRIES, sync: scan };
 })();

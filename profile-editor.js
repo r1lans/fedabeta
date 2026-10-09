@@ -48,6 +48,7 @@
         const user = window.currentAuthUser || (typeof auth !== 'undefined' && auth.currentUser); if (!user) return;
         const p = window.currentUserProfile || {}; ensure();
         $('peName').value = p.name || ''; $('peSurname').value = p.surname || ''; $('pePhone').value = p.phone || ''; $('peTg').value = p.telegram ? '@' + p.telegram : ''; $('peNick').value = p.nickname || '';
+        if (window.StarthPhone && window.StarthPhone.sync) window.StarthPhone.sync();   // show the phone right away instead of waiting for the next periodic sync
         $('peShow').checked = p.showStatus !== false; $('peEmailNow').textContent = user.email || '—'; $('peEmail').value = ''; $('pePw').value = ''; $('peEmailPw').hidden = true;
         say('peStatus', '', true); say('peEmailStatus', '', true);
         box.classList.add('show'); setTimeout(() => $('peName').focus(), 50);

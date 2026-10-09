@@ -34,6 +34,8 @@
     let people = [], unsubs = [], hbTimer = null, uiTimer = null, authUnsub = null;
     let groupDoc = null, attMarks = {}, started = false;
     const gid = new URLSearchParams(location.search).get('group') || '';
+    let zoom = 1, zOuter = null, zWrap = null, pinch = null;
+    const ZMIN = 0.4, ZMAX = 10;
 
     const isOwner = () => !!(me && board && board.teacherUid === me.uid);
     const canWrite = () => !!(me && board && (board.teacherUid === me.uid || board.allowAll === true || (board.allowed || []).indexOf(me.uid) !== -1));
@@ -75,6 +77,61 @@
         return [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))];
     }
     const r4 = (n) => Math.round(n * 10000) / 10000;
+
+    // ── zoom (CSS-transform scale of .bd-canvas-wrap inside a scrollable outer box) ──
+    function setZoom(z, clientX, clientY) {
+        if (!zOuter || !zWrap) return;
+        const nz = Math.min(ZMAX, Math.max(ZMIN, z));
+        if (nz === zoom) return;
+        const r = zOuter.getBoundingClientRect();
+        const cx = (clientX != null ? clientX : r.left + r.width / 2) - r.left;
+        const cy = (clientY != null ? clientY : r.top + r.height / 2) - r.top;
+        const ux = (zOuter.scrollLeft + cx) / zoom;
+        const uy = (zOuter.scrollTop + cy) / zoom;
+        zoom = nz;
+        zWrap.style.transform = 'scale(' + zoom + ')';
+        zOuter.scrollLeft = ux * zoom - cx;
+        zOuter.scrollTop = uy * zoom - cy;
+        const pct = $('bd-zoom-pct'); if (pct) pct.textContent = Math.round(zoom * 100) + '%';
+    }
+    function resetZoom() {
+        zoom = 1;
+        if (zWrap) zWrap.style.transform = 'scale(1)';
+        if (zOuter) { zOuter.scrollLeft = 0; zOuter.scrollTop = 0; }
+        const pct = $('bd-zoom-pct'); if (pct) pct.textContent = '100%';
+    }
+    function pinchDist(a, b) { return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY); }
+    function bindZoomUI() {
+        zOuter = $('bd-zoom-outer'); zWrap = $('bd-canvas-wrap');
+        if (!zOuter || !zWrap) return;
+        const inBtn = $('bd-zoom-in'), outBtn = $('bd-zoom-out'), rstBtn = $('bd-zoom-reset');
+        if (inBtn) inBtn.onclick = () => setZoom(zoom * 1.4);
+        if (outBtn) outBtn.onclick = () => setZoom(zoom / 1.4);
+        if (rstBtn) rstBtn.onclick = resetZoom;
+        zOuter.addEventListener('wheel', (e) => {
+            if (!e.ctrlKey && !e.metaKey) return;      // plain wheel/trackpad scroll stays native
+            e.preventDefault();
+            setZoom(zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12), e.clientX, e.clientY);
+        }, { passive: false });
+        const pts = new Map();
+        zOuter.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch') pts.set(e.pointerId, e); });
+        zOuter.addEventListener('pointermove', (e) => {
+            if (!pts.has(e.pointerId)) return;
+            pts.set(e.pointerId, e);
+            if (pts.size === 2) {
+                e.preventDefault();
+                const [a, b] = Array.from(pts.values());
+                const d = pinchDist(a, b);
+                const mx = (a.clientX + b.clientX) / 2, my = (a.clientY + b.clientY) / 2;
+                if (pinch) setZoom(zoom * (d / pinch.d), mx, my);
+                pinch = { d };
+            }
+        });
+        const endPt = (e) => { pts.delete(e.pointerId); if (pts.size < 2) pinch = null; };
+        zOuter.addEventListener('pointerup', endPt);
+        zOuter.addEventListener('pointercancel', endPt);
+        zOuter.addEventListener('pointerleave', endPt);
+    }
 
     function flush(final) {
         if (!gesture || !buf.length) return;
@@ -423,6 +480,7 @@
         canvas.addEventListener('pointermove', (e) => sendCursor(e, false));
         canvas.addEventListener('pointerleave', (e) => sendCursor(e, true));
         curTimer = setInterval(paintTeacherDot, 4000);
+        bindZoomUI();
     }
 
     // ── start / stop ────────────────────────────────────────────────────────
@@ -505,6 +563,7 @@
         if (me && boardRef) boardRef.collection('people').doc(me.uid).delete().catch(() => {});
         closeTextBox(false); strokes.clear(); tb.clear(); localIds.clear(); myGestures = []; people = []; board = null; groupDoc = null; attMarks = {};
         if (ctx) { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        resetZoom(); zOuter = null; zWrap = null; pinch = null;
     }
     window.addEventListener('beforeunload', () => { if (me && boardRef) boardRef.collection('people').doc(me.uid).delete().catch(() => {}); });
 

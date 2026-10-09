@@ -8,7 +8,7 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=38">
+    <link rel="stylesheet" href="styles.css?v=42">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         body { background: var(--paper-alt); }
@@ -160,6 +160,7 @@
                 <button class="admin-tab active" data-tab="news" onclick="switchTab('news')">Новости</button>
                 <button class="admin-tab" data-tab="announcement" onclick="switchTab('announcement')">Баннер сверху</button>
                 <button class="admin-tab" data-tab="catalog" onclick="switchTab('catalog')">Курсы и цены</button>
+                <button class="admin-tab" data-tab="promo" onclick="switchTab('promo')">Промокоды</button>
                 <button class="admin-tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</button>
                 <button class="admin-tab" data-tab="results" onclick="switchTab('results')">Результаты</button>
                 <button class="admin-tab" data-tab="videos" onclick="switchTab('videos')">Видео на главной</button>
@@ -190,6 +191,9 @@
 
             <!-- COURSES & PRICES -->
             <div class="admin-panel" id="panel-catalog"><div id="cat-root"><div class="empty-state">Загрузка…</div></div></div>
+
+            <!-- PROMO CODES -->
+            <div class="admin-panel" id="panel-promo"><div id="promo-root"><div class="empty-state">Загрузка…</div></div></div>
 
             <!-- REVIEWS -->
             <div class="admin-panel" id="panel-reviews">
@@ -583,7 +587,8 @@
             document.querySelectorAll('.admin-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
             document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
             if (tab === 'catalog' && window.loadCatalog) window.loadCatalog();
-            const act = document.querySelector('.admin-tab.active'); const pt = document.getElementById('admin-ptitle'); if (pt && act) pt.textContent = act.textContent; const ph = document.getElementById('admin-phint'); if (ph) { const H = { news: 'Записи на странице «Новости» (news.html): заголовок, текст, дата. Остаются в списке, пока вы их не удалите.', announcement: 'Одна короткая строка-баннер СВЕРХУ на каждой странице сайта (например: «Набор открыт — осталось 5 мест»). Можно добавить ссылку и в любой момент выключить.', catalog: 'Курсы, цены и описания на главной. Сохраните — и всё сразу обновится на сайте.' }; ph.textContent = H[tab] || ''; ph.style.display = H[tab] ? '' : 'none'; }
+            if (tab === 'promo' && window.loadPromo) window.loadPromo();
+            const act = document.querySelector('.admin-tab.active'); const pt = document.getElementById('admin-ptitle'); if (pt && act) pt.textContent = act.textContent; const ph = document.getElementById('admin-phint'); if (ph) { const H = { news: 'Записи на странице «Новости» (news.html): заголовок, текст, дата. Остаются в списке, пока вы их не удалите.', announcement: 'Одна короткая строка-баннер СВЕРХУ на каждой странице сайта (например: «Набор открыт — осталось 5 мест»). Можно добавить ссылку и в любой момент выключить.', catalog: 'Курсы, цены и описания на главной. Сохраните — и всё сразу обновится на сайте.', promo: 'Промокоды для блока цен на главной: скидка в процентах или полностью бесплатно, с необязательной датой окончания.' }; ph.textContent = H[tab] || ''; ph.style.display = H[tab] ? '' : 'none'; }
         }
 
         if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
@@ -1729,6 +1734,7 @@
     <script src="catalog-defaults.js"></script>
     <script src="presence.js"></script>
     <script src="admin-catalog.js"></script>
+    <script src="admin-promo.js"></script>
     <script src="admin-mock.js"></script>
 </body>
 </html>
