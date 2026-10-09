@@ -1,0 +1,49 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Videos for the home-page carousel (Admin panel -> Видео).
+    // Everyone can watch them; only admins (listed in the Firestore `admins`
+    // collection) can upload or delete. Only video files up to 80 MB.
+    match /heroVideos/{file} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
+        && request.resource.size < 80 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+      allow delete: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+      allow update: if false;
+    }
+
+    // Listening audio for the mock tests (Admin panel -> Mock-тесты). Everyone can play it;
+    // only admins can upload or delete. Audio files up to 60 MB.
+    match /mockAudio/{file} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
+        && request.resource.size < 60 * 1024 * 1024
+        && request.resource.contentType.matches('audio/.*');
+      allow delete: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+      allow update: if false;
+    }
+
+    // Pictures for Writing Task 1 (graphs, maps). Everyone can see them; only admins upload. Images up to 8 MB.
+    match /mockImages/{file} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid))
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null
+        && firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+      allow update: if false;
+    }
+
+    // Everything else stays closed.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

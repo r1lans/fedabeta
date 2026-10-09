@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js"></script>
+    <script src="sheets-config.js"></script>
+    <title>Видеоурок — TheStarth</title>
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="Онлайн видеоурок TheStarth.">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css?v=42">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+        main.lesson-main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 7rem 1.5rem 4rem;
+        }
+
+        /* Join screen */
+        #join-screen { max-width: 480px; margin: 3rem auto; text-align: center; }
+        #join-screen h1 { font-size: 1.8rem; margin-bottom: 0.75rem; }
+        #join-screen p { color: var(--ink-soft); margin-bottom: 2rem; line-height: 1.6; }
+        #join-screen input {
+            width: 100%; padding: 0.9rem; border-radius: 8px; border: 1px solid var(--rule);
+            background: var(--surface); color: var(--ink); font-size: 1rem; margin-bottom: 1rem;
+        }
+        .teacher-quick-links {
+            display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; margin-top: 2rem;
+        }
+        .teacher-quick-links a {
+            font-size: 0.85rem; color: var(--ink-soft); border: 1px solid var(--rule);
+            border-radius: 20px; padding: 0.4rem 1rem;
+        }
+        .teacher-quick-links a:hover { border-color: var(--accent); color: var(--accent); }
+
+        .jl-note { color: var(--ink-soft); font-size: 0.9rem; margin: 0.4rem 0 0.8rem; }
+        .jl-card { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap; text-align: left; background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 14px; padding: 0.9rem 1rem; margin-bottom: 0.7rem; }
+        .jl-card strong { display: block; font-size: 1rem; }
+        .jl-card small { color: var(--ink-soft); }
+        .jl-card .today { color: #1e8449; font-weight: 700; }
+        .jl-card .btn-primary { padding: 0.7rem 1.3rem; border-radius: 10px; }
+        .code-box { margin-top: 1.5rem; text-align: left; }
+        .code-box summary { cursor: pointer; color: var(--ink-soft); text-align: center; font-size: 0.9rem; }
+        .code-box input { margin-top: 0.4rem; }
+        .more-menu { position: relative; }
+        .more-menu summary { list-style: none; cursor: pointer; }
+        .more-menu summary::-webkit-details-marker { display: none; }
+        .more-pop { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px; padding: 0.3rem; min-width: 220px; box-shadow: 0 10px 24px rgba(0,0,0,.2); display: flex; flex-direction: column; }
+        .more-pop button { text-align: left; background: none; border: 0; color: var(--ink); font: inherit; font-size: 0.88rem; padding: 0.55rem 0.7rem; border-radius: 8px; cursor: pointer; }
+        .more-pop button:hover { background: var(--accent-tint); }
+
+        /* Meeting room */
+        #meeting-screen { display: none; }
+        .lesson-topbar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem; flex-wrap: wrap; gap: 0.75rem;
+        }
+        .lesson-topbar h2 { font-size: 1.1rem; }
+        #call-container { width: 100%; }
+        #jitsi-container {
+            width: 100%; height: 70vh; min-height: 480px;
+            border-radius: 12px; overflow: hidden; border: 1px solid var(--rule);
+            background: #111;
+        }
+        .lesson-note {
+            margin-top: 1rem; font-size: 0.82rem; color: var(--ink-soft); text-align: center;
+        }
+
+        main.lesson-main.wide { max-width: 1100px; }
+        .lesson-grid { display: block; }
+        /* Shared whiteboard */
+        #board-panel { display: none; margin-top: 1rem; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper-alt); padding: 0.9rem; }
+        .bd-top { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+        .bd-top strong { font-size: 1rem; }
+        .bd-status { font-size: 0.82rem; color: var(--ink-soft); }
+        .bd-status.on { color: #1e8449; font-weight: 600; }
+        .bd-tools { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-left: auto; }
+        .bd-color { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--rule); cursor: pointer; padding: 0; }
+        .bd-color.sel { outline: 2px solid var(--accent); outline-offset: 2px; }
+        .bd-btn { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 0.4rem 0.7rem; font: inherit; font-size: 0.82rem; cursor: pointer; color: var(--ink); min-height: 34px; }
+        .bd-btn.sel { border-color: var(--accent); color: var(--accent); }
+        .bd-btn:hover { border-color: var(--accent); }
+        .bd-nav { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+        .bd-ov { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+        .bd-grid { position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(31,95,191,.25) 1px, transparent 1px), linear-gradient(to bottom, rgba(31,95,191,.25) 1px, transparent 1px); background-size: 6.25% 10%; }
+        .bd-grid[hidden], .bd-tdot[hidden] { display: none; }
+        .bd-gl, .bd-gn { position: absolute; font-size: 10px; font-weight: 700; color: #1f5fbf; background: rgba(255,255,255,.8); border-radius: 4px; padding: 0 3px; line-height: 14px; }
+        .bd-gl { top: 2px; transform: translateX(-50%); } .bd-gn { left: 2px; transform: translateY(-50%); }
+        #bd-canvas.pick-mode { cursor: crosshair !important; }
+        .bd-mark { position: absolute; transform: translate(-50%, -50%); }
+        .bd-mark i { display: block; width: 26px; height: 26px; border: 3px solid #e67e22; border-radius: 50%; background: rgba(230,126,34,.18); }
+        .bd-mark.pulse i { animation: bdPulse 1s ease-out infinite; }
+        @keyframes bdPulse { 0% { box-shadow: 0 0 0 0 rgba(230,126,34,.7); } 100% { box-shadow: 0 0 0 22px rgba(230,126,34,0); } }
+        .bd-mark b { position: absolute; left: 50%; top: 100%; transform: translateX(-50%); margin-top: 3px; background: #e67e22; color: #fff; font-size: 12px; padding: 1px 7px; border-radius: 999px; white-space: nowrap; }
+        .bd-mark.rect { transform: none; border: 3px solid #e67e22; border-radius: 8px; background: rgba(230,126,34,.14); animation: bdPulse 1.2s ease-out 3; }
+        .bd-mark.rect b { left: 0; top: auto; bottom: 100%; transform: none; margin: 0 0 3px; }
+        .bd-tdot { position: absolute; transform: translate(-50%, -50%); transition: left .35s linear, top .35s linear; }
+        .bd-tdot i { display: block; width: 16px; height: 16px; border-radius: 50%; background: #c0392b; border: 2px solid #fff; box-shadow: 0 0 0 2px #c0392b; }
+        .bd-tdot b { position: absolute; left: 14px; top: 10px; background: #c0392b; color: #fff; font-size: 11px; padding: 1px 6px; border-radius: 999px; white-space: nowrap; }
+        .bd-pop { position: absolute; z-index: 6; display: flex; align-items: center; gap: .3rem; background: var(--paper, #fff); border: 1px solid var(--rule, #ccc); border-radius: 10px; padding: .3rem .4rem; box-shadow: 0 8px 22px rgba(0,0,0,.22); font-size: .82rem; }
+        .bd-pop strong { padding: 0 .3rem; font-size: .95rem; }
+        .bd-pop button { border: 1px solid var(--rule, #ccc); background: var(--paper-alt, #f4f4f4); color: var(--ink, #111); border-radius: 7px; padding: .25rem .55rem; font: inherit; font-size: .8rem; cursor: pointer; }
+        .bd-pop button:hover { border-color: var(--accent); }
+        .cm-coord { border: 1px solid var(--accent); background: transparent; color: var(--accent); border-radius: 6px; padding: 0 .35rem; font: inherit; font-weight: 700; cursor: pointer; }
+        .cm.mine .cm-coord { color: inherit; border-color: currentColor; }
+        .bd-zoom-outer { overflow: auto; border-radius: 8px; border: 1px solid var(--rule); background: #d8d9dc; max-height: 64vh; touch-action: pan-x pan-y; }
+        .bd-canvas-wrap { position: relative; width: 100%; aspect-ratio: 16 / 10; background: #fff; overflow: hidden; transform-origin: 0 0; }
+        #bd-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+        .bd-zoom-ctl { display: flex; align-items: center; gap: .4rem; margin-top: .5rem; }
+        .bd-zoom-ctl .bd-btn { min-width: 2.2rem; text-align: center; padding: .35rem .6rem; }
+        .bd-zoom-pct { font-size: .82rem; color: var(--ink-soft, #777); min-width: 3.2rem; text-align: center; }
+        #bd-canvas.text-mode { cursor: text !important; }
+        .bd-textbox { position: absolute; z-index: 5; min-width: 80px; background: rgba(255,255,255,.92); border: 1px dashed #1f5fbf; outline: none; resize: none; overflow: hidden; padding: 0 2px; margin: 0; font-family: 'Segoe UI', Arial, sans-serif; font-weight: 600; line-height: 1.25; }
+        #bd-canvas.can-write { cursor: crosshair; touch-action: none; }
+        .bd-lock { position: absolute; right: 10px; bottom: 8px; font-size: 0.78rem; color: #666; background: rgba(255,255,255,0.85); padding: 0.2rem 0.6rem; border-radius: 999px; pointer-events: none; }
+
+        /* Picture-in-picture: when the board is open, the video call shrinks to a small corner window
+           next to the board (or the other way round) — click the small one to swap, like Discord's stage. */
+        #call-container.lesson-pip, #bd-zoom-outer.lesson-pip {
+            position: fixed; right: 16px; bottom: 92px; width: 240px; max-width: 42vw;
+            aspect-ratio: 16 / 10; height: auto; max-height: none; z-index: 70;
+            border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+            border: 2px solid var(--accent); cursor: pointer; background: #14171c;
+        }
+        #call-container.lesson-pip *, #bd-zoom-outer.lesson-pip * { pointer-events: none; }
+        #call-container.lesson-pip:hover, #bd-zoom-outer.lesson-pip:hover { outline: 3px solid var(--accent); }
+        #call-container.lesson-pip::after, #bd-zoom-outer.lesson-pip::after {
+            content: 'На весь экран'; position: absolute; left: 0; right: 0; bottom: 0; padding: 4px 8px;
+            font-size: 0.72rem; color: #fff; background: rgba(0,0,0,.55); text-align: center;
+        }
+        #call-container.lesson-pip .call-live { height: 100%; min-height: 0; border-radius: 0; border: 0; }
+        #call-container.lesson-pip .call-bar, #call-container.lesson-pip .call-side,
+        #call-container.lesson-pip .call-warn, #call-container.lesson-pip .call-wait, #call-container.lesson-pip .call-rec { display: none; }
+        #call-container.lesson-pip .call-stage { padding: 3px; gap: 3px; }
+        #bd-zoom-outer.lesson-pip { overflow: hidden; }
+        #bd-zoom-outer.lesson-pip .bd-canvas-wrap { transform: none !important; width: 100% !important; height: 100% !important; }
+        @media (max-width: 640px) {
+            #call-container.lesson-pip, #bd-zoom-outer.lesson-pip { width: 160px; bottom: 76px; right: 10px; }
+        }
+        #bd-people, #lesson-att { margin-top: 0.9rem; border-top: 1px dashed var(--rule); padding-top: 0.8rem; }
+        .bd-person { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0; flex-wrap: wrap; }
+        .bd-switch { position: relative; display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.85rem; }
+        .bd-switch input { width: 40px; height: 22px; accent-color: var(--accent); cursor: pointer; }
+        #lesson-att { display: none; background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 12px; padding: 0.9rem; margin-top: 1rem; }
+        .la-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.45rem 0; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+        .la-row:last-child { border-bottom: 0; }
+        .la-name { flex: 1 1 150px; min-width: 0; overflow-wrap: anywhere; }
+        .la-online { font-size: 0.72rem; color: #1e8449; border: 1px solid #1e8449; border-radius: 999px; padding: 0.05rem 0.5rem; margin-left: 0.4rem; white-space: nowrap; }
+        .la-seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+        .la-seg button { background: var(--paper); border: 0; border-right: 1px solid var(--rule); padding: 0.4rem 0.7rem; font: inherit; font-size: 0.8rem; cursor: pointer; color: var(--ink-soft); min-height: 36px; }
+        .la-seg button:last-child { border-right: 0; }
+        .la-seg button.on-present { background: #1e8449; color: #fff; }
+        .la-seg button.on-late { background: #d68910; color: #fff; }
+        .la-seg button.on-absent { background: #c0392b; color: #fff; }
+        @media (max-width: 600px) {
+            #jitsi-container { height: 60vh; min-height: 360px; }
+            .bd-tools { margin-left: 0; width: 100%; }
+            .la-seg { width: 100%; } .la-seg button { flex: 1; padding: 0.4rem 0.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
+            <div class="nav-links">
+                <a href="index.html#courses" data-i18n="nav.courses">Курсы</a>
+                <a href="results.html" data-i18n="nav.results">Результаты</a>
+                <a href="about.html" data-i18n="nav.about">О нас</a>
+                <a href="news.html" data-i18n="nav.news">Новости</a>
+                <a href="dashboard.html" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="lesson-main" id="lesson-main">
+
+        <!-- Before joining -->
+        <div id="join-screen">
+            <h1>Видеоурок</h1>
+            <div id="my-lessons"><p class="jl-note">Загрузка ваших уроков…</p></div>
+            <details class="code-box" id="code-box">
+                <summary>Войти по коду комнаты</summary>
+                <p class="jl-note">Код комнаты вам мог прислать куратор.</p>
+                <input type="text" id="room-input" placeholder="Например: firdavs-mon-1800">
+                <button class="btn-primary" style="width: 100%;" onclick="joinRoom()">Войти</button>
+                <div class="teacher-quick-links" id="teacher-links"></div>
+            </details>
+        </div>
+
+        <!-- Meeting -->
+        <div id="meeting-screen">
+            <div class="lesson-topbar">
+                <h2><span>Урок</span> <span id="room-name-label" style="color: var(--accent);"></span></h2>
+                <div style="display:flex; gap:0.6rem; flex-wrap:wrap; align-items:center;">
+                    <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="onBoardToggleClick()" id="board-toggle-btn">Открыть доску</button>
+                    <button class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem; display:none;" onclick="toggleAttendance()" id="att-toggle-btn">Посещаемость</button>
+                    <details class="more-menu" id="more-menu">
+                        <summary class="btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Ещё</summary>
+                        <div class="more-pop">
+                            <button type="button" onclick="copyLink()">Скопировать ссылку</button>
+                            <button type="button" onclick="switchMode()" id="mode-btn">Запасной режим (Jitsi)</button>
+                            <hr style="border:0;border-top:1px solid var(--rule);margin:0.3rem 0;">
+                            <button type="button" onclick="leaveRoom()" style="color:#c0392b;">Выйти из комнаты</button>
+                        </div>
+                    </details>
+                </div>
+            </div>
+            <div id="call-container"></div>
+            <div id="jitsi-container" style="display:none;"></div>
+
+            <!-- Shared whiteboard: everyone sees it, only the teacher (and people the teacher allows) can write -->
+            <div id="board-panel">
+                <div class="bd-top">
+                    <strong>Доска</strong>
+                    <span class="bd-status" id="bd-status"></span>
+                    <div class="bd-tools" id="bd-tools" style="display:none;">
+                        <button class="bd-color sel" data-c="#111111" style="background:#111111" aria-label="Чёрный"></button>
+                        <button class="bd-color" data-c="#1f5fbf" style="background:#1f5fbf" aria-label="Синий"></button>
+                        <button class="bd-color" data-c="#c0392b" style="background:#c0392b" aria-label="Красный"></button>
+                        <button class="bd-color" data-c="#1e8449" style="background:#1e8449" aria-label="Зелёный"></button>
+                        <button class="bd-btn" data-w="3">Тонко</button>
+                        <button class="bd-btn sel" data-w="6">Средне</button>
+                        <button class="bd-btn" data-w="12">Толсто</button>
+                        <button class="bd-btn" id="bd-text" title="Текст"><b>T</b> Текст</button>
+                        <button class="bd-btn" id="bd-eraser">Ластик</button>
+                        <button class="bd-btn" id="bd-undo">Отменить</button>
+                        <button class="bd-btn" id="bd-clear" style="display:none;">Очистить всё</button>
+                    </div>
+                </div>
+                <div class="bd-nav" id="bd-nav">
+                    <button class="bd-btn" id="bd-grid" type="button" title="Сетка с координатами">Сетка</button>
+                    <button class="bd-btn" id="bd-pt" type="button" title="Нажмите на доску, чтобы узнать и скопировать координаты" style="display:none;">Координаты</button>
+                    <button class="bd-btn" id="bd-last" type="button" title="Показать, где учитель писал последний раз">Где писал учитель</button>
+                    <button class="bd-btn" id="bd-follow" type="button" title="Показывать, где сейчас курсор учителя">Следить за учителем</button>
+                    <span class="bd-status" id="bd-follow-note"></span>
+                </div>
+                <div class="bd-zoom-outer" id="bd-zoom-outer">
+                    <div class="bd-canvas-wrap" id="bd-canvas-wrap">
+                        <canvas id="bd-canvas" width="1600" height="1000"></canvas>
+                        <div class="bd-lock" id="bd-lock" style="display:none;">Только просмотр</div>
+                    </div>
+                </div>
+                <div class="bd-zoom-ctl">
+                    <button class="bd-btn" id="bd-zoom-out" type="button" title="Уменьшить">−</button>
+                    <span class="bd-zoom-pct" id="bd-zoom-pct">100%</span>
+                    <button class="bd-btn" id="bd-zoom-in" type="button" title="Увеличить">+</button>
+                    <button class="bd-btn" id="bd-zoom-reset" type="button" title="Сбросить масштаб">1:1</button>
+                </div>
+                <div id="bd-people" style="display:none;">
+                    <strong style="font-size:0.9rem;">Кто может писать на доске</strong>
+                    <p class="bd-status" style="margin:0.2rem 0 0.5rem;">Вы всегда можете писать. Остальным дайте доступ переключателем — и заберите его, когда нужно.</p>
+                    <label class="bd-switch" style="margin-bottom:0.4rem;"><input type="checkbox" id="bd-allow-all"> Разрешить всем</label>
+                    <div id="bd-people-list"><span class="bd-status">Пока никого нет в комнате (видны только вошедшие в аккаунт).</span></div>
+                </div>
+            </div>
+
+            <!-- Attendance for a group lesson (teacher of the group only) -->
+            <div id="lesson-att">
+                <strong id="la-title">Посещаемость урока</strong>
+                <p class="bd-status" style="margin:0.2rem 0 0.6rem;">Ученики, которые зашли в комнату под своим аккаунтом, помечены «в комнате».</p>
+                <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.6rem;">
+                    <button class="bd-btn" id="la-checkin">Отметить вошедших как «был»</button>
+                    <input type="text" id="la-topic" placeholder="Тема урока (по желанию)" maxlength="120" style="flex:1 1 200px;padding:0.45rem 0.6rem;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font-size:16px;">
+                </div>
+                <div id="la-rows"></div>
+                <div style="margin-top:0.7rem;display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;">
+                    <button class="btn-primary" style="padding:0.55rem 1.2rem;border-radius:8px;" id="la-save">Сохранить посещаемость</button>
+                    <span class="bd-status" id="la-msg"></span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://meet.jit.si/external_api.js"></script>
+    <script src="icons.js"></script>
+    <script src="call-config.js"></script>
+    <script src="lesson-attention.js"></script>
+    <script src="lesson-call.js"></script>
+    <script src="lesson-board.js"></script>
+    <script>
+        const TEACHERS_FOR_ROOMS = {
+            firdavs: 'Фирдавс', sadokat: 'Садокат', javokhir: 'Жавохир', behruz: 'Бехруз', azizbek: 'Азизбек'
+        };
+        const linksWrap = document.getElementById('teacher-links');
+        Object.entries(TEACHERS_FOR_ROOMS).forEach(([id, name]) => {
+            const a = document.createElement('a');
+            a.href = `video-lesson.html?room=TheStarth-${id}`;
+            a.textContent = name;
+            linksWrap.appendChild(a);
+        });
+
+        let jitsiApi = null, currentRoom = '', currentMode = '', _gi = null;
+        // name of the group this lesson belongs to (?group=<id>), if the viewer is allowed to read it
+        async function groupInfo() {
+            if (_gi) return _gi;
+            const id = new URLSearchParams(location.search).get('group') || '';
+            _gi = { id, name: '' };
+            if (id && typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
+                try { const u = auth.currentUser || await new Promise((r) => { const f = auth.onAuthStateChanged((x) => { f(); r(x); }); });
+                    if (u) { const d = await db.collection('groups').doc(id).get(); if (d.exists) _gi.name = d.data().name || ''; } } catch (e) {}
+            }
+            const l = document.getElementById('room-name-label'); if (l && _gi.name) l.textContent = '· ' + _gi.name;
+            return _gi;
+        }
+        const callBox = () => document.getElementById('call-container');
+        const jitsiBox = () => document.getElementById('jitsi-container');
+
+        // Our own call (lesson-call.js) is the default; Jitsi stays as the backup mode (?mode=jitsi or the button).
+        function startNative(room) {
+            currentMode = 'native';
+            jitsiBox().style.display = 'none'; callBox().style.display = 'block';
+            document.getElementById('mode-btn').textContent = 'Запасной режим (Jitsi)';
+            const go = async () => {
+                const g = await groupInfo();
+                LessonCall.start(room, callBox(), {
+                    groupId: g.id, groupName: g.name, title: g.name,
+                    onFallback: () => startJitsi(room),
+                    onBeforeEnd: async () => { if (window.LessonBoard) await LessonBoard.reset(); },
+                    onEnded: () => { if (window.LessonBoard) LessonBoard.stop(); document.getElementById('board-panel').style.display = 'none'; document.getElementById('lesson-att').style.display = 'none'; document.querySelector('.lesson-topbar').style.display = 'none'; setStagePip(''); }
+                });
+            };
+            if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
+        }
+        function startJitsi(room) {
+            if (window.LessonCall) LessonCall.stop();
+            currentMode = 'jitsi'; if (window.StarthPresence) StarthPresence.setLesson(true);
+            callBox().style.display = 'none'; jitsiBox().style.display = 'block';
+            document.getElementById('mode-btn').textContent = 'Основной режим';
+            if (jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
+            const p = window.currentUserProfile || {};
+            const userName = [p.name, p.surname].filter(Boolean).join(' ') || localStorage.getItem('userName') || 'Гость';
+            jitsiApi = new JitsiMeetExternalAPI('meet.jit.si', {
+                roomName: room,
+                parentNode: document.getElementById('jitsi-container'),
+                width: '100%',
+                height: '100%',
+                userInfo: { displayName: userName },
+                configOverwrite: {
+                    prejoinPageEnabled: true,
+                    // The lesson has its own whiteboard below the video (only the teacher decides who can write),
+                    // so Jitsi's built-in one, which anybody could use, is removed from the toolbar.
+                    whiteboard: { enabled: false },
+                    toolbarButtons: ['microphone', 'camera', 'closedcaptions', 'desktop', 'fullscreen', 'fodeviceselection',
+                        'hangup', 'profile', 'chat', 'recording', 'settings', 'raisehand', 'videoquality', 'filmstrip',
+                        'tileview', 'select-background', 'download', 'help', 'mute-everyone', 'security']
+                },
+                interfaceConfigOverwrite: { SHOW_JITSI_WATERMARK: false }
+            });
+        }
+        function switchMode() {
+            // Switching away from the main call drops it immediately (camera/mic, everyone's video) — confirm so a stray tap in the "Ещё" menu doesn't knock someone out of the lesson.
+            if (currentMode === 'native') { if (confirm('Переключиться в запасной режим (Jitsi)? Текущий видеозвонок отключится.')) startJitsi(currentRoom); }
+            else startNative(currentRoom);
+        }
+
+        function startMeeting(room) {
+            currentRoom = room;
+            document.getElementById('join-screen').style.display = 'none';
+            document.getElementById('meeting-screen').style.display = 'block';
+            document.getElementById('room-name-label').textContent = '';
+            if (new URLSearchParams(location.search).get('mode') === 'jitsi') startJitsi(room); else startNative(room);
+            document.getElementById('lesson-main').classList.add('wide');
+            // the board needs Firebase, which loads at the bottom of the page
+            if (document.readyState === 'complete') LessonBoard.start(room);
+            else window.addEventListener('load', () => LessonBoard.start(room));
+
+            const url = new URL(window.location);
+            url.searchParams.set('room', room);
+            window.history.replaceState({}, '', url);
+        }
+
+        function joinRoom() {
+            const raw = document.getElementById('room-input').value.trim();
+            if (!raw) return;
+            const room = raw.startsWith('TheStarth-') ? raw : `TheStarth-${raw}`;
+            startMeeting(room);
+        }
+
+        function leaveRoom() {
+            if (!confirm('Выйти из комнаты? Видео и микрофон отключатся.')) return;
+            if (window.StarthPresence) StarthPresence.setLesson(false);
+            if (jitsiApi) { jitsiApi.dispose(); jitsiApi = null; }
+            if (window.LessonCall) LessonCall.stop();
+            if (window.LessonBoard) LessonBoard.stop();
+            document.getElementById('lesson-main').classList.remove('wide');
+            document.getElementById('board-panel').style.display = 'none';
+            document.getElementById('lesson-att').style.display = 'none';
+            document.getElementById('board-toggle-btn').textContent = 'Открыть доску';
+            document.getElementById('meeting-screen').style.display = 'none';
+            document.getElementById('join-screen').style.display = 'block';
+            document.querySelector('.lesson-topbar').style.display = '';
+            setStagePip('');
+            loadMyLessons();
+            const url = new URL(window.location);
+            url.searchParams.delete('room');
+            window.history.replaceState({}, '', url);
+        }
+
+        // Picture-in-picture: opening the board shrinks the video call into a small corner window next to it
+        // (and vice versa) — click the small one to swap which is the "main" view, like Discord's stage view.
+        function setStagePip(which) {
+            const call = document.getElementById('call-container'), board = document.getElementById('bd-zoom-outer');
+            if (!call || !board) return;
+            call.classList.toggle('lesson-pip', which === 'call');
+            board.classList.toggle('lesson-pip', which === 'board');
+        }
+        function onBoardToggleClick() {
+            toggleBoard();
+            const open = document.getElementById('board-panel').style.display === 'block';
+            // Only shrink the call when a live native call is actually showing (not the pre-join screen, not Jitsi).
+            const live = document.querySelector('#call-container .call-live');
+            setStagePip(open && live && live.offsetParent ? 'call' : '');
+        }
+        (function () {
+            const call = document.getElementById('call-container'), board = document.getElementById('bd-zoom-outer');
+            if (call) call.addEventListener('click', () => { if (call.classList.contains('lesson-pip')) setStagePip('board'); });
+            if (board) board.addEventListener('click', () => { if (board.classList.contains('lesson-pip')) setStagePip('call'); });
+        })();
+
+        function copyLink() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                alert('Ссылка скопирована!');
+            });
+            const m = document.getElementById('more-menu'); if (m) m.open = false;
+        }
+        // close the "Ещё" menu after any action inside it, so it never sits open over the page
+        document.addEventListener('click', (e) => {
+            const m = document.getElementById('more-menu');
+            if (m && m.open && e.target.closest('.more-pop button')) setTimeout(() => { m.open = false; }, 0);
+        });
+
+        // "Your lessons": one big button per group, no room codes to type
+        async function loadMyLessons() {
+            const box = document.getElementById('my-lessons'), cb = document.getElementById('code-box');
+            const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY) { box.innerHTML = ''; cb.open = true; return; }
+            const u = await new Promise((r) => { const f = auth.onAuthStateChanged((x) => { f(); r(x); }); });
+            if (!u) { box.innerHTML = '<p class="jl-note">Войдите в аккаунт — здесь появятся ваши уроки.</p><a class="btn-primary" style="display:inline-block;padding:0.8rem 1.6rem;border-radius:10px;" href="index.html#login">Войти</a>'; return; }
+            try {
+                const ud = await db.collection('users').doc(u.uid).get(); const role = ud.exists ? (ud.data().role || 'student') : 'student';
+                const q = role === 'teacher' ? db.collection('groups').where('teacherUid', '==', u.uid) : db.collection('groups').where('memberUids', 'array-contains', u.uid);
+                const snap = await q.get(); const list = [];
+                snap.forEach((d) => { const g = Object.assign({ id: d.id }, d.data()); if (!g.archived) list.push(g); });
+                const todayIdx = (new Date().getDay() + 6) % 7;
+                if (!list.length) { box.innerHTML = '<p class="jl-note">Пока нет уроков. Если куратор прислал код комнаты — введите его ниже.</p>'; cb.open = true; return; }
+                list.sort((a, b) => (b.days || []).includes(todayIdx) - (a.days || []).includes(todayIdx) || (a.name || '').localeCompare(b.name || ''));
+                box.innerHTML = list.map((g) => { const td = (g.days || []).includes(todayIdx);
+                    return `<div class="jl-card"><div><strong>${esc(g.name)}</strong><small>${td ? '<span class="today">Сегодня</span> · ' : ''}${esc(g.scheduleText || '')}${role !== 'teacher' && g.teacherName ? ' · ' + esc(g.teacherName) : ''}</small></div>
+                    <a class="btn-primary" href="video-lesson.html?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">${role === 'teacher' ? 'Начать урок' : 'Войти в урок'}</a></div>`; }).join('');
+                if (window.starthLocale && window.X) { /* i18n observer translates the new nodes */ }
+            } catch (e) { console.warn(e); box.innerHTML = ''; cb.open = true; }
+        }
+        window.addEventListener('load', () => { if (!roomParam) loadMyLessons(); });
+
+        // Auto-join if ?room= is present in the URL
+        const params = new URLSearchParams(window.location.search);
+        var roomParam = params.get('room');
+        if (roomParam) startMeeting(roomParam);
+    </script>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin-nav.js"></script>
+    <script src="translations.js"></script>
+    <script src="content-i18n.js"></script>
+    <script src="app.js"></script>
+    <script src="i18n-extra.js"></script>
+    
+    <script src="back-btn.js"></script>
+</body>
+</html>

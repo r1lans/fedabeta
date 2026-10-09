@@ -1,0 +1,400 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // A teacher is an account whose profile has role == 'teacher'. Only an admin can give that role
+    // (see the users rule below), so a student cannot make themselves a teacher.
+    function isTeacher() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'teacher';
+    }
+
+    // Each student can read/write only their own profile document.
+    // Admins can read every profile, and can also write to any profile
+    // (needed to change roles from the admin panel).
+    // IMPORTANT: a person may edit their own profile but may NOT change their own role —
+    // only an admin can make someone a teacher / admin (Admin panel -> Ученики).
+    match /users/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && (isAdmin() || (request.auth.uid == uid &&
+        request.resource.data.get('role', 'student') == 'student'));
+      allow update: if isSignedIn() && (isAdmin() || (request.auth.uid == uid &&
+        request.resource.data.get('role', 'student') == resource.data.get('role', 'student')));
+      allow delete: if isAdmin();
+    }
+
+    // Nickname uniqueness "reservation" documents: doc id == the nickname.
+    // Read is public (not signed-in yet) because availability must be
+    // checkable *before* the account exists — that's the whole point.
+    // Creating one still requires being signed in as that exact uid.
+    match /nicknames/{nickname} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      // the owner may release / re-point their own nickname (profile editor); an admin may clean up
+      allow update, delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+    }
+
+    // Student ID counter (000001, 000002, ...). Any signed-in user may read it and
+    // move it forward by exactly +1 (that is how a new student takes the next number).
+    // Nobody can lower it, skip numbers, or delete it.
+    match /counters/{doc} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && doc == 'students' && request.resource.data.last == 1;
+      allow update: if isSignedIn() && doc == 'students' &&
+        request.resource.data.last == resource.data.last + 1;
+      allow delete: if false;
+    }
+
+    // News & reviews: public read of published items. Admins can write
+    // anything; signed-in students can submit a review, but only ever
+    // as unpublished (pending admin approval) — never publish themselves.
+    match /news/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /reviews/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      // Visitors can only send a review as "not published yet", with sane sizes.
+      allow create: if isAdmin() || (
+        request.resource.data.published == false &&
+        request.resource.data.keys().hasOnly(['name', 'rating', 'text', 'published', 'createdAt']) &&
+        request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 80 &&
+        request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1500
+      );
+      allow update, delete: if isAdmin();
+    }
+
+    // Teachers shown in "О нас -> Команда Экспертов" and on teacher.html.
+    // Everyone can read; only admins can add / edit / delete (Admin panel -> Учителя).
+    match /teachers/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Student results (certificates with the magnifier) on results.html.
+    // Everyone can read; only admins can add / delete (Admin panel -> Результаты).
+    match /results/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Videos in the home-page carousel (Admin panel -> Видео).
+    // Everyone can watch; only admins can add / reorder / delete.
+    match /heroVideos/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Lesson schedule: admin assigns lessons (teacher + student + time).
+    // Public read (needed by the teacher's own unauthenticated schedule
+    // link and the student dashboard); only admins can write.
+    match /schedule/{id} {
+      allow read: if true;
+      allow create, delete: if isAdmin();
+      // The assigned teacher may also update ONE lesson: mark it done/missed and
+      // leave homework — nothing else (not the date, time, student, or teacher).
+      allow update: if isAdmin() || (
+        isSignedIn() &&
+        resource.data.teacherUid == request.auth.uid &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'homework', 'note']) &&
+        request.resource.data.teacherUid == resource.data.teacherUid &&
+        request.resource.data.studentNickname == resource.data.studentNickname &&
+        request.resource.data.date == resource.data.date &&
+        request.resource.data.time == resource.data.time
+      );
+    }
+
+    // Site-wide settings (accent color, logo, announcement banner):
+    // public read, admin-only write.
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ── TEACHER CABINET ─────────────────────────────────────────────────────
+    // Groups: a teacher creates and manages their own groups; a student can read the groups they are in.
+    match /groups/{id} {
+      allow read: if isSignedIn() && (isAdmin() ||
+        resource.data.teacherUid == request.auth.uid ||
+        request.auth.uid in resource.data.memberUids);
+      allow create: if isSignedIn() && (isAdmin() ||
+        (isTeacher() && request.resource.data.teacherUid == request.auth.uid));
+      allow update: if isSignedIn() && (isAdmin() ||
+        (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid));
+      allow delete: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+    }
+
+    // Attendance: one document per group per day, id = "<groupId>_<yyyy-mm-dd>".
+    // Only the group's teacher writes; the teacher and the students listed in it can read.
+    match /attendance/{id} {
+      allow read: if isSignedIn() && (isAdmin() ||
+        resource.data.teacherUid == request.auth.uid ||
+        request.auth.uid in resource.data.studentUids);
+      allow create, update: if isSignedIn() && (isAdmin() || (
+        isTeacher() &&
+        request.resource.data.teacherUid == request.auth.uid &&
+        id == request.resource.data.groupId + '_' + request.resource.data.date &&
+        get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.teacherUid == request.auth.uid));
+      allow delete: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+    }
+
+    // Grades (0-10): written by the group's teacher; readable by that teacher and by the graded student.
+    match /grades/{id} {
+      allow read: if isSignedIn() && (isAdmin() ||
+        resource.data.teacherUid == request.auth.uid ||
+        resource.data.studentUid == request.auth.uid);
+      allow create: if isSignedIn() && (isAdmin() || (
+        isTeacher() &&
+        request.resource.data.teacherUid == request.auth.uid &&
+        request.resource.data.score is number &&
+        request.resource.data.score >= 0 && request.resource.data.score <= 10 &&
+        get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.teacherUid == request.auth.uid));
+      allow update: if isAdmin();
+      allow delete: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+    }
+
+    // Lesson whiteboard. Everybody in the room can SEE it. Only the teacher who opened the board
+    // (teacherUid) and the people the teacher switched on (allowed / allowAll) can DRAW.
+    match /lessonBoards/{room} {
+      allow read: if true;
+      allow create: if isSignedIn() && isTeacher() && request.resource.data.teacherUid == request.auth.uid;
+      allow update: if isAdmin() || (isSignedIn() &&
+        resource.data.teacherUid == request.auth.uid &&
+        request.resource.data.teacherUid == resource.data.teacherUid);
+      allow delete: if isAdmin();
+
+      match /strokes/{strokeId} {
+        allow read: if true;
+        allow create: if isSignedIn() &&
+          request.resource.data.uid == request.auth.uid &&
+          request.resource.data.pts.size() >= 2 && request.resource.data.pts.size() <= 400 &&
+          (!('text' in request.resource.data) || request.resource.data.text.size() <= 300) &&
+          (get(/databases/$(database)/documents/lessonBoards/$(room)).data.teacherUid == request.auth.uid ||
+           get(/databases/$(database)/documents/lessonBoards/$(room)).data.get('allowAll', false) == true ||
+           request.auth.uid in get(/databases/$(database)/documents/lessonBoards/$(room)).data.get('allowed', []));
+        // Text can be edited / moved by its author or by the board's teacher (while they still may write).
+        allow update: if isSignedIn() && ('text' in resource.data) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pts', 'text', 'ts']) &&
+          request.resource.data.pts.size() == 2 && request.resource.data.text.size() <= 300 &&
+          (resource.data.uid == request.auth.uid ||
+           get(/databases/$(database)/documents/lessonBoards/$(room)).data.teacherUid == request.auth.uid) &&
+          (get(/databases/$(database)/documents/lessonBoards/$(room)).data.teacherUid == request.auth.uid ||
+           get(/databases/$(database)/documents/lessonBoards/$(room)).data.get('allowAll', false) == true ||
+           request.auth.uid in get(/databases/$(database)/documents/lessonBoards/$(room)).data.get('allowed', []));
+        allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin() ||
+          get(/databases/$(database)/documents/lessonBoards/$(room)).data.teacherUid == request.auth.uid);
+      }
+
+      // "Who is in the room" — each signed-in person writes only their own entry.
+      match /people/{uid} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && request.auth.uid == uid;
+      }
+    }
+
+    // Group leaderboard privacy: a student can hide themselves from the rating (hidden: true).
+    // Group mates read it to know whom to leave out. Each person writes only their own document.
+    match /boardPrefs/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['hidden', 'updatedAt']) && request.resource.data.hidden is bool;
+      allow delete: if false;
+    }
+
+    // ── DIRECTORY: a public "phone book" (name, nickname, role) so signed-in people can find each other in the messenger.
+    // Nothing else from the profile is exposed. A person writes only their own entry and it must match their profile.
+    match /directory/{uid} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && (isAdmin() || (request.auth.uid == uid &&
+        request.resource.data.uid == uid &&
+        exists(/databases/$(database)/documents/users/$(uid)) &&
+        request.resource.data.nickname == get(/databases/$(database)/documents/users/$(uid)).data.get('nickname', '') &&
+        request.resource.data.role == (get(/databases/$(database)/documents/users/$(uid)).data.get('role', 'student') == 'teacher' ? 'teacher' : 'student')));
+      allow delete: if isAdmin();
+    }
+
+    // ── MESSENGER (personal cabinet) ────────────────────────────────────────
+    // chats/<uidA_uidB> — a private chat between exactly two people (uids sorted, joined with "_").
+    // chats/<autoId> with group:true — a group (2..50 members). Only the creator can add/remove people or rename it;
+    // any member can leave. Members read and write messages; a message author can edit/delete their own message
+    // (the group creator can also delete messages in the group). Pinned message = field "pinned" on the chat doc.
+    match /chats/{chatId} {
+      allow read: if isSignedIn() && request.auth.uid in resource.data.members;
+      allow create: if isSignedIn() && request.auth.uid in request.resource.data.members && (
+        (!('group' in request.resource.data) &&
+          request.resource.data.members.size() == 2 &&
+          chatId == request.resource.data.members[0] + '_' + request.resource.data.members[1] &&
+          request.resource.data.members[0] < request.resource.data.members[1]) ||
+        (request.resource.data.group == true &&
+          request.resource.data.createdBy == request.auth.uid &&
+          request.resource.data.members.size() >= 2 && request.resource.data.members.size() <= 50 &&
+          request.resource.data.title is string && request.resource.data.title.size() > 0 && request.resource.data.title.size() <= 60));
+      allow update: if isSignedIn() && request.auth.uid in resource.data.members && (
+        request.resource.data.members == resource.data.members ||
+        (resource.data.get('group', false) == true && request.resource.data.group == true &&
+          request.resource.data.createdBy == resource.data.createdBy &&
+          ((resource.data.createdBy == request.auth.uid &&
+              request.resource.data.members.size() >= 1 && request.resource.data.members.size() <= 50 &&
+              request.auth.uid in request.resource.data.members) ||
+           (request.resource.data.members.size() == resource.data.members.size() - 1 &&
+              request.resource.data.members.hasAll(resource.data.members.removeAll([request.auth.uid]))))));
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.get('group', false) == true && resource.data.createdBy == request.auth.uid);
+
+      match /messages/{mid} {
+        allow read: if isSignedIn() &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+        allow create: if isSignedIn() && request.resource.data.from == request.auth.uid &&
+          request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 2000 &&
+          (!('img' in request.resource.data) ||
+            (request.resource.data.img is string && request.resource.data.img.size() <= 260000 &&
+             request.resource.data.img.matches('data:image/(jpeg|png|webp);base64,.*'))) &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+        // edit: only the author, only the text (plus the "edited" marks)
+        allow update: if isSignedIn() && resource.data.from == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'edited', 'editedAt']) &&
+          request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 2000 &&
+          request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.members;
+        allow delete: if isSignedIn() && (resource.data.from == request.auth.uid || isAdmin() ||
+          (get(/databases/$(database)/documents/chats/$(chatId)).data.get('group', false) == true &&
+           get(/databases/$(database)/documents/chats/$(chatId)).data.createdBy == request.auth.uid));
+      }
+    }
+
+    // ── LIVE VIDEO LESSON (built-in call, lesson-call.js) ───────────────────
+    // The room document holds teacher controls (mute everyone, remove a person) — only teachers/admins write it.
+    // peers/ = who is in the room (each person writes only their own entry). signals/ = WebRTC handshake messages,
+    // readable only by the addressee. chat/ = lesson chat.
+    match /lessonCalls/{room} {
+      allow read: if isSignedIn();
+      allow create, update: if isAdmin() || isTeacher();
+      allow delete: if isAdmin();
+
+      match /peers/{uid} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn() && request.auth.uid == uid;
+      }
+      match /signals/{id} {
+        allow read: if isSignedIn() && resource.data.to == request.auth.uid;
+        allow create: if isSignedIn() && request.resource.data.from == request.auth.uid &&
+          request.resource.data.data is string && request.resource.data.data.size() < 30000;
+        allow delete: if isSignedIn() && (resource.data.to == request.auth.uid || resource.data.from == request.auth.uid);
+      }
+      match /chat/{id} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid &&
+          request.resource.data.text is string && request.resource.data.text.size() <= 500;
+        allow delete: if isAdmin() || isTeacher();
+      }
+    }
+
+    // ── LESSON SESSIONS (who taught, when, for how long, who attended and for how many minutes) ──
+    // Created by the teacher when they enter the room; closed with "Закончить урок". Everybody in the lesson writes ONLY
+    // their own attendee entry (minutes spent). Readable by the teacher of that lesson and by admins.
+    match /lessonSessions/{sid} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+      allow create: if isSignedIn() && isTeacher() && request.resource.data.teacherUid == request.auth.uid;
+      allow update: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+      allow delete: if isAdmin();
+
+      match /attendees/{uid} {
+        allow read: if isSignedIn() && (uid == request.auth.uid || isAdmin() ||
+          get(/databases/$(database)/documents/lessonSessions/$(sid)).data.teacherUid == request.auth.uid);
+        allow create, update: if isSignedIn() && uid == request.auth.uid &&
+          exists(/databases/$(database)/documents/lessonSessions/$(sid));
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ── REFERRALS ───────────────────────────────────────────────────────────
+    // referrals/<new student's uid>. A new student creates it once, as "registered", pointing at the
+    // person who invited them (the nickname must really belong to referrerUid). Only admins can move
+    // it to "paid" / "rewarded". Readable by the inviter, the invited student and admins.
+    match /referrals/{id} {
+      allow read: if isSignedIn() && (isAdmin() ||
+        resource.data.referrerUid == request.auth.uid ||
+        resource.data.referredUid == request.auth.uid);
+      allow create: if isSignedIn() &&
+        id == request.auth.uid &&
+        request.resource.data.referredUid == request.auth.uid &&
+        request.resource.data.status == 'registered' &&
+        request.resource.data.referrerUid != request.auth.uid &&
+        request.resource.data.keys().hasOnly(['referrerUid', 'referrerNickname', 'referredUid', 'referredNickname', 'referredName', 'status', 'createdAt']) &&
+        get(/databases/$(database)/documents/nicknames/$(request.resource.data.referrerNickname)).data.uid == request.resource.data.referrerUid;
+      allow update, delete: if isAdmin();
+    }
+
+    // IELTS mock tests (Admin panel -> Mock-тесты). Students read published tests only; admins write.
+    match /mockTests/{id} {
+      allow read: if resource.data.published == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // What a student got on a mock test. A student can only add a result under their own uid
+    // (and read their own); admins and teachers read everything; only admins can edit or delete.
+    match /mockResults/{id} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'name', 'testId', 'title', 'skill', 'scope', 'parts', 'correct', 'total', 'band', 'bandEstimated', 'secs', 'ts', 'fullId', 'fullTitle']) &&
+        request.resource.data.skill in ['listening', 'reading'] &&
+        request.resource.data.scope in ['full', 'part'] &&
+        request.resource.data.name is string && request.resource.data.name.size() <= 80 &&
+        request.resource.data.title is string && request.resource.data.title.size() <= 120 &&
+        request.resource.data.correct is int && request.resource.data.total is int &&
+        request.resource.data.correct >= 0 && request.resource.data.correct <= request.resource.data.total &&
+        request.resource.data.total <= 40 &&
+        request.resource.data.parts is list && request.resource.data.parts.size() <= 4;
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin() || isTeacher());
+      allow update, delete: if isAdmin();
+    }
+
+    // Writing work written on the site. A student adds their own work (always as 'new') and reads their own;
+    // teachers and admins read all and add the evaluation (only the feedback fields can change); only admins delete.
+    match /mockWritings/{id} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'name', 'testId', 'testTitle', 'taskIdx', 'taskTitle', 'taskType', 'prompt', 'imageUrl', 'text', 'words', 'secs', 'ts', 'status', 'fullId', 'fullTitle']) &&
+        request.resource.data.status == 'new' &&
+        request.resource.data.taskType in ['task1', 'task2'] &&
+        request.resource.data.text is string && request.resource.data.text.size() <= 9500 &&
+        request.resource.data.prompt is string && request.resource.data.prompt.size() <= 3100 &&
+        request.resource.data.name is string && request.resource.data.name.size() <= 80;
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin() || isTeacher());
+      allow update: if (isAdmin() || isTeacher()) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback', 'status', 'checkedBy', 'checkedAt']);
+      allow delete: if isAdmin();
+    }
+
+    // Admin allowlist: existing admins can promote/demote other admins
+    // from the admin panel. The very first admin still has to be added
+    // by hand in the Firebase console (see FIREBASE_SETUP.md, step 6) —
+    // there has to be one admin before any admin-granted permission works.
+    // Admins are secret: a person can read only their own record; admins can read all. Only an admin writes.
+    match /admins/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow write: if isAdmin();
+    }
+
+    // ── PRESENCE (online / in a lesson). Heartbeat document, one per person.
+    match /presence/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Promo codes (Admin panel -> «Промокоды»): % discount or fully-free, with an optional expiry date.
+    // Public read so the pricing block and the payment page can check a code; only an admin can write.
+    match /promoCodes/{code} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
