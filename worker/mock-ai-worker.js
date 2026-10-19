@@ -23,7 +23,7 @@ const MAX_BUILD = 60000;
 
 export default {
     async fetch(request, env) {
-        const allowed = (env.ALLOWED_ORIGIN || 'https://thestarth.com').split(',').map((s) => s.trim());
+        const allowed = (env.ALLOWED_ORIGIN || 'https://thestarth.com').split(',').map((s) => s.trim().replace(/[./]+$/, '')).filter(Boolean);   // a stray dot or slash at the end is ignored
         const origin = request.headers.get('Origin') || '';
         const okOrigin = allowed.indexOf(origin) !== -1 || allowed.some((a) => a.replace('://', '://www.') === origin);
         const cors = {
@@ -133,7 +133,7 @@ How studying works: 1) free trial lesson + level test, 2) the teacher builds a p
 Missed a lesson? Lessons are recorded and available in the personal cabinet; questions can be asked in the chat.
 Teachers have their own IELTS 8.0+ / verified certificates. Telegram chat with the teacher between lessons, answer within a day.
 Personal cabinet (dashboard): student ID, progress charts, homework grades, lesson schedule, recordings, messenger.
-Certificate: given after finishing all course modules and passing the final mock test; every certificate has a number / QR code that can be verified on the site.
+Certificate: given after finishing all course modules and passing the final mock test; every certificate has a unique number that can be checked on the home page (section «Сертификаты»). Do not claim official recognition by universities or employers.
 Free tools on the site: IELTS level test (level-test.html), SAT Math level test (math-test.html), Mock Exam (mock-exam.html).
 Discounts: referral program — invite a friend: the friend gets 10% off the first month, you get 20% off your next month (referral link in the personal cabinet). Promo codes can be entered in the "Promo code" box on the home page.
 Payment: card payments are not taken on the site. The student leaves a payment request (payment.html) and a curator sends a Payme / Click link or bank details within a working day. We never ask for card numbers or CVV.

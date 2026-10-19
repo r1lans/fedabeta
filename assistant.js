@@ -14,7 +14,8 @@
             ph: 'Напишите вопрос…', send: 'Отправить', mic: 'Сказать голосом', micStop: 'Остановить запись', listen: 'Слушаю…',
             voiceOn: 'Читать ответы вслух: вкл.', voiceOff: 'Читать ответы вслух: выкл.', close: 'Закрыть', clear: 'Начать заново',
             typing: 'Печатает…', err: 'Не получилось ответить. Попробуйте ещё раз или напишите нам в Telegram: t.me/TheStarthChannel',
-            limit: 'Слишком много вопросов подряд. Подождите несколько минут или напишите нам в Telegram: t.me/TheStarthChannel',
+            limit: 'Сейчас помощник не может ответить: лимит вопросов на сегодня закончился. Если у вас есть вопросы — позвоните нам: +998 91 867 97 77, или задайте свой вопрос здесь, и куратор ответит вам.',
+            fName: 'Ваше имя', fPhone: 'Телефон', fMsg: 'Ваш вопрос', fSend: 'Отправить вопрос', fThanks: 'Спасибо! Вопрос отправлен — куратор свяжется с вами в течение рабочего дня.', fNeed: 'Укажите имя и телефон.',
             noMic: 'Ваш браузер не поддерживает голосовой ввод. Попробуйте Chrome или напишите текстом.', micDenied: 'Нет доступа к микрофону. Разрешите его в настройках браузера.',
             book: 'Записаться на бесплатный урок', tg: 'Написать в Telegram',
             q: ['Сколько стоит обучение?', 'Как проходят уроки?', 'Как записаться на пробный урок?', 'Какие есть учителя?'] },
@@ -23,7 +24,8 @@
             ph: 'Savolingizni yozing…', send: 'Yuborish', mic: 'Ovoz bilan aytish', micStop: 'Yozishni to\'xtatish', listen: 'Eshityapman…',
             voiceOn: 'Javoblarni ovoz bilan o\'qish: yoqilgan', voiceOff: 'Javoblarni ovoz bilan o\'qish: o\'chirilgan', close: 'Yopish', clear: 'Qaytadan boshlash',
             typing: 'Yozmoqda…', err: 'Javob berib bo\'lmadi. Qayta urinib ko\'ring yoki Telegram orqali yozing: t.me/TheStarthChannel',
-            limit: 'Juda ko\'p savol ketma-ket. Bir necha daqiqa kuting yoki Telegram orqali yozing: t.me/TheStarthChannel',
+            limit: 'Hozir yordamchi javob bera olmaydi: bugungi savollar limiti tugadi. Savollaringiz bo\'lsa — bizga qo\'ng\'iroq qiling: +998 91 867 97 77, yoki savolingizni shu yerda qoldiring, kurator sizga javob beradi.',
+            fName: 'Ismingiz', fPhone: 'Telefon', fMsg: 'Savolingiz', fSend: 'Savolni yuborish', fThanks: 'Rahmat! Savol yuborildi — kurator ish kuni davomida siz bilan bog\'lanadi.', fNeed: 'Ism va telefonni kiriting.',
             noMic: 'Brauzeringiz ovozli kiritishni qo\'llab-quvvatlamaydi. Chrome\'ni sinab ko\'ring yoki matn bilan yozing.', micDenied: 'Mikrofonga ruxsat yo\'q. Uni brauzer sozlamalarida yoqing.',
             book: 'Bepul darsga yozilish', tg: 'Telegram\'da yozish',
             q: ['O\'qish qancha turadi?', 'Darslar qanday o\'tadi?', 'Sinov darsiga qanday yozilaman?', 'Qanday o\'qituvchilar bor?'] },
@@ -32,7 +34,8 @@
             ph: 'Type your question…', send: 'Send', mic: 'Speak', micStop: 'Stop recording', listen: 'Listening…',
             voiceOn: 'Read answers aloud: on', voiceOff: 'Read answers aloud: off', close: 'Close', clear: 'Start over',
             typing: 'Typing…', err: 'Couldn\'t answer. Please try again or message us on Telegram: t.me/TheStarthChannel',
-            limit: 'Too many questions in a row. Please wait a few minutes or message us on Telegram: t.me/TheStarthChannel',
+            limit: 'The assistant can\'t answer right now: today\'s question limit is used up. If you have questions, call us: +998 91 867 97 77, or leave your question here and a curator will get back to you.',
+            fName: 'Your name', fPhone: 'Phone', fMsg: 'Your question', fSend: 'Send question', fThanks: 'Thank you! Your question has been sent — a curator will contact you within a working day.', fNeed: 'Please enter your name and phone.',
             noMic: 'Your browser doesn\'t support voice input. Try Chrome or type your question.', micDenied: 'No access to the microphone. Allow it in your browser settings.',
             book: 'Book a free lesson', tg: 'Message on Telegram',
             q: ['How much does it cost?', 'How do lessons work?', 'How do I book a trial lesson?', 'Who are the teachers?'] },
@@ -60,15 +63,19 @@
     }
 
     const CSS = `
-.sa-fab{position:fixed;right:18px;bottom:18px;z-index:2500;width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;background:var(--accent,#8f5a0c);color:var(--on-accent,#fff);box-shadow:0 8px 24px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;transition:transform .2s ease,bottom .4s ease}
-.sa-fab:hover{transform:scale(1.06)}.sa-fab svg{width:28px;height:28px}
+.sa-fab{position:fixed;right:18px;bottom:18px;z-index:2500;width:60px;height:60px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#f7cf5a,#e6a91e 70%);color:#1b1b1f;box-shadow:0 8px 24px rgba(0,0,0,.28),0 0 0 4px rgba(230,169,30,.18);display:flex;align-items:center;justify-content:center;transition:transform .2s ease,bottom .4s ease}
+.sa-fab:hover{transform:scale(1.06)}.sa-fab svg{width:27px;height:27px}
+.sa-form2{align-self:stretch;display:flex;flex-direction:column;gap:7px;background:var(--paper,#fff);border:1px solid var(--rule,#e5e0d5);border-radius:14px;padding:10px}
+.sa-form2 input,.sa-form2 textarea{border:1px solid var(--rule,#e5e0d5);border-radius:10px;padding:8px 10px;font:inherit;font-size:.88rem;background:var(--paper,#fff);color:var(--ink,#1a1a1a);resize:vertical}
+.sa-form2 button{border:0;border-radius:10px;padding:9px;background:var(--accent,#8f5a0c);color:var(--on-accent,#fff);font:inherit;font-weight:600;font-size:.88rem;cursor:pointer}
+.sa-form2 .sa-fmsg{font-size:.8rem;color:#8a1f11}
 .sa-fab .sa-dot{position:absolute;top:6px;right:6px;width:12px;height:12px;border-radius:50%;background:#2ecc71;border:2px solid var(--paper,#fff)}
 body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
 .sa-fab.sa-lift{bottom:96px}
 .sa-panel{position:fixed;right:18px;bottom:88px;z-index:2501;width:370px;max-width:calc(100vw - 24px);height:560px;max-height:calc(100vh - 110px);display:none;flex-direction:column;background:var(--paper,#fff);color:var(--ink,#1a1a1a);border:1px solid var(--rule,#e5e0d5);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.28);overflow:hidden;font-family:inherit}
 .sa-panel.open{display:flex}
 .sa-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 14px;background:var(--accent,#8f5a0c);color:var(--on-accent,#fff)}
-.sa-head .sa-av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.sa-head .sa-av{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f7cf5a,#e6a91e 70%);color:#1b1b1f;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
 .sa-head .sa-av svg{width:20px;height:20px}
 .sa-head .sa-t{flex:1;min-width:0}.sa-head strong{display:block;font-size:.98rem}.sa-head small{display:block;font-size:.74rem;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sa-hb{background:transparent;border:0;color:inherit;width:34px;height:34px;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
@@ -96,7 +103,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
 @media (max-width:640px){.sa-panel{right:0;left:0;bottom:0;width:100%;max-width:100%;height:100%;max-height:100%;border-radius:0}.sa-fab{right:14px;bottom:14px;width:54px;height:54px}}
 @media (prefers-reduced-motion:reduce){.sa-mic.rec{animation:none}}`;
     const I = {
-        chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg>',
+        chat: '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M5 3.5h14A2.5 2.5 0 0 1 21.5 6v9a2.5 2.5 0 0 1-2.5 2.5H9.2L5 21v-3.5A2.5 2.5 0 0 1 2.5 15V6A2.5 2.5 0 0 1 5 3.5Z"/><path d="M7 8.3h10M7 11.3h10M7 14.3h6" stroke="#f2bf3f" stroke-width="1.7" stroke-linecap="round"/></svg>',
         x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>',
         send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M13 6l6 6-6 6"/></svg>',
         mic: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
@@ -193,12 +200,35 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
             });
             clearTimeout(timer);
             const j = await r.json().catch(() => ({}));
-            if (r.status === 429) errKey = 'limit'; else if (!r.ok || !j.text) errKey = 'err'; else answer = String(j.text);
+            if (r.status === 429 || (r.status === 502 && j.error === 'ai')) errKey = 'limit'; else if (!r.ok || !j.text) errKey = 'err'; else answer = String(j.text);
         } catch (e) { errKey = 'err'; }
         typing.remove();
         if (answer) { history.push({ role: 'assistant', content: answer }); store.set('saHistory', history); render(); speak(answer); }
+        else if (errKey === 'limit') { history.pop(); store.set('saHistory', history); render(); bubble('sa-bot', fmt(T().limit)); askForm(text); }
         else { history.pop(); store.set('saHistory', history); render(); bubble('sa-err', fmt(T()[errKey])); list.scrollTop = list.scrollHeight; input.value = text; grow(); }
         busy = false; sendBtn.disabled = false;
+    }
+
+    // When the assistant can't answer (limit used up): a small form right in the chat — the question goes to
+    // the Google Sheet tab "Contacts", exactly like the "Остались вопросы?" form on the home page.
+    function askForm(question) {
+        const t = T(), f = document.createElement('form'); f.className = 'sa-form2';
+        f.innerHTML = '<input name="n" maxlength="80" autocomplete="name" placeholder="' + esc(t.fName) + '">' +
+            '<input name="p" type="tel" data-nophone maxlength="25" autocomplete="tel" placeholder="' + esc(t.fPhone) + ': +998 90 123 45 67">' +
+            '<textarea name="m" rows="2" maxlength="600" placeholder="' + esc(t.fMsg) + '"></textarea>' +
+            '<div class="sa-fmsg" hidden></div><button type="submit">' + esc(t.fSend) + '</button>';
+        f.elements.m.value = question || '';
+        f.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = f.elements.n.value.trim(), phone = f.elements.p.value.trim(), message = f.elements.m.value.trim();
+            const msg = f.querySelector('.sa-fmsg');
+            if (!name || phone.replace(/\D/g, '').length < 7) { msg.textContent = T().fNeed; msg.hidden = false; return; }
+            if (typeof window.logToSheet === 'function') window.logToSheet('log_contact', { name, phone, message: '[ИИ-помощник] ' + message });
+            f.replaceWith(Object.assign(document.createElement('div'), { className: 'sa-m sa-bot', innerHTML: fmt(T().fThanks) }));
+            input.value = ''; grow();
+        });
+        list.appendChild(f); list.scrollTop = list.scrollHeight;
+        setTimeout(() => f.elements.n.focus(), 50);
     }
 
     // ── voice input ──

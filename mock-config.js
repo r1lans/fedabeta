@@ -3,4 +3,4 @@
  * "Скопировать запрос для ИИ" / "Вставить JSON" instead of the "Составить с помощью ИИ" button.
  * Example: window.MOCK_AI_URL = 'https://starth-mock-ai.YOURNAME.workers.dev';
  */
-window.MOCK_AI_URL = window.MOCK_AI_URL || '';
+window.MOCK_AI_URL = window.MOCK_AI_URL || 'https://starth-ai.ralmi999777.workers.dev';
