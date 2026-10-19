@@ -111,7 +111,9 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
 @keyframes saPulse{0%{box-shadow:0 0 0 0 rgba(231,76,60,.5)}70%{box-shadow:0 0 0 10px rgba(231,76,60,0)}100%{box-shadow:0 0 0 0 rgba(231,76,60,0)}}
 .sa-call-ov{position:absolute;inset:0;z-index:5;display:none;flex-direction:column;align-items:center;justify-content:space-between;padding:22px 18px 26px;color:#fff;background:radial-gradient(circle at 50% 35%,#2a2620 0%,#121114 70%)}
 .sa-call-ov.on{display:flex}
-.sa-call-top{text-align:center}.sa-call-top strong{display:block;font-size:1rem}.sa-call-top small{opacity:.7;font-size:.78rem}
+.sa-call-top{text-align:center}.sa-clang{display:flex;gap:6px;justify-content:center;margin-top:10px}
+.sa-clang button{border:1px solid rgba(255,255,255,.3);background:transparent;color:#fff;border-radius:999px;padding:3px 11px;font:inherit;font-size:.75rem;cursor:pointer}
+.sa-clang button.on{background:#f0b429;border-color:#f0b429;color:#111;font-weight:700}.sa-call-top strong{display:block;font-size:1rem}.sa-call-top small{opacity:.7;font-size:.78rem}
 .sa-orb{width:170px;height:170px;border-radius:50%;border:0;cursor:pointer;background:radial-gradient(circle at 35% 30%,#ffe08a,#f0b429 45%,#b97a0e 100%);box-shadow:0 0 60px rgba(240,180,41,.35);transition:transform .25s ease;position:relative}
 .sa-orb:before{content:'';position:absolute;inset:-14px;border-radius:50%;border:2px solid rgba(240,180,41,.35);opacity:0}
 .sa-call-ov[data-s="listen"] .sa-orb{animation:saBreath 1.6s ease-in-out infinite}
@@ -156,7 +158,8 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
             '<div class="sa-panel" role="dialog" aria-modal="false" aria-labelledby="sa-title">' +
             '<div class="sa-head"><div class="sa-av">' + I.chat + '</div><div class="sa-t"><strong id="sa-title"></strong><small class="sa-sub"></small></div>' +
             '<button type="button" class="sa-hb sa-callbtn">' + I.phone + '</button><button type="button" class="sa-hb sa-spk">' + I.spk + '</button><button type="button" class="sa-hb sa-clear">' + I.redo + '</button><button type="button" class="sa-hb sa-close">' + I.x + '</button></div>' +
-            '<div class="sa-call-ov" data-s="idle" role="dialog" aria-live="polite"><div class="sa-call-top"><strong class="sa-ct"></strong><small class="sa-ctime">0:00</small></div>' +
+            '<div class="sa-call-ov" data-s="idle" role="dialog" aria-live="polite"><div class="sa-call-top"><strong class="sa-ct"></strong><small class="sa-ctime">0:00</small>' +
+            '<div class="sa-clang" role="group"><button type="button" data-l="ru">RU</button><button type="button" data-l="uz">UZ</button><button type="button" data-l="en">EN</button></div></div>' +
             '<button type="button" class="sa-orb"></button><div class="sa-call-st"></div><div class="sa-call-cap"></div>' +
             '<div class="sa-call-btns"><button type="button" class="sa-cb sa-cmute" aria-pressed="false">' + I.mic + '</button><button type="button" class="sa-cb end sa-cend">' + I.hang + '</button></div></div>' +
             '<div class="sa-list" aria-live="polite"></div>' +
@@ -182,6 +185,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         root.querySelector('.sa-cend').addEventListener('click', endCall);
         root.querySelector('.sa-cmute').addEventListener('click', toggleMute);
         root.querySelector('.sa-orb').addEventListener('click', orbTap);
+        root.querySelectorAll('.sa-clang button').forEach((b) => b.addEventListener('click', () => setCallLang(b.dataset.l)));
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.classList.contains('open')) toggle(false); });
         window.addEventListener('starth-lang-changed', () => { labels(); render(); });
         labels(); render();
@@ -250,7 +254,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
             const timer = setTimeout(() => { if (ctrl) ctrl.abort(); }, 45000);
             const r = await fetch(window.MOCK_AI_URL, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctrl ? ctrl.signal : undefined,
-                body: JSON.stringify({ mode: 'assistant', voice: !!voice, lang: lang(), page: location.pathname.split('/').pop() || 'index', messages: history.slice(-10) }),
+                body: JSON.stringify({ mode: 'assistant', voice: !!voice, lang: voice ? vlang() : lang(), page: location.pathname.split('/').pop() || 'index', messages: history.slice(-10) }),
             });
             clearTimeout(timer);
             const j = await r.json().catch(() => ({}));
@@ -309,11 +313,12 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
     // 2) Otherwise the browser's own voice: we pick the most natural one available ("Natural"/"Online"/"Google"/"Premium")
     //    and speak sentence by sentence (sounds smoother and avoids Chrome cutting long texts).
     const synth = window.speechSynthesis;
+    const vlang = () => (call.on && call.lang) || lang();
     let premium = store.get('saTTS', null);      // null = unknown, true / false after the first try
     const audio = typeof Audio !== 'undefined' ? new Audio() : null;
     let sayToken = 0;
     function scoreVoice(v, l) {
-        const code = SPEECH_LANG[l].toLowerCase(), vl = String(v.lang || '').toLowerCase().replace('_', '-'), n = String(v.name || '');
+        const code = (SPEECH_LANG[l] || (l + '-' + l)).toLowerCase(), vl = String(v.lang || '').toLowerCase().replace('_', '-'), n = String(v.name || '');
         if (!(vl === code || vl.startsWith(l))) return -1;
         let sc = vl === code ? 2 : 1;
         if (/natural/i.test(n)) sc += 6; if (/online/i.test(n)) sc += 4; if (/neural/i.test(n)) sc += 4;
@@ -321,23 +326,45 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         if (/compact|espeak/i.test(n)) sc -= 3; if (v.localService === false) sc += 1;
         return sc;
     }
-    function voiceFor(l) {
+    function exactVoice(l) {
         if (!synth) return null;
         let best = null, bs = -1;
         (synth.getVoices() || []).forEach((v) => { const sc = scoreVoice(v, l); if (sc > bs) { bs = sc; best = v; } });
         return bs >= 0 ? best : null;
     }
+    function voiceFor(l) { return exactVoice(l) || (l === 'uz' ? exactVoice('tr') : null); }
     function canSpeak() { return premium === true || !!(synth && voiceFor(lang())); }
     if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = () => { if (root) labels(); };
     const cleanSpeech = (text) => String(text).replace(/\*\*/g, '').replace(/https?:\/\/\S+/g, '').replace(/\b(?:t\.me|instagram\.com)\/\S+/g, '').replace(/[•#*_]/g, '').replace(/\s*\n+\s*[-–]?\s*/g, '. ').replace(/\s+/g, ' ').trim();
+    // How the voice should pronounce our words and numbers (otherwise "TheStarth" sounds like "тистарт", "IELTS" letter by letter,
+    // and "7.5" gets a pause in the middle).
+    const SAY = {
+        ru: [[/the\s?starth/gi, 'Зе Старз'], [/\bIELTS\b/g, 'айелтс'], [/\bSAT\b/g, 'сат'], [/\bMock\b/gi, 'мок'], [/\bSpeaking\b/g, 'спикинг'], [/\bWriting\b/g, 'райтинг'], [/\bReading\b/g, 'ридинг'], [/\bListening\b/g, 'лиснинг'],
+            [/(\d+)[.,]5\b/g, '$1 с половиной'], [/(\d+)[.,](\d)\b/g, '$1 и $2'], [/\$\s?(\d+)/g, '$1 долларов'], [/(\d+)\s?\$/g, '$1 долларов'], [/1-на-1/g, 'один на один'], [/\bTelegram\b/gi, 'телеграм'], [/\bPayme\b/gi, 'пэйми'], [/\bClick\b/g, 'клик']],
+        uz: [[/the\s?starth/gi, 'Ze Starz'], [/\bIELTS\b/g, 'ayelts'], [/\bSAT\b/g, 'sat'], [/(\d+)[.,]5\b/g, '$1 yarim'], [/(\d+)[.,](\d)\b/g, '$1 butun $2'], [/\$\s?(\d+)/g, '$1 dollar'], [/(\d+)\s?\$/g, '$1 dollar']],
+        en: [[/the\s?starth/gi, 'The Starz'], [/\$\s?(\d+)/g, '$1 dollars'], [/1-on-1/gi, 'one on one']],
+    };
+    function speechText(text) {
+        const l = vlang(); let t = cleanSpeech(text); (SAY[l] || []).forEach(([re, to]) => { t = t.replace(re, to); });
+        // No Uzbek voice on this device: a Turkish voice reads Uzbek Latin text almost right once the letters are mapped.
+        if (l === 'uz' && !exactVoice('uz') && exactVoice('tr')) t = t.replace(/[gG][ʻ'’`‘]/g, 'ğ').replace(/[oO][ʻ'’`‘]/g, 'o').replace(/sh/g, 'ş').replace(/Sh/g, 'Ş').replace(/ch/g, 'ç').replace(/Ch/g, 'Ç').replace(/j/g, 'c').replace(/J/g, 'C').replace(/x/g, 'h').replace(/X/g, 'H').replace(/q/g, 'k').replace(/Q/g, 'K');
+        return t;
+    }
+    // Split only at real sentence ends (punctuation followed by a space), and glue short sentences together: fewer pauses.
+    function chunks(t) {
+        const out = []; let cur = '';
+        t.split(/(?<=[.!?…])\s+/).forEach((sn) => { if ((cur + ' ' + sn).length > 220 && cur) { out.push(cur); cur = sn; } else cur = cur ? cur + ' ' + sn : sn; });
+        if (cur) out.push(cur);
+        return out;
+    }
     function speak(text) { if (voiceOn) say(text); }
     // say(text, done): speaks and calls done() when finished (or when stopped).
     async function say(text, done) {
         const my = ++sayToken, fin = () => { if (my === sayToken && done) done(); };
-        const clean = cleanSpeech(text); if (!clean) return fin();
+        const clean = speechText(text); if (!clean) return fin();
         if (premium !== false && audio) {
             try {
-                const r = await fetch(window.MOCK_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'tts', lang: lang(), text: clean.slice(0, 700) }) });
+                const r = await fetch(window.MOCK_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'tts', lang: vlang(), text: cleanSpeech(text).slice(0, 700) }) });
                 if (my !== sayToken) return;
                 if (r.ok && /audio/.test(r.headers.get('Content-Type') || '')) {
                     premium = true; store.set('saTTS', true);
@@ -350,17 +377,17 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
             if (my !== sayToken) return;
         }
         if (!synth) return fin();
-        const v = voiceFor(lang());
+        const v = voiceFor(vlang());
         if (!v) return fin();
         try { synth.cancel(); } catch (e) {}
-        const parts = (clean.match(/[^.!?…]+[.!?…]*/g) || [clean]).map((x) => x.trim()).filter(Boolean);
+        const parts = chunks(clean);
         let i = 0, guard = 0;
         const next = () => {
             clearTimeout(guard);
             if (my !== sayToken) return;
             if (i >= parts.length) return fin();
             const u = new SpeechSynthesisUtterance(parts[i++]);
-            u.voice = v; u.lang = v.lang || SPEECH_LANG[lang()]; u.rate = lang() === 'en' ? 1.02 : 1.05; u.pitch = 1;
+            u.voice = v; u.lang = v.lang || SPEECH_LANG[vlang()]; u.rate = 1; u.pitch = 1;
             u.onend = next; u.onerror = next;
             guard = setTimeout(next, 2500 + u.text.length * 110);   // some browsers forget to fire "end"
             synth.speak(u);
@@ -370,7 +397,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
     function stopSpeak() { sayToken++; try { if (synth) synth.cancel(); } catch (e) {} try { if (audio) { audio.pause(); audio.removeAttribute('src'); } } catch (e) {} }
 
     // ── voice call (like a phone call: listen → answer aloud → listen again) ──
-    const call = { on: false, muted: false, state: 'idle', silent: 0, rec: null, t0: 0, timer: 0 };
+    const call = { on: false, muted: false, state: 'idle', silent: 0, rec: null, t0: 0, timer: 0, lang: '' };
     const ov = () => root.querySelector('.sa-call-ov');
     function setState(st, cap) {
         call.state = st; const o = ov(); o.dataset.s = st;
@@ -384,13 +411,23 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         // unlock audio on phones (must happen inside the tap)
         try { if (audio) { audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA='; audio.play().catch(() => {}); } } catch (e) {}
         try { if (synth) { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; synth.speak(u); } } catch (e) {}
-        call.on = true; call.muted = false; call.silent = 0; call.t0 = Date.now();
+        call.on = true; call.muted = false; call.silent = 0; call.t0 = Date.now(); call.lang = lang(); markLang();
         ov().classList.add('on'); labels();
         const cm = root.querySelector('.sa-cmute'); cm.setAttribute('aria-pressed', 'false'); cm.innerHTML = I.mic;
         clearInterval(call.timer);
         call.timer = setInterval(() => { const s2 = Math.floor((Date.now() - call.t0) / 1000); root.querySelector('.sa-ctime').textContent = Math.floor(s2 / 60) + ':' + String(s2 % 60).padStart(2, '0'); }, 1000);
-        const hi = T().callHi;
+        const hi = L[call.lang].callHi;
         setState('speak', esc(hi));
+        say(hi, () => { if (call.on) listen(); });
+    }
+    function markLang() { root.querySelectorAll('.sa-clang button').forEach((b) => b.classList.toggle('on', b.dataset.l === call.lang)); }
+    // Change the language of the call: recognition, the AI's replies and the voice all switch.
+    function setCallLang(l) {
+        if (!call.on || !L[l] || l === call.lang) return;
+        call.lang = l; markLang();
+        try { if (call.rec) call.rec.abort(); } catch (e) {} call.rec = null;
+        stopSpeak();
+        const hi = L[l].callHi; setState('speak', esc(hi));
         say(hi, () => { if (call.on) listen(); });
     }
     function endCall() {
@@ -414,7 +451,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         if (call.muted) return setState('muted');
         try { if (call.rec) call.rec.abort(); } catch (e) {}
         const r = new SR(); call.rec = r;
-        r.lang = SPEECH_LANG[lang()]; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
+        r.lang = SPEECH_LANG[vlang()]; r.interimResults = true; r.continuous = false; r.maxAlternatives = 1;
         let fin = '', interim = '', denied = false;
         setState('listen');      // the last answer stays on screen until the person starts speaking
         r.onresult = (e) => {
