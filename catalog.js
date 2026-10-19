@@ -77,21 +77,21 @@
 
     // ---------------- pricing ----------------
     function plan(id) { return ((cat.plans && cat.plans.list) || []).find((p) => p.id === id); }
-    function currentMode() { const g = document.getElementById('btn-pricing-grp'); return g && g.classList.contains('active') ? 'grp' : 'ind'; }
+    function currentMode() { return window.starthPricingMode ? window.starthPricingMode() : 'grp5'; }
     function applyPricing() {
         const mode = currentMode(), P = cat.plans || {};
-        const desc = document.getElementById('pricing-toggle-desc'); const dtxt = pick(P, mode === 'ind' ? 'descInd' : 'descGrp'); if (desc && dtxt) desc.textContent = dtxt;
+        const desc = document.getElementById('pricing-toggle-desc'); const dtxt = pick(P, mode === 'ind' ? 'descInd' : mode === 'grp5' ? 'descGrp5' : 'descGrp'); if (desc && dtxt) desc.textContent = dtxt;
         ['trial', 'standard', 'intensive'].forEach((id) => {
             const p = plan(id); if (!p) return;
             const amount = document.getElementById('price-' + id); if (!amount) return;
-            amount.setAttribute('data-ind', p.priceInd); amount.setAttribute('data-grp', p.priceGrp);
-            const price = Number(mode === 'ind' ? p.priceInd : p.priceGrp);
+            amount.setAttribute('data-ind', p.priceInd); amount.setAttribute('data-grp', p.priceGrp); amount.setAttribute('data-grp5', p.priceGrp5 != null ? p.priceGrp5 : p.priceGrp);
+            const price = Number(mode === 'ind' ? p.priceInd : mode === 'grp5' ? (p.priceGrp5 != null ? p.priceGrp5 : p.priceGrp) : p.priceGrp);
             if (!window.currentActivePromo || id === 'trial') amount.textContent = (price === 0 && id === 'trial') ? T('pricing.free', 'Бесплатно') : String(price);
             const card = amount.closest('.card'); if (!card) return;
-            const h3 = card.querySelector('h3'); if (h3) { h3.removeAttribute('data-i18n'); h3.textContent = pick(p, 'title'); }
+            const h3 = card.querySelector('h3'); if (h3) { h3.removeAttribute('data-i18n'); h3.textContent = String(pick(p, 'title')).replace(/\(1 Месяц\)/, '(1 месяц)'); }
             const sub = id === 'trial' ? document.getElementById('trial-card-desc') : card.querySelector('h3 + p');
-            if (sub) { sub.removeAttribute('data-i18n'); sub.textContent = pick(p, mode === 'grp' ? 'subGrp' : 'sub') || pick(p, 'sub'); }
-            const ul = document.getElementById(id + '-card-features'); const feats = pickL(p, mode === 'grp' ? 'featGrp' : 'featInd');
+            if (sub) { sub.removeAttribute('data-i18n'); sub.textContent = (mode === 'grp5' && pick(p, 'subGrp5')) || pick(p, mode === 'ind' ? 'sub' : 'subGrp') || pick(p, 'sub'); }
+            const ul = document.getElementById(id + '-card-features'); const feats = pickL(p, mode === 'ind' ? 'featInd' : 'featGrp');
             if (ul && feats.length) ul.innerHTML = feats.map((f) => '<li>' + esc(f) + '</li>').join('');
             const badge = card.querySelector('.pulse-badge'); if (badge) { badge.removeAttribute('data-i18n'); badge.textContent = pick(p, 'badge'); badge.style.display = p.badge ? '' : 'none'; }
             card.style.borderColor = p.featured ? 'var(--accent)' : '';
@@ -110,7 +110,7 @@
         renderAll();
         if (typeof FIREBASE_READY === 'undefined' || !FIREBASE_READY || typeof db === 'undefined') return;
         db.collection('settings').doc('catalog').get().then((d) => {
-            if (d.exists) { const x = d.data(); if (x.courses && x.courses.length) cat.courses = x.courses; if (x.plans && x.plans.list && x.plans.list.length) cat.plans = x.plans; renderAll(); }
+            if (d.exists) { const x = d.data(); if (x.courses && x.courses.length) cat.courses = x.courses; if (x.plans && x.plans.list && x.plans.list.length) cat.plans = window.starthCatalogFill ? window.starthCatalogFill(x.plans) : x.plans; renderAll(); }
         }).catch(() => {});
     }
     window.addEventListener('starth-lang-changed', () => setTimeout(renderAll, 0));

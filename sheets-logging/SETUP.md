@@ -34,6 +34,13 @@ Firebase — включая те формы, которые раньше ник�
 | date | name | phone | course |
 |---|---|---|---|
 
+**TeacherRequests** — кнопка «Записаться» на странице конкретного
+учителя (teacher.html). В колонке teacher — к какому учителю хотят.
+Новые учителя из админки появляются тут сами (по имени). Вкладка
+создаётся автоматически при первой заявке.
+| date | teacher | name | phone | specialization | language | teacher_id | status |
+|---|---|---|---|---|---|---|---|
+
 **CareerApplications** — анкета кандидата на странице «Вакансии»
 (careers.html)
 | date | name | phone | email | vacancy | score | message |

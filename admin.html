@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="theme.js"></script>
+    <script src="theme.js?v=47"></script>
     <title>Админ-панель — TheStarth</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=42">
+    <link rel="stylesheet" href="styles.css?v=47">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         body { background: var(--paper-alt); }
@@ -296,7 +296,10 @@
                 <div class="admin-form" id="teacher-form">
                     <h3 id="teacher-form-title" style="margin-bottom: 0.5rem;">Добавить учителя</h3>
                     <label>Имя и фамилия *</label>
-                    <input type="text" id="tch-name" placeholder="Например: Каримов Алишер" maxlength="80">
+                    <input type="text" id="tch-name" placeholder="Например: Каримов Алишер" maxlength="80" oninput="tchNameHint()">
+                    <label>Имя латиницей — для узбекской и английской версий (необязательно)</label>
+                    <input type="text" id="tch-name-lat" placeholder="Например: Karimov Alisher" maxlength="80">
+                    <p style="color: var(--ink-soft); font-size: 0.8rem; margin-top: 0.4rem;">Если оставить пустым, имя на кириллице само напишется латиницей (<span id="tch-name-auto">—</span>). Заполните, если хотите точное написание.</p>
                     <label>Специализация *</label>
                     <input type="text" id="tch-role" placeholder="Например: IELTS Writing Expert" maxlength="100">
                     <label>Балл на значке (необязательно)</label>
@@ -309,7 +312,7 @@
                         <option value="uz">O'zbekcha</option>
                         <option value="en">English</option>
                     </select>
-                    <p style="color: var(--ink-soft); font-size: 0.8rem; margin-top: 0.4rem;">Сайт автоматически переведёт специализацию, теги, описание и названия сертификатов на два других языка при сохранении. Имя не переводится.</p>
+                    <p style="color: var(--ink-soft); font-size: 0.8rem; margin-top: 0.4rem;">Сайт автоматически переведёт специализацию, теги, описание и названия сертификатов на два других языка при сохранении. Имя не переводится — на UZ/EN оно показывается латиницей.</p>
                     <label>Коротко о преподавателе * (на карточке)</label>
                     <textarea id="tch-bio" placeholder="Чем занимается, в чём сильнее всего, результаты учеников..." maxlength="600"></textarea>
                     <label>Подробное описание (необязательно — на странице профиля)</label>
@@ -514,13 +517,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="video-embed.js"></script>
-    <script src="csv-export.js"></script>
-    <script src="mock-config.js"></script>
-    <script src="mock-engine.js"></script>
-    <script src="content-i18n.js"></script>
-    <script src="teachers-data.js"></script>
+    <script src="firebase-config.js?v=47"></script>
+    <script src="video-embed.js?v=47"></script>
+    <script src="csv-export.js?v=47"></script>
+    <script src="mock-config.js?v=47"></script>
+    <script src="mock-engine.js?v=47"></script>
+    <script src="content-i18n.js?v=47"></script>
+    <script src="teachers-data.js?v=47"></script>
     <script>
         function escapeHtml(str) {
             if (str === undefined || str === null) return '';
@@ -1108,7 +1111,7 @@
             const wrap = document.getElementById('teacher-items');
             if (!list.length) { wrap.innerHTML = '<div class="empty-state">Учителей пока нет — добавьте первого выше.</div>'; return; }
             wrap.innerHTML = '';
-            list.forEach(t => {
+            list.forEach((t, idx) => {
                 const card = document.createElement('div');
                 card.className = 'admin-card';
                 const photo = /^(data:image\/|https?:\/\/|images\/)/i.test(t.photo || '') ? `<img class="admin-thumb" src="${escapeHtml(t.photo)}" alt="" onerror="this.style.visibility='hidden'">` : '<div class="admin-thumb"></div>';
@@ -1117,10 +1120,12 @@
                     <div class="admin-card-row">
                         ${photo}
                         <div>
-                            <h3>${escapeHtml(t.name)} ${t.badge ? `<span class="chip">${escapeHtml(t.badge)}</span>` : ''}${t.i18n ? '<span class="chip" title="Есть переводы на другие языки">UZ · EN</span>' : ''}</h3>
+                            <h3>${teachersManaged ? `<span class="chip" title="Место на сайте">№${idx + 1}</span> ` : ''}${escapeHtml(t.name)} ${t.badge ? `<span class="chip">${escapeHtml(t.badge)}</span>` : ''}${t.i18n ? '<span class="chip" title="Есть переводы на другие языки">UZ · EN</span>' : ''}</h3>
                             <div class="meta">${escapeHtml(t.role)}</div>
                             <p>${escapeHtml(t.bio)}</p>
                             ${teachersManaged ? `<div class="admin-card-actions">
+                                <button class="btn-small" onclick="moveTeacher('${id}', -1)" ${idx === 0 ? 'disabled style="opacity:.4;cursor:default"' : ''} title="Показывать раньше">↑ Выше</button>
+                                <button class="btn-small" onclick="moveTeacher('${id}', 1)" ${idx === list.length - 1 ? 'disabled style="opacity:.4;cursor:default"' : ''} title="Показывать позже">↓ Ниже</button>
                                 <button class="btn-small primary" onclick="editTeacher('${id}')">Изменить</button>
                                 <button class="btn-small danger" onclick="deleteTeacher('${id}')">Удалить</button>
                             </div>` : ''}
@@ -1179,10 +1184,11 @@
 
         function resetTeacherForm() {
             editingTeacherId = null;
-            ['tch-name', 'tch-role', 'tch-badge', 'tch-tags', 'tch-bio', 'tch-bio-full', 'tch-video'].forEach(id => { document.getElementById(id).value = ''; });
+            ['tch-name', 'tch-name-lat', 'tch-role', 'tch-badge', 'tch-tags', 'tch-bio', 'tch-bio-full', 'tch-video'].forEach(id => { document.getElementById(id).value = ''; });
             document.querySelectorAll('.tch-cert-label, .tch-cert-href').forEach(i => { i.value = ''; });
             removeTeacherPhoto();
             document.getElementById('tch-lang').value = 'ru';
+            tchNameHint();
             document.getElementById('teacher-form-title').textContent = 'Добавить учителя';
             document.getElementById('tch-save-btn').textContent = 'Добавить учителя';
             document.getElementById('tch-cancel-btn').style.display = 'none';
@@ -1194,6 +1200,8 @@
             editingTeacherId = id;
             document.getElementById('tch-lang').value = t.srcLang || 'ru';
             document.getElementById('tch-name').value = t.name || '';
+            document.getElementById('tch-name-lat').value = (t.i18n && ((t.i18n.uz && t.i18n.uz.name) || (t.i18n.en && t.i18n.en.name))) || '';
+            tchNameHint();
             document.getElementById('tch-role').value = t.role || '';
             document.getElementById('tch-badge').value = t.badge || '';
             document.getElementById('tch-tags').value = (t.tags || []).join(', ');
@@ -1246,6 +1254,11 @@
                 const i18n = {};
                 StarthI18n.LANGS.filter(l => l !== srcLang).forEach(l => { i18n[l] = Object.assign({}, prev[l] || {}, tr[l] || {}); });
                 const warn = tr._failed ? ' Часть текстов не удалось перевести автоматически (лимит сервиса перевода) — на сайте они покажутся на исходном языке; позже нажмите «Обновить переводы».' : '';
+                // Latin spelling of the name for the UZ / EN site (empty = automatic transliteration).
+                const nameLat = document.getElementById('tch-name-lat').value.trim();
+                StarthI18n.LANGS.filter(l => l !== srcLang && l !== 'ru').forEach(l => {
+                    if (nameLat) i18n[l].name = nameLat; else delete i18n[l].name;
+                });
                 const data = { name, role, badge, tags, bio, bioFull, video, photo: teacherPhoto || '', certs, initials: makeInitials(name), srcLang, i18n, ...deriveScore(badge) };
                 if (editingTeacherId) {
                     await db.collection('teachers').doc(editingTeacherId).update(data);
@@ -1258,6 +1271,26 @@
                 resetTeacherForm();
                 loadTeachers();
             } catch (err) { setStatus('tch-status', 'Ошибка: ' + err.message, false); }
+        }
+
+        function tchNameHint() {
+            const el = document.getElementById('tch-name-auto'); if (!el) return;
+            const n = document.getElementById('tch-name').value.trim();
+            el.textContent = n ? StarthI18n.translit(n, 'uz') : '—';
+        }
+
+        // Order of teachers on the site ("Команда экспертов"): move a card up / down.
+        async function moveTeacher(id, dir) {
+            const list = Object.values(teachersCache).sort((a, b) => (a.order || 999) - (b.order || 999) || String(a.createdAt || '').localeCompare(String(b.createdAt || '')));
+            const i = list.findIndex(t => t.id === id), j = i + dir;
+            if (i < 0 || j < 0 || j >= list.length) return;
+            [list[i], list[j]] = [list[j], list[i]];
+            try {
+                const batch = db.batch();
+                list.forEach((t, k) => { if (t.order !== k + 1) batch.update(db.collection('teachers').doc(t.id), { order: k + 1 }); });
+                await batch.commit();
+                await loadTeachers();
+            } catch (err) { alert('Ошибка: ' + err.message); }
         }
 
         function deleteTeacher(id) {
@@ -1731,10 +1764,10 @@
             } catch (err) { statusEl.textContent = 'Ошибка: ' + err.message; statusEl.className = 'status-msg error'; }
         }
     </script>
-    <script src="catalog-defaults.js"></script>
-    <script src="presence.js"></script>
-    <script src="admin-catalog.js"></script>
-    <script src="admin-promo.js"></script>
-    <script src="admin-mock.js"></script>
+    <script src="catalog-defaults.js?v=47"></script>
+    <script src="presence.js?v=47"></script>
+    <script src="admin-catalog.js?v=47"></script>
+    <script src="admin-promo.js?v=47"></script>
+    <script src="admin-mock.js?v=47"></script>
 </body>
 </html>

@@ -905,81 +905,48 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Pricing Format Switcher (texts come from translations.js)
+    // Three formats: 'grp5' = groups up to 5 (first, default), 'grp' = mini-groups up to 3, 'ind' = 1-on-1.
+    const PRICING_MODES = ['grp5', 'grp', 'ind'];
+    window.starthPricingMode = function () {
+        for (const m of PRICING_MODES) { const b = document.getElementById('btn-pricing-' + m); if (b && b.classList.contains('active')) return m; }
+        return 'grp5';
+    };
     window.addEventListener('starth-lang-changed', () => {
-        const g = document.getElementById('btn-pricing-grp');
-        window.setPricingMode(g && g.classList.contains('active') ? 'grp' : 'ind');
+        if (document.getElementById('pricing-toggle-desc')) window.setPricingMode(window.starthPricingMode());
     });
     window.setPricingMode = function(mode) {
-        const btnInd = document.getElementById('btn-pricing-ind');
-        const btnGrp = document.getElementById('btn-pricing-grp');
         const desc = document.getElementById('pricing-toggle-desc');
-        
-        if (!btnInd || !btnGrp || !desc) return;
-        
-        if (mode === 'ind') {
-            btnInd.classList.add('active');
-            btnGrp.classList.remove('active');
-            desc.textContent = t('pricing.desc_ind');
-        } else {
-            btnGrp.classList.add('active');
-            btnInd.classList.remove('active');
-            desc.textContent = t('pricing.desc_grp');
-        }
-        
+        if (!desc || !document.getElementById('btn-pricing-' + mode)) return;
+        PRICING_MODES.forEach((m) => { const b = document.getElementById('btn-pricing-' + m); if (b) b.classList.toggle('active', m === mode); });
+        // groups of 5 share the group texts (features), with their own description
+        const tx = mode === 'ind' ? 'ind' : 'grp';
+        desc.textContent = t('pricing.desc_' + mode);
+
         // Update price tags
         const priceTrial = document.getElementById('price-trial');
         const priceStandard = document.getElementById('price-standard');
         const priceIntensive = document.getElementById('price-intensive');
-        
+        const val = (el) => el.getAttribute('data-' + mode) != null ? el.getAttribute('data-' + mode) : el.getAttribute('data-grp');
+
         if (priceTrial) {
-            priceTrial.textContent = parseFloat(priceTrial.getAttribute('data-' + mode)) === 0 ? t('pricing.free') : priceTrial.getAttribute('data-' + mode);
+            priceTrial.textContent = parseFloat(val(priceTrial)) === 0 ? t('pricing.free') : val(priceTrial);
         }
-        if (priceStandard) {
-            priceStandard.textContent = priceStandard.getAttribute('data-' + mode);
-        }
-        if (priceIntensive) {
-            priceIntensive.textContent = priceIntensive.getAttribute('data-' + mode);
-        }
-        
+        if (priceStandard) priceStandard.textContent = val(priceStandard);
+        if (priceIntensive) priceIntensive.textContent = val(priceIntensive);
+
         // Dynamic card context updating
         const trialDesc = document.getElementById('trial-card-desc');
         if (trialDesc) {
-            trialDesc.textContent = t(mode === 'ind' ? 'pricing.trial_desc_ind' : 'pricing.trial_desc_grp');
+            trialDesc.textContent = t(mode === 'grp5' ? 'pricing.trial_desc_grp5' : 'pricing.trial_desc_' + tx);
         }
-        
-        const trialFeatures = document.getElementById('trial-card-features');
-        if (trialFeatures) {
-            trialFeatures.innerHTML = mode === 'ind' 
-                ? `<li>${t('pricing.trial_f_ind1')}</li>
-                   <li>${t('pricing.trial_f_ind2')}</li>
-                   <li>${t('pricing.trial_f_ind3')}</li>`
-                : `<li>${t('pricing.trial_f_grp1')}</li>
-                   <li>${t('pricing.trial_f_grp2')}</li>
-                   <li>${t('pricing.trial_f_grp3')}</li>`;
-        }
-        
-        const standardFeatures = document.getElementById('standard-card-features');
-        if (standardFeatures) {
-            standardFeatures.innerHTML = mode === 'ind'
-                ? `<li>${t('pricing.std_f_ind1')}</li>
-                   <li>${t('pricing.std_f_ind2')}</li>
-                   <li>${t('pricing.std_f_ind3')}</li>`
-                : `<li>${t('pricing.std_f_grp1')}</li>
-                   <li>${t('pricing.std_f_grp2')}</li>
-                   <li>${t('pricing.std_f_grp3')}</li>`;
-        }
-        
-        const intensiveFeatures = document.getElementById('intensive-card-features');
-        if (intensiveFeatures) {
-            intensiveFeatures.innerHTML = mode === 'ind'
-                ? `<li>${t('pricing.int_f_ind1')}</li>
-                   <li>${t('pricing.int_f_ind2')}</li>
-                   <li>${t('pricing.int_f_ind3')}</li>`
-                : `<li>${t('pricing.int_f_grp1')}</li>
-                   <li>${t('pricing.int_f_grp2')}</li>
-                   <li>${t('pricing.int_f_grp3')}</li>`;
-        }
-        
+        const fill = (id, pre) => {
+            const ul = document.getElementById(id); if (!ul) return;
+            ul.innerHTML = [1, 2, 3].map((i) => `<li>${t(pre + tx + i)}</li>`).join('');
+        };
+        fill('trial-card-features', 'pricing.trial_f_');
+        fill('standard-card-features', 'pricing.std_f_');
+        fill('intensive-card-features', 'pricing.int_f_');
+
         // Re-calculate active coupon discounts dynamically
         if (window.currentActivePromo) {
             window.applyPromoCode(true);
@@ -987,8 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     (function () {
-        const g = document.getElementById('btn-pricing-grp');
-        if (document.getElementById('pricing-toggle-desc')) window.setPricingMode(g && g.classList.contains('active') ? 'grp' : 'ind');
+        if (document.getElementById('pricing-toggle-desc')) window.setPricingMode(window.starthPricingMode());
     })();
 
     // Logout is defined in the Firebase auth block above (window.starthLogout)
@@ -1093,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const priceStandard = document.getElementById('price-standard');
             const priceIntensive = document.getElementById('price-intensive');
             
-            const activeMode = document.getElementById('btn-pricing-grp').classList.contains('active') ? 'grp' : 'ind';
+            const activeMode = window.starthPricingMode();
             
             if (priceTrial && parseFloat(priceTrial.getAttribute('data-' + activeMode)) > 0) {
                 const origVal = parseFloat(priceTrial.getAttribute('data-' + activeMode));
@@ -1117,7 +1083,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Revert changes if error entered
             window.currentActivePromo = null;
-            const activeMode = document.getElementById('btn-pricing-grp').classList.contains('active') ? 'grp' : 'ind';
+            const activeMode = window.starthPricingMode();
             window.setPricingMode(activeMode);
         }
         });

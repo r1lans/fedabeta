@@ -17,7 +17,8 @@ const SHEET_NAMES = {
   CONTACTS: 'Contacts',
   TRIAL_REQUESTS: 'TrialRequests',
   CAREER_APPLICATIONS: 'CareerApplications',
-  TEST_LEADS: 'TestLeads'
+  TEST_LEADS: 'TestLeads',
+  TEACHER_REQUESTS: 'TeacherRequests'
 };
 
 // Column titles. If a tab does not exist yet it is created automatically with
@@ -28,7 +29,10 @@ const HEADERS = {
   Contacts: ['date', 'name', 'phone', 'message'],
   TrialRequests: ['date', 'name', 'phone', 'course'],
   CareerApplications: ['date', 'name', 'phone', 'email', 'vacancy', 'score', 'message'],
-  TestLeads: ['date', 'name', 'phone', 'source', 'score']
+  TestLeads: ['date', 'name', 'phone', 'source', 'score'],
+  // "Записаться" on a teacher's page: which teacher the person wants. Any teacher added in the
+  // admin panel appears here automatically (by name) — nothing to set up per teacher.
+  TeacherRequests: ['date', 'teacher', 'name', 'phone', 'specialization', 'language', 'teacher_id', 'status']
 };
 
 function getSheet_(name) {
@@ -150,6 +154,16 @@ function doPost(e) {
       appendByHeaders_(SHEET_NAMES.TEST_LEADS, {
         date: new Date(), name: clean_(p.name), phone: clean_(p.phone),
         source: clean_(p.source), score: clean_(p.score)
+      });
+      return jsonOut_({ ok: true });
+    }
+
+    if (data.action === 'log_teacher_request') {
+      const p = data.payload || {};
+      appendByHeaders_(SHEET_NAMES.TEACHER_REQUESTS, {
+        date: new Date(), teacher: clean_(p.teacher), name: clean_(p.name), phone: clean_(p.phone),
+        specialization: clean_(p.role), language: clean_(String(p.lang || '').toUpperCase()),
+        teacher_id: clean_(p.teacher_id), status: 'Новая'
       });
       return jsonOut_({ ok: true });
     }

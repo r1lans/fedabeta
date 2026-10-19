@@ -11,7 +11,7 @@
     const TAGS = { 'tag-ielts': 'Английский (синий)', 'tag-sat': 'Математика (зелёный)', 'tag-olympiad': 'Олимпиады', 'tag-ege': 'Школьная программа' };
     const UNITS = { lesson: 'за урок', month: 'в месяц', '': 'без подписи' };
     const CF = [['badge', 'text', 'Метка'], ['title', 'text', 'Название'], ['desc', 'area', 'Короткое описание'], ['features', 'lines', 'Преимущества (по одному в строке)'], ['details', 'area', 'Подробно (окно «Подробнее»)']];
-    const PF = [['title', 'text', 'Название'], ['sub', 'text', 'Подпись (индивидуально)'], ['subGrp', 'text', 'Подпись (группа)'], ['badge', 'text', 'Метка (например: ПОПУЛЯРНЫЙ)'], ['featInd', 'lines', 'Что входит: индивидуально (по строке)'], ['featGrp', 'lines', 'Что входит: группа (по строке)']];
+    const PF = [['title', 'text', 'Название'], ['sub', 'text', 'Подпись (индивидуально)'], ['subGrp', 'text', 'Подпись (мини-группа до 3)'], ['subGrp5', 'text', 'Подпись (группа до 5; пусто = как у мини-группы)'], ['badge', 'text', 'Метка (например: ПОПУЛЯРНЫЙ)'], ['featInd', 'lines', 'Что входит: индивидуально (по строке)'], ['featGrp', 'lines', 'Что входит: группы (по строке)']];
     const PLAN_NAMES = { trial: 'Пробный урок', standard: 'Стандарт', intensive: 'Интенсив' };
     let st = null, orig = null, touched = new Set(), loaded = false;
 
@@ -35,7 +35,7 @@
     function render() {
         const root = $('cat-root'); if (!root) return;
         const cs = st.courses || [];
-        let h = '<div class="cat-sec"><h3>Курсы на главной</h3><p class="cat-hint">Карточки в разделе «Наши курсы». Кнопка «Подробнее» открывает окно с подробным описанием и кнопкой записи.</p>';
+        let h = '<div class="cat-sec"><h3>Курсы</h3><p class="cat-hint">Список курсов в форме «Записаться» на главной (раздел «Наши курсы» убран — цены показываются в «Инвестиции в образование»).</p>';
         h += cs.map((c, i) => {
             const b = 'courses.' + i;
             return '<div class="admin-card cat-card" data-i="' + i + '"><div class="cat-head"><strong>' + esc(c.title || 'Новый курс') + '</strong><span class="cat-btns">' +
@@ -48,15 +48,15 @@
         h += '<button type="button" class="btn-small" data-act="add">+ Добавить курс</button></div>';
 
         const P = st.plans || (st.plans = { list: [] }); const pl = P.list || [];
-        h += '<div class="cat-sec"><h3>Цены и тарифы</h3><p class="cat-hint">Три карточки в разделе «Инвестиции в образование» и переключатель «Индивидуально / Мини-группы». Промокоды продолжают работать.</p>';
+        h += '<div class="cat-sec"><h3>Цены и тарифы</h3><p class="cat-hint">Три карточки в разделе «Инвестиции в образование» и переключатель «Группы до 5 / Мини-группы до 3 / Индивидуально». Промокоды продолжают работать.</p>';
         h += '<div class="admin-card cat-card"><strong>Подписи переключателя</strong>' +
-            field('plans', ['descInd', 'area', 'Описание: индивидуально 1-на-1'], 'ru') + field('plans', ['descGrp', 'area', 'Описание: мини-группы'], 'ru') +
-            '<details class="cat-tr"><summary>Переводы</summary>' + ['uz', 'en'].map((lg) => '<div class="cat-lang"><h5>' + (lg === 'uz' ? "O'zbekcha" : 'English') + '</h5>' + field('plans', ['descInd', 'area', 'Индивидуально'], lg) + field('plans', ['descGrp', 'area', 'Мини-группы'], lg) + '</div>').join('') + '</details></div>';
+            field('plans', ['descGrp5', 'area', 'Описание: группы до 5'], 'ru') + field('plans', ['descGrp', 'area', 'Описание: мини-группы до 3'], 'ru') + field('plans', ['descInd', 'area', 'Описание: индивидуально 1-на-1'], 'ru') +
+            '<details class="cat-tr"><summary>Переводы</summary>' + ['uz', 'en'].map((lg) => '<div class="cat-lang"><h5>' + (lg === 'uz' ? "O'zbekcha" : 'English') + '</h5>' + field('plans', ['descGrp5', 'area', 'Группы до 5'], lg) + field('plans', ['descGrp', 'area', 'Мини-группы'], lg) + field('plans', ['descInd', 'area', 'Индивидуально'], lg) + '</div>').join('') + '</details></div>';
         h += pl.map((p, i) => {
             const b = 'plans.list.' + i;
             return '<div class="admin-card cat-card"><div class="cat-head"><strong>' + esc(PLAN_NAMES[p.id] || p.id) + ': ' + esc(p.title) + '</strong></div>' +
                 '<div class="cat-checks">' + checkField(b + '.featured', 'Выделить рамкой') + '</div>' +
-                '<div class="cat-grid">' + numField(b + '.priceInd', 'Цена индивидуально, $') + numField(b + '.priceGrp', 'Цена в группе, $') + selField(b + '.per', 'Подпись цены', { month: 'в месяц', lesson: 'за урок', '': 'без подписи' }) + '</div>' +
+                '<div class="cat-grid">' + numField(b + '.priceGrp5', 'Цена: группа до 5, $') + numField(b + '.priceGrp', 'Цена: мини-группа до 3, $') + numField(b + '.priceInd', 'Цена: индивидуально, $') + selField(b + '.per', 'Подпись цены', { month: 'в месяц', lesson: 'за урок', '': 'без подписи' }) + '</div>' +
                 PF.map((s) => field(b, s, 'ru')).join('') + trBlock(b, PF) + '</div>';
         }).join('') + '</div>';
         h += '<div class="admin-card cat-save"><button type="button" class="btn-primary" data-act="save">Сохранить и опубликовать</button> <button type="button" class="btn-small" data-act="reset">Вернуть стандартные</button><div class="status-msg" id="cat-status"></div></div>';
@@ -118,9 +118,9 @@
                 failed += await translateItem(c, 'courses.' + i, CF, before);
             }
             out.plans.srcLang = 'ru';
-            failed += await translateItem(out.plans, 'plans', [['descInd', 'area'], ['descGrp', 'area']], orig.plans);
+            failed += await translateItem(out.plans, 'plans', [['descInd', 'area'], ['descGrp', 'area'], ['descGrp5', 'area']], orig.plans);
             for (let i = 0; i < out.plans.list.length; i++) {
-                const p = out.plans.list[i]; p.priceInd = Number(p.priceInd) || 0; p.priceGrp = Number(p.priceGrp) || 0; p.srcLang = 'ru';
+                const p = out.plans.list[i]; p.priceInd = Number(p.priceInd) || 0; p.priceGrp = Number(p.priceGrp) || 0; p.priceGrp5 = Number(p.priceGrp5) || 0; p.srcLang = 'ru';
                 const before = ((orig.plans || {}).list || []).find((x) => x.id === p.id);
                 failed += await translateItem(p, 'plans.list.' + i, PF, before);
             }
@@ -136,7 +136,7 @@
         if (loaded) return; loaded = true;
         const root = $('cat-root'); if (!root) return;
         st = clone(window.StarthCatalogDefaults || { courses: [], plans: { list: [] } });
-        try { const d = await db.collection('settings').doc('catalog').get(); if (d.exists) { const x = d.data(); if (x.courses) st.courses = x.courses; if (x.plans && x.plans.list) st.plans = x.plans; } }
+        try { const d = await db.collection('settings').doc('catalog').get(); if (d.exists) { const x = d.data(); if (x.courses) st.courses = x.courses; if (x.plans && x.plans.list) st.plans = window.starthCatalogFill ? window.starthCatalogFill(x.plans) : x.plans; } }
         catch (e) { root.innerHTML = '<div class="empty-state">Не удалось загрузить: ' + esc(e.message) + '</div>'; loaded = false; return; }
         orig = clone(st); render();
         root.addEventListener('input', onInput); root.addEventListener('change', onInput); root.addEventListener('click', onClick);

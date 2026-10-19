@@ -127,5 +127,61 @@
         return result;
     }
 
-    window.StarthI18n = { lang: lang, pick: pick, pickList: pickList, detect: detect, translate: translate, translateFields: translateFields, LANGS: LANGS };
+    /* ── Names ──
+     * A name is not translated, it is written in the visitor's alphabet: on the UZ / EN site a
+     * Cyrillic name is shown in Latin letters ("Убайдуллоев Фирдавс" -> "Ubaydulloyev Firdavs").
+     * The admin can type the exact Latin spelling (stored as i18n.uz.name / i18n.en.name);
+     * otherwise it is transliterated automatically (Uzbek Latin rules; English uses kh/ts/k/gh). */
+    var VOW = 'аеёиоуыэюяўАЕЁИОУЫЭЮЯЎ';
+    var MAP = { а: 'a', б: 'b', в: 'v', г: 'g', д: 'd', ё: 'yo', ж: 'j', з: 'z', и: 'i', й: 'y', к: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r', с: 's', т: 't', у: 'u', ф: 'f', х: 'x', ц: 's', ч: 'ch', ш: 'sh', щ: 'sh', ъ: '', ы: 'i', ь: '', э: 'e', ю: 'yu', я: 'ya', ў: "o'", қ: 'q', ғ: "g'", ҳ: 'h' };
+    function translit(s, to) {
+        s = String(s == null ? '' : s);
+        var en = to === 'en', out = '';
+        for (var i = 0; i < s.length; i++) {
+            var ch = s[i], lo = ch.toLowerCase(), up = ch !== lo, prev = s[i - 1] || '';
+            var r;
+            if (lo === 'е') r = ((prev && VOW.indexOf(prev) >= 0) || prev === 'ъ' || prev === 'ь') ? 'ye' : 'e';
+            else if (lo === 'х') {
+                // Russian spelling uses "х" for both Uzbek x and h (Беҳруз, Жавоҳир -> Behruz, Javohir).
+                // Keep x only where Uzbek names really have it: Xurshid, Xolmirza, Baxt…, …xon.
+                var nx = (s[i + 1] || '').toLowerCase(), start = !prev || /[\s\-]/.test(prev);
+                r = ((start && /[уо]/.test(nx)) || nx === 'т' || s.substr(i, 3).toLowerCase() === 'хон') ? (en ? 'kh' : 'x') : 'h';
+            }
+            else if (en && lo === 'ц') r = 'ts';
+            else if (en && lo === 'қ') r = 'k';
+            else if (en && lo === 'ғ') r = 'gh';
+            else if (en && lo === 'ў') r = 'o';
+            else if (Object.prototype.hasOwnProperty.call(MAP, lo)) r = MAP[lo];
+            else { out += ch; continue; }
+            if (up && r) {
+                var nextUp = s[i + 1] && s[i + 1] !== s[i + 1].toLowerCase();
+                r = nextUp ? r.toUpperCase() : r.charAt(0).toUpperCase() + r.slice(1);
+            }
+            out += r;
+        }
+        return out;
+    }
+    var hasCyr = function (s) { return /[А-Яа-яЁёЎўҚқҒғҲҳ]/.test(String(s || '')); };
+    /** Name of a person in the visitor's language/alphabet. */
+    function name(obj, forLang) {
+        if (!obj) return '';
+        var l = forLang || lang(), n = obj.name == null ? '' : String(obj.name);
+        if (l === 'ru') return (obj.srcLang && obj.srcLang !== 'ru' && obj.i18n && obj.i18n.ru && obj.i18n.ru.name) || n;
+        var own = obj.i18n && obj.i18n[l] && obj.i18n[l].name;
+        if (own) return own;
+        return hasCyr(n) ? translit(n, l) : n;
+    }
+    function initialsOf(n) {
+        var p = String(n || '').trim().split(/\s+/);
+        return ((p[0] || '?')[0] + (p[1] ? '.' + p[1][0] : '')).toUpperCase();
+    }
+    /** Copy of a teacher with name + initials in the visitor's alphabet (for rendering). */
+    function localPerson(obj, forLang) {
+        if (!obj) return obj;
+        var n = name(obj, forLang), c = Object.assign({}, obj, { name: n });
+        if (n !== obj.name || !obj.initials) c.initials = initialsOf(n);
+        return c;
+    }
+
+    window.StarthI18n = { lang: lang, pick: pick, pickList: pickList, detect: detect, translate: translate, translateFields: translateFields, LANGS: LANGS, translit: translit, name: name, localPerson: localPerson };
 })();

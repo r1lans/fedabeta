@@ -118,7 +118,7 @@ window.StarthCatalogDefaults = {
     }
    },
    "badge": "Олимпиады",
-   "title": "Академическая Математика & Олимпиады",
+   "title": "Академическая математика и олимпиады",
    "desc": "Углубленная математика для школьников и подготовка к престижным олимпиадам.",
    "features": [
     "Длительность: 6-12 месяцев",
@@ -175,6 +175,7 @@ window.StarthCatalogDefaults = {
    {
     "id": "trial",
     "badge": "",
+    "priceGrp5": 0,
     "priceInd": 0,
     "priceGrp": 0,
     "per": "",
@@ -184,13 +185,14 @@ window.StarthCatalogDefaults = {
       "title": "Sinov darsi",
       "sub": "Daraja va metodikani baholash (Yakka tartibda)",
       "subGrp": "Daraja va metodikani baholash (Mini-guruhda)",
+      "subGrp5": "Daraja va metodikani baholash (guruhda)",
       "featInd": [
        "1 ta to'liq dars (90 daqiqa)",
        "Mutaxassis tomonidan bilimlar diagnostikasi",
        "Individual o'quv yo'nalishi"
       ],
       "featGrp": [
-       "Mini-guruhda 1 ta dars (90 daqiqa)",
+       "Guruhda 1 ta dars (90 daqiqa)",
        "Speaking darajasi diagnostikasi",
        "Guruhda suhbat amaliyoti"
       ],
@@ -200,13 +202,14 @@ window.StarthCatalogDefaults = {
       "title": "Trial lesson",
       "sub": "Assess your level and our method (Individual)",
       "subGrp": "Assess your level and our method (In a mini-group)",
+      "subGrp5": "Assess your level and our method (In a group)",
       "featInd": [
        "1 full lesson (90 minutes)",
        "Knowledge assessment by an expert",
        "Individual learning path"
       ],
       "featGrp": [
-       "1 lesson in a mini-group (90 minutes)",
+       "1 group lesson (90 minutes)",
        "Speaking level assessment",
        "Group speaking practice"
       ],
@@ -214,15 +217,16 @@ window.StarthCatalogDefaults = {
      }
     },
     "title": "Пробный урок",
-    "sub": "Оценить уровень и методику (Индивидуально)",
-    "subGrp": "Оценить уровень и методику (В мини-группе)",
+    "sub": "Оценить уровень и методику (индивидуально)",
+    "subGrp": "Оценить уровень и методику (в мини-группе)",
+    "subGrp5": "Оценить уровень и методику (в группе)",
     "featInd": [
      "1 полноценное занятие (90 минут)",
      "Диагностика знаний экспертом",
      "Индивидуальная траектория"
     ],
     "featGrp": [
-     "1 занятие в мини-группе (90 минут)",
+     "1 занятие в группе (90 минут)",
      "Диагностика уровня Speaking",
      "Разговорная практика в группе"
     ],
@@ -231,6 +235,7 @@ window.StarthCatalogDefaults = {
    {
     "id": "standard",
     "badge": "ПОПУЛЯРНЫЙ",
+    "priceGrp5": 108,
     "priceInd": 180,
     "priceGrp": 144,
     "per": "month",
@@ -269,7 +274,7 @@ window.StarthCatalogDefaults = {
       "badge": "POPULAR"
      }
     },
-    "title": "Стандарт (1 Месяц)",
+    "title": "Стандарт (1 месяц)",
     "sub": "Занятия через день (3 раза в неделю)",
     "subGrp": "Занятия через день (3 раза в неделю)",
     "featInd": [
@@ -287,6 +292,7 @@ window.StarthCatalogDefaults = {
    {
     "id": "intensive",
     "badge": "",
+    "priceGrp5": 216,
     "priceInd": 360,
     "priceGrp": 288,
     "per": "month",
@@ -325,7 +331,7 @@ window.StarthCatalogDefaults = {
       "badge": ""
      }
     },
-    "title": "Интенсив (1 Месяц)",
+    "title": "Интенсив (1 месяц)",
     "sub": "Занятия каждый день (6 раз в неделю)",
     "subGrp": "Занятия каждый день (6 раз в неделю)",
     "featInd": [
@@ -342,17 +348,36 @@ window.StarthCatalogDefaults = {
    }
   ],
   "descInd": "Персональный ментор, 100% внимания преподавателя, гибкий график под ваши цели. Стоимость — $15 за 90‑минутный урок.",
+  "descGrp5": "Занятия в группе до 5 человек: живая разговорная практика и командная работа по самой доступной цене. Стоимость — $9 за урок с ученика.",
   "descGrp": "Обучение в мини-группах до 3 человек (строго!). Здоровая конкуренция, максимум разговорной практики и командной работы. Стоимость — $12 за урок с ученика.",
   "i18n": {
    "uz": {
     "descInd": "Shaxsiy mentor, o'qituvchining 100% e'tibori, maqsadlaringizga mos moslashuvchan jadval. Narxi — 90 daqiqalik dars uchun $15.",
+    "descGrp5": "5 kishigacha bo'lgan guruhlarda o'qish: jonli suhbat amaliyoti va jamoaviy ish eng qulay narxda. Narxi — har bir o'quvchidan dars uchun $9.",
     "descGrp": "3 kishigacha bo'lgan mini-guruhlarda o'qish (qat'iy!). Sog'lom raqobat, maksimal suhbat amaliyoti va jamoaviy ish. Narxi — har bir o'quvchidan dars uchun $12."
    },
    "en": {
     "descInd": "A personal mentor, 100% of the teacher’s attention and a flexible schedule built around your goals. Price: $15 per 90-minute lesson.",
+    "descGrp5": "Learning in groups of up to 5 people: lively speaking practice and teamwork at the most affordable price. Price: $9 per lesson per student.",
     "descGrp": "Learning in mini-groups of up to 3 people (strictly!). Healthy competition, maximum speaking practice and teamwork. Price: $12 per lesson per student."
    }
   },
   "srcLang": "ru"
  }
+};
+
+/* An older catalog saved in the admin panel has no "groups of 5" price / texts yet: take them from the defaults. */
+window.starthCatalogFill = function (plans) {
+    var D = window.StarthCatalogDefaults.plans;
+    if (!plans || !plans.list) return plans;
+    plans.list.forEach(function (p) {
+        var d = (D.list || []).filter(function (x) { return x.id === p.id; })[0] || {};
+        if (p.priceGrp5 == null) p.priceGrp5 = d.priceGrp5 != null ? d.priceGrp5 : p.priceGrp;
+        if (p.subGrp5 == null && d.subGrp5) { p.subGrp5 = d.subGrp5; ['uz', 'en'].forEach(function (l) { if (d.i18n && d.i18n[l] && d.i18n[l].subGrp5) { p.i18n = p.i18n || {}; p.i18n[l] = p.i18n[l] || {}; if (!p.i18n[l].subGrp5) p.i18n[l].subGrp5 = d.i18n[l].subGrp5; } }); }
+    });
+    if (!plans.descGrp5) {
+        plans.descGrp5 = D.descGrp5;
+        ['uz', 'en'].forEach(function (l) { plans.i18n = plans.i18n || {}; plans.i18n[l] = plans.i18n[l] || {}; if (!plans.i18n[l].descGrp5) plans.i18n[l].descGrp5 = D.i18n[l].descGrp5; });
+    }
+    return plans;
 };
