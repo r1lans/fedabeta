@@ -169,7 +169,7 @@
     }, true);
     function scan() {
         document.querySelectorAll('input[type="tel"], input[name="phone"], input[id$="hone"]').forEach((el) => { if (isPhone(el)) prep(el); });
-        // values set from code (profile editor, autofill, payment.html prefilling by id, …) → keep button + field in step
+        // values set from code (profile editor, autofill, payment prefilling by id, …) → keep button + field in step
         document.querySelectorAll('input').forEach((el) => {
             if (!el.__ppBtn) return;
             const tw = el.__twin;
@@ -183,7 +183,7 @@
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan); else scan();
     setInterval(scan, 800);
-    // Code that just wrote a phone field's value by id (profile editor's open(), payment.html prefilling, …)
+    // Code that just wrote a phone field's value by id (profile editor's open(), payment prefilling, …)
     // can call this to show it immediately instead of waiting up to 800ms for the next scan().
     window.StarthPhone = { format: fmt, countries: COUNTRIES, sync: scan };
 })();

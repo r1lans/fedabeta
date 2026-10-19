@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="theme.js?v=48"></script>
-    <script src="sheets-config.js?v=48"></script>
+    <script src="theme.js?v=50"></script>
+    <script src="sheets-config.js?v=50"></script>
     <title>Мессенджер — TheStarth</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=48">
+    <link rel="stylesheet" href="styles.css?v=50">
     <style>
         body.msg-body { overflow-x: hidden; }
         .msg-wrap { max-width: 1280px; margin: 0 auto; padding: 104px 1rem 1rem; }
@@ -22,20 +22,20 @@
 <body class="msg-body">
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" style="text-decoration: none;">
+            <a href="./" style="text-decoration: none;">
                 <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
                     <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
                 </div>
             </a>
             <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
             <div class="nav-links">
-                <a href="index.html#pricing" data-i18n="nav.courses">Курсы</a>
-                <a href="results.html" data-i18n="nav.results">Результаты</a>
-                <a href="about.html" data-i18n="nav.about">О нас</a>
-                <a href="news.html" data-i18n="nav.news">Новости</a>
-                <a href="mock-exam.html" style="color: var(--accent); font-weight: bold; position: relative;">Mock Exam <span style="position: absolute; top: -12px; right: -15px; background: red; color: white; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; text-transform: uppercase;">New</span></a>
-                <a href="payment.html" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
-                <a href="dashboard.html" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
+                <a href="./#pricing" data-i18n="nav.courses">Курсы</a>
+                <a href="results" data-i18n="nav.results">Результаты</a>
+                <a href="about" data-i18n="nav.about">О нас</a>
+                <a href="news" data-i18n="nav.news">Новости</a>
+                <a href="mock-exam" style="color: var(--accent); font-weight: bold; position: relative;">Mock Exam <span style="position: absolute; top: -12px; right: -15px; background: red; color: white; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; text-transform: uppercase;">New</span></a>
+                <a href="payment" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <a href="dashboard" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
                 <div class="lang-switch">
                     <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
                     <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
@@ -49,7 +49,7 @@
         <h1>Мессенджер</h1>
         <div class="msg-login" id="msgLogin" style="display:none;">
             <p>Войдите в аккаунт, чтобы писать сообщения.</p>
-            <a class="btn-primary" style="display:inline-block;padding:.8rem 1.6rem;border-radius:10px;" href="index.html#login">Войти</a>
+            <a class="btn-primary" style="display:inline-block;padding:.8rem 1.6rem;border-radius:10px;" href="./#login">Войти</a>
         </div>
         <div id="messengerSection" data-page="1"></div>
     </main>
@@ -57,14 +57,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js?v=48"></script>
-    <script src="admin-nav.js?v=48"></script>
-    <script src="translations.js?v=48"></script>
-    <script src="content-i18n.js?v=48"></script>
-    <script src="icons.js?v=48"></script>
-    <script src="app.js?v=48"></script>
-    <script src="i18n-extra.js?v=48"></script>
-    <script src="messenger.js?v=48"></script>
+    <script src="firebase-config.js?v=50"></script>
+    <script src="admin-nav.js?v=50"></script>
+    <script src="translations.js?v=50"></script>
+    <script src="content-i18n.js?v=50"></script>
+    <script src="icons.js?v=50"></script>
+    <script src="app.js?v=50"></script>
+    <script src="i18n-extra.js?v=50"></script>
+    <script src="messenger.js?v=50"></script>
     <script>
         (function () {
             var sec = document.getElementById('messengerSection'), login = document.getElementById('msgLogin');
@@ -88,6 +88,6 @@
             });
         })();
     </script>
-    <script src="back-btn.js?v=48"></script>
+    <script src="back-btn.js?v=50"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* TheStarth — Admin panel: «Курсы и цены».
  * Edits Firestore settings/catalog, which the home page (catalog.js) shows: course cards + the «Подробнее» window, and the three price cards.
  * Texts are written in Russian; on save the Uzbek and English versions are translated automatically (only what changed) and can be corrected by hand.
- * Needs: db, escapeHtml (admin.html), content-i18n.js (StarthI18n), catalog-defaults.js.
+ * Needs: db, escapeHtml (admin), content-i18n.js (StarthI18n), catalog-defaults.js.
  */
 (function () {
     'use strict';

@@ -1,5 +1,5 @@
 /* TheStarth — admin panel: "Mock-тесты" (build IELTS Listening / Reading tests, with AI help, and see student results).
- * Needs (from admin.html): db, firebase, escapeHtml, CsvExport.   Needs: mock-engine.js, mock-config.js.
+ * Needs (from admin): db, firebase, escapeHtml, CsvExport.   Needs: mock-engine.js, mock-config.js.
  * Collections: mockTests (the tests), mockResults (what students got).  Audio goes to Firebase Storage: mockAudio/…
  */
 (function () {

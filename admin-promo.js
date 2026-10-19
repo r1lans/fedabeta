@@ -1,7 +1,7 @@
 /* TheStarth — Admin panel: «Промокоды».
  * Each code is its own doc in Firestore promoCodes/{CODE}: { code, pct, free, expires ('' or 'YYYY-MM-DD'), active, createdAt }.
  * Read by the pricing block on the home page (app.js -> applyPromoCode): % discount, or fully free, with an optional expiry date.
- * Needs: db, escapeHtml (admin.html).
+ * Needs: db, escapeHtml (admin).
  */
 (function () {
     'use strict';

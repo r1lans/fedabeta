@@ -5,14 +5,14 @@
     'use strict';
     if (document.body && document.body.hasAttribute('data-no-back')) return;
     var path = location.pathname.split('/').pop();
-    if (!path || path === 'index.html') return;
+    if (!path || path === 'index.html' || path === 'index') return;
     var L = { ru: 'Назад', uz: 'Orqaga', en: 'Back' };
     function lang() { try { return localStorage.getItem('starthLang') || 'ru'; } catch (e) { return 'ru'; } }
     function build() {
         if (document.getElementById('backBtn')) return;
         var nav = document.querySelector('.navbar');
         var a = document.createElement('a');
-        a.id = 'backBtn'; a.href = 'index.html'; a.className = 'back-btn';
+        a.id = 'backBtn'; a.href = './'; a.className = 'back-btn';
         a.innerHTML = '<span aria-hidden="true">←</span> <span class="back-txt">' + L[lang()] + '</span>';
         a.addEventListener('click', function (e) {
             var same = false; try { same = document.referrer && new URL(document.referrer).host === location.host; } catch (x) {}

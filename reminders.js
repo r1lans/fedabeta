@@ -38,14 +38,14 @@
             .forEach((s) => items.push({ kind: 'lesson', icon: 'clock', tone: s.date === today ? 'hot' : '', sort: 0,
                 title: (s.date === today ? 'Сегодня' : 'Завтра') + ' урок в ' + (s.time || ''),
                 text: 'Преподаватель: ' + (s.teacherName || '') + (s.subject ? ' · ' + s.subject : ''),
-                href: s.room ? 'video-lesson.html?room=' + encodeURIComponent(s.room) : '', cta: 'Войти на урок' }));
+                href: s.room ? 'video-lesson?room=' + encodeURIComponent(s.room) : '', cta: 'Войти на урок' }));
         // lessons (groups, by schedule text)
         groups.filter((g) => !g.archived).forEach((g) => {
             const p = parseScheduleText(g.scheduleText);
             [[now, 'Сегодня', 'hot'], [tom, 'Завтра', '']].forEach(([d, label, tone]) => {
                 if (p.days.indexOf(monIdx(d)) !== -1) items.push({ kind: 'lesson', icon: 'clock', tone, sort: label === 'Сегодня' ? 0 : 1,
                     title: label + ' урок группы «' + g.name + '»' + (p.time ? ' в ' + p.time : ''), text: 'Преподаватель: ' + (g.teacherName || ''),
-                    href: g.room ? 'video-lesson.html?room=' + encodeURIComponent(g.room) + '&group=' + encodeURIComponent(g.id) : '', cta: label === 'Сегодня' ? 'Войти на урок' : '' });
+                    href: g.room ? 'video-lesson?room=' + encodeURIComponent(g.room) + '&group=' + encodeURIComponent(g.id) : '', cta: label === 'Сегодня' ? 'Войти на урок' : '' });
             });
         });
         // homework

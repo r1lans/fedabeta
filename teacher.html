@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="theme.js?v=48"></script>
-    <script src="sheets-config.js?v=48"></script>
+    <script src="theme.js?v=50"></script>
+    <script src="sheets-config.js?v=50"></script>
     <title id="page-title">Преподаватель — TheStarth</title>
     <meta name="twitter:card" content="summary_large_image">
     <meta property="og:site_name" content="TheStarth">
@@ -12,7 +12,7 @@
     <meta name="description" id="page-desc" content="Профиль преподавателя TheStarth.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=48">
+    <link rel="stylesheet" href="styles.css?v=50">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         main.profile-main {
@@ -166,19 +166,19 @@
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="index.html" style="text-decoration: none;">
+            <a href="./" style="text-decoration: none;">
                 <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
                     <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
                 </div>
             </a>
             <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
             <div class="nav-links">
-                <a href="index.html#pricing" data-i18n="nav.courses">Курсы</a>
-                <a href="results.html" data-i18n="nav.results">Результаты</a>
-                <a href="about.html" data-i18n="nav.about">О нас</a>
-                <a href="news.html" data-i18n="nav.news">Новости</a>
-                <a href="payment.html" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
-                <a href="dashboard.html" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
+                <a href="./#pricing" data-i18n="nav.courses">Курсы</a>
+                <a href="results" data-i18n="nav.results">Результаты</a>
+                <a href="about" data-i18n="nav.about">О нас</a>
+                <a href="news" data-i18n="nav.news">Новости</a>
+                <a href="payment" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <a href="dashboard" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
                 <div class="lang-switch">
                     <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
                     <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
@@ -190,7 +190,7 @@
 
     <div id="profile-wait" style="text-align:center;padding:5rem 1rem;color:var(--ink-soft);" data-i18n="teacher.loading">Загрузка…</div>
     <main class="profile-main" id="profile-main">
-        <a href="about.html" class="profile-back" data-i18n="teacher.back">← Команда экспертов</a>
+        <a href="about" class="profile-back" data-i18n="teacher.back">← Команда экспертов</a>
 
         <div class="profile-header">
             <div class="profile-photo-wrap">
@@ -208,7 +208,6 @@
                     </div>
                     <button type="button" class="btn-primary" id="p-book-btn" data-i18n="teacher.book">Записаться на пробный урок</button>
                     <button type="button" class="btn-outline" id="p-video-btn" style="display:none" data-i18n="about.team_watch">Смотреть видео</button>
-                    <a class="btn-outline" id="p-room-link" href="#" data-i18n="teacher.room">Войти в комнату</a>
                 </div>
             </div>
         </div>
@@ -231,7 +230,7 @@
         <div id="not-found">
             <h1 data-i18n="teacher.nf_title">Преподаватель не найден</h1>
             <p style="color: var(--ink-soft); margin: 1rem 0;" data-i18n="teacher.nf_text">Возможно, ссылка устарела. Посмотрите всю команду на странице «О нас».</p>
-            <a href="about.html" class="btn-primary" style="display: inline-block; text-decoration: none;" data-i18n="teacher.nf_btn">К команде экспертов</a>
+            <a href="about" class="btn-primary" style="display: inline-block; text-decoration: none;" data-i18n="teacher.nf_btn">К команде экспертов</a>
         </div>
     </main>
 
@@ -247,7 +246,7 @@
                 <input type="tel" name="phone" data-i18n-placeholder="form.phone_ph" placeholder="Номер телефона" required>
                 <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="teacher.book_send">Отправить заявку</button>
                 <p data-i18n-html="auth.agree" style="font-size: 0.75rem; color: var(--ink-soft); text-align: center; margin-top: 1rem;">
-                    Нажимая кнопку, вы соглашаетесь с <a href="privacy.html" style="color: var(--accent); text-decoration: underline;">Политикой конфиденциальности</a>.
+                    Нажимая кнопку, вы соглашаетесь с <a href="privacy" style="color: var(--accent); text-decoration: underline;">Политикой конфиденциальности</a>.
                 </p>
             </form>
         </div>
@@ -294,7 +293,7 @@
                     <div id="register-form-error" style="color: var(--accent-warm); font-size: 0.85rem; margin-top: 0.5rem;"></div>
                     <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;" data-i18n="auth.register_link">Зарегистрироваться</button>
                     <p data-i18n-html="auth.agree" style="font-size: 0.75rem; color: var(--ink-soft); text-align: center; margin-top: 1rem;">
-                        Нажимая кнопку, вы соглашаетесь с <a href="privacy.html" style="color: var(--accent); text-decoration: underline;">Политикой конфиденциальности</a>.
+                        Нажимая кнопку, вы соглашаетесь с <a href="privacy" style="color: var(--accent); text-decoration: underline;">Политикой конфиденциальности</a>.
                     </p>
                 </form>
                 <p style="text-align: center; margin-top: 1rem; font-size: 0.85rem; color: var(--ink-soft);"><span data-i18n="auth.have_account">Уже есть аккаунт?</span> <a href="#" id="show-login" style="color: var(--accent);" data-i18n="nav.login">Войти</a></p>
@@ -322,10 +321,10 @@
             <div class="footer-col">
                 <h4 data-i18n="footer.quicklinks">Быстрые ссылки</h4>
                 <ul>
-                    <li><a href="index.html#pricing" data-i18n="nav.courses">Курсы</a></li>
-                    <li><a href="about.html" data-i18n="nav.about">О нас</a></li>
-                    <li><a href="news.html" data-i18n="nav.news">Новости</a></li>
-                    <li><a href="careers.html" data-i18n="footer.careers">Вакансии</a></li>
+                    <li><a href="./#pricing" data-i18n="nav.courses">Курсы</a></li>
+                    <li><a href="about" data-i18n="nav.about">О нас</a></li>
+                    <li><a href="news" data-i18n="nav.news">Новости</a></li>
+                    <li><a href="careers" data-i18n="footer.careers">Вакансии</a></li>
                 </ul>
             </div>
             <div class="footer-col">
@@ -341,8 +340,8 @@
         </div>
     </footer>
 
-    <script src="content-i18n.js?v=48"></script>
-    <script src="teachers-data.js?v=48"></script>
+    <script src="content-i18n.js?v=50"></script>
+    <script src="teachers-data.js?v=50"></script>
     <script>
         // Teacher profile. Data comes from the database (admin panel -> Учителя) or from the
         // built-in list; every text is shown in the visitor's language.
@@ -420,7 +419,6 @@
             document.getElementById('p-score-label').textContent = x.scoreLabel || '';
             const scoreBox = document.getElementById('p-score').closest('.profile-score');
             if (scoreBox) scoreBox.style.display = x.score ? '' : 'none';
-            document.getElementById('p-room-link').href = 'video-lesson.html?room=TheStarth-' + encodeURIComponent(x.id);
 
             const tagsWrap = document.getElementById('p-tags');
             tagsWrap.innerHTML = '';
@@ -449,7 +447,7 @@
             otherWrap.innerHTML = '';
             TEACHER_LIST.filter(v => v.id !== x.id).map(v => StarthI18n.localPerson(v)).forEach(other => {
                 const a = document.createElement('a');
-                a.href = 'teacher.html?id=' + encodeURIComponent(other.id);
+                a.href = 'teacher?id=' + encodeURIComponent(other.id);
                 a.className = 'other-teacher-link';
                 const mini = document.createElement('span');
                 mini.className = 'mini-avatar';
@@ -494,13 +492,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js?v=48"></script>
-    <script src="admin-nav.js?v=48"></script>
-    <script src="translations.js?v=48"></script>
-    <script src="icons.js?v=48"></script>
-    <script src="video-embed.js?v=48"></script>
-    <script src="video-lightbox.js?v=48"></script>
-    <script src="app.js?v=48"></script>
+    <script src="firebase-config.js?v=50"></script>
+    <script src="admin-nav.js?v=50"></script>
+    <script src="translations.js?v=50"></script>
+    <script src="icons.js?v=50"></script>
+    <script src="video-embed.js?v=50"></script>
+    <script src="video-lightbox.js?v=50"></script>
+    <script src="app.js?v=50"></script>
     <script>
         // Teacher list: from the database when the admin manages teachers, otherwise the built-in list.
         // Teachers added in the admin panel exist ONLY in the database, so for them we wait for it (up to 25 s,
@@ -528,9 +526,9 @@
             }
         })();
     </script>
-    <script src="back-btn.js?v=48"></script>
-    <script src="phone-prefix.js?v=48"></script>
-    <script src="mock-config.js?v=48"></script>
-    <script src="assistant.js?v=48"></script>
+    <script src="back-btn.js?v=50"></script>
+    <script src="phone-prefix.js?v=50"></script>
+    <script src="mock-config.js?v=50"></script>
+    <script src="assistant.js?v=50"></script>
 </body>
 </html>

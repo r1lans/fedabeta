@@ -161,7 +161,7 @@
                     <div><span class="tc-count">${ic('users')} ${n} ${plural(n, 'ученик', 'ученика', 'учеников')}</span></div>
                     <div class="tc-actions">
                         <button class="tc-btn primary" data-open="${esc(g.id)}" type="button">Открыть</button>
-                        <a class="tc-btn" href="video-lesson.html?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">Войти на урок</a>
+                        <a class="tc-btn" href="video-lesson?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">Войти на урок</a>
                     </div>`;
                 list.appendChild(card);
             });
@@ -234,7 +234,7 @@
                     <div class="tc-meta">${esc(g.subject || '')}${g.scheduleText ? ' · ' + esc(g.scheduleText) : ''} · ${n} ${plural(n, 'ученик', 'ученика', 'учеников')}</div>
                 </div>
                 <div class="tc-actions" style="margin:0;padding:0;">
-                    <a class="tc-btn primary" href="video-lesson.html?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">Войти на урок группы</a>
+                    <a class="tc-btn primary" href="video-lesson?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">Войти на урок группы</a>
                     <button class="tc-btn" type="button" id="tcEdit">Изменить</button>
                     <button class="tc-btn" type="button" id="tcArch">${g.archived ? 'Вернуть из архива' : 'В архив'}</button>
                     <button class="tc-btn danger" type="button" id="tcDel">Удалить</button>

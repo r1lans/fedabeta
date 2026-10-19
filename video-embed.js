@@ -1,4 +1,4 @@
-// Shared by index.html (carousel) and admin.html (validation + preview).
+// Shared by index.html (carousel) and admin (validation + preview).
 // Turns a pasted link into something the carousel can play:
 //   YouTube (watch / youtu.be / shorts / live / embed) -> { type:'youtube', id }
 //   Instagram (reel / p / tv)                          -> { type:'instagram', kind, code }

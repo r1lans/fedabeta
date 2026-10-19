@@ -26,7 +26,7 @@
         if (!box) return;
         const nick = profile && profile.nickname;
         if (!nick) { box.innerHTML = ''; return; }
-        const link = window.starthReferralLink ? window.starthReferralLink(nick) : (location.origin + '/index.html?ref=' + encodeURIComponent(nick));
+        const link = window.starthReferralLink ? window.starthReferralLink(nick) : (location.origin + '/?ref=' + encodeURIComponent(nick));
         const shareText = 'Я учусь в TheStarth (IELTS, SAT, математика). Регистрируйся по моей ссылке — получишь скидку 10% на первый месяц:';
 
         box.innerHTML = `
@@ -147,7 +147,7 @@
                     <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;align-items:center;">
                         <div><h3 style="margin:0 0 .2rem;">${esc(g.name)}</h3>
                             <div class="tc-meta">Преподаватель: ${esc(g.teacherName || '')}${g.subject ? ' · ' + esc(g.subject) : ''}${g.scheduleText ? ' · ' + esc(g.scheduleText) : ''}</div></div>
-                        <a class="tc-btn primary" href="video-lesson.html?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">Войти на урок</a>
+                        <a class="tc-btn primary" href="video-lesson?room=${encodeURIComponent(g.room)}&group=${encodeURIComponent(g.id)}">Войти на урок</a>
                     </div>
                     <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin:.9rem 0 .4rem;">
                         <span class="tc-chip ${avg == null ? '' : avg >= 8 ? 'good' : avg >= 5 ? 'mid' : 'low'}">Средняя оценка: ${avg == null ? '—' : (Math.round(avg * 10) / 10)}</span>

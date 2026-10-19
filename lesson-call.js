@@ -463,7 +463,7 @@
                 <p>${esc(hm(startedAt))} – ${esc(hm(endedAt))} · ${esc(fmtDur(endedAt - startedAt))}</p>
                 <div class="end-list">${rows}</div><p class="call-hint">${esc(X('Итоги отправлены администратору.'))}</p>
                 <button class="btn-primary" type="button" id="end-back">${esc(X('К списку уроков'))}</button></div></div></div>`;
-            const bk = $('#end-back'); if (bk) bk.onclick = () => { location.href = 'video-lesson.html'; };
+            const bk = $('#end-back'); if (bk) bk.onclick = () => { location.href = 'video-lesson'; };
             if (opts.onEnded) opts.onEnded();
         } catch (e) { console.warn(e); card(X('Не удалось завершить урок: '), e.message); }
         ending = false;
@@ -564,7 +564,7 @@
         cleanup();
         if (root) {
             root.innerHTML = `<div class="call"><div class="call-pre"><div class="call-card"><h3>${esc(final ? X('Урок завершён') : X('Вы вышли из урока'))}</h3>${msg ? `<p>${esc(msg)}</p>` : ''}${final ? `<button class="btn-primary" type="button" id="call-rejoin">${esc(X('К списку уроков'))}</button>` : `<button class="btn-primary" type="button" id="call-rejoin">${esc(X('Войти снова'))}</button>`}</div></div></div>`;
-            $('#call-rejoin').onclick = () => (final ? (location.href = 'video-lesson.html') : start(room, root, opts));
+            $('#call-rejoin').onclick = () => (final ? (location.href = 'video-lesson') : start(room, root, opts));
         }
         if (final && opts.onEnded) opts.onEnded();
         if (opts.onLeave) opts.onLeave();
@@ -623,7 +623,7 @@
         build();
         const user = await new Promise((res) => { if (auth.currentUser) return res(auth.currentUser); const u = auth.onAuthStateChanged((x) => { u(); res(x); }); });
         if (!user) {
-            $('#call-pre').innerHTML = `<div class="call-card"><h3>${esc(X('Войдите в аккаунт'))}</h3><p>${esc(X('Чтобы войти в урок, нужно войти в свой аккаунт TheStarth.'))}</p><a class="btn-primary" href="index.html#login">${esc(X('Войти'))}</a><button class="call-alt" type="button" id="pre-alt">${esc(X('Запасной режим (Jitsi, без входа)'))}</button></div>`;
+            $('#call-pre').innerHTML = `<div class="call-card"><h3>${esc(X('Войдите в аккаунт'))}</h3><p>${esc(X('Чтобы войти в урок, нужно войти в свой аккаунт TheStarth.'))}</p><a class="btn-primary" href="./#login">${esc(X('Войти'))}</a><button class="call-alt" type="button" id="pre-alt">${esc(X('Запасной режим (Jitsi, без входа)'))}</button></div>`;
             $('#pre-alt').onclick = () => opts.onFallback && opts.onFallback(); return;
         }
         me = user; let p = window.currentUserProfile || {};

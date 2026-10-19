@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateAuthUI(user) {
         window.currentAuthUser = user;
-        const authLinks = document.querySelectorAll('.nav-links a[href="dashboard.html"], .nav-links a[href="#"], .nav-links a.auth-nav-link');
+        const authLinks = document.querySelectorAll('.nav-links a[href="dashboard"], .nav-links a[href="#"], .nav-links a.auth-nav-link');
         authLinks.forEach(link => {
             if (link.classList.contains('lang-btn')) return;
             // Recognise the button by attribute, not by its (translated) text
@@ -508,7 +508,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const roleLabel = profile.role === 'teacher' ? t('role.teacher') : t('role.student');
                 // Убираем data-i18n, чтобы смена языка не затирала имя пользователя
                 link.removeAttribute('data-i18n');
-                link.href = "dashboard.html";
+                link.href = "dashboard";
                 link.classList.add('auth-nav-user');
                 link.title = t('nav.open_dashboard');
                 link.innerHTML =
@@ -522,11 +522,11 @@ document.addEventListener('DOMContentLoaded', () => {
             let a = nav.querySelector('.nav-msg-link');
             if (!user) { if (a) a.remove(); return; }
             if (!a) {
-                a = document.createElement('a'); a.className = 'nav-msg-link btn-outline'; a.href = 'messenger.html'; a.setAttribute('data-i18n', 'nav.messenger');
+                a = document.createElement('a'); a.className = 'nav-msg-link btn-outline'; a.href = 'messenger'; a.setAttribute('data-i18n', 'nav.messenger');
                 a.textContent = t('nav.messenger');
                 const anchor = nav.querySelector('a.auth-nav-link'); if (anchor) nav.insertBefore(a, anchor); else nav.appendChild(a);
             }
-            if (/messenger\.html/.test(location.pathname)) a.classList.add('active');
+            if (/\/messenger(\.html)?$/.test(location.pathname)) a.classList.add('active');
         });
     }
 
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await auth.signInWithEmailAndPassword(loginForm.email.value.trim(), loginForm.password.value);
                 authModal.style.display = 'none';
-                window.location.href = 'dashboard.html';
+                window.location.href = 'dashboard';
             } catch (err) {
                 errEl.textContent = translateFirebaseError_(err.code, err.message);
             } finally {
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ── REFERRALS ──────────────────────────────────────────────────────────────
-    // Invite code = the student's nickname. Link: index.html?ref=<nickname>.
+    // Invite code = the student's nickname. Link: ./?ref=<nickname>.
     // The code is remembered in this browser, and when the visitor registers we write
     // referrals/<new uid> (status "registered"). The admin later marks it "paid" / "rewarded".
     const REF_RE = /^[a-z0-9_]{3,20}$/;
@@ -637,7 +637,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try { const r = localStorage.getItem('starth_ref') || ''; return REF_RE.test(r) ? r : ''; } catch (e) { return ''; }
     };
     window.starthReferralLink = function (nickname) {
-        return window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + 'index.html?ref=' + encodeURIComponent(nickname);
+        return window.location.origin + window.location.pathname.replace(/[^/]*$/, '') + '?ref=' + encodeURIComponent(nickname);
     };
     function trOr_(key, fallback) { const v = (typeof t === 'function') ? t(key) : key; return (v && v !== key) ? v : fallback; }
 
@@ -768,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await Promise.race([sheetSent, new Promise(r => setTimeout(r, 2500))]);
 
                 authModal.style.display = 'none';
-                window.location.href = 'dashboard.html';
+                window.location.href = 'dashboard';
             } catch (err) {
                 errEl.textContent = translateFirebaseError_(err.code, err.message);
             } finally {
@@ -780,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.starthLogout = function() {
         if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) auth.signOut();
-        window.location.href = 'index.html';
+        window.location.href = './';
     };
 
     // Hero no longer uses a canvas animation — replaced with a static score-report visual.
@@ -963,11 +963,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // everybody else is sent to the referral section of the personal cabinet (asks to log in).
     window.generateReferralLink = function() {
         const profile = window.currentUserProfile;
-        if (!profile || !profile.nickname) { window.location.href = 'dashboard.html#referral'; return; }
+        if (!profile || !profile.nickname) { window.location.href = 'dashboard#referral'; return; }
         const link = window.starthReferralLink(profile.nickname);
         navigator.clipboard.writeText(link).then(() => {
             window.showToast(t('js.ref_copied'), 'users');
-        }).catch(() => { window.location.href = 'dashboard.html#referral'; });
+        }).catch(() => { window.location.href = 'dashboard#referral'; });
     };
 
     // Quests action triggers

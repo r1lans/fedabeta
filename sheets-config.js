@@ -4,7 +4,7 @@
  * >>> (заканчивается на /exec) — инструкция в sheets-logging/SETUP.md.
  * Пока адрес пустой, запись в таблицу отключена, а сайт работает как обычно.
  */
-var SHEETS_LOG_URL = "https://script.google.com/macros/s/AKfycbz2Tc78_wjK4CKOjP60HXP-fo65I0lhxO0EBwl8OR6cYXrOKsZntubMqQ0oAOSV8M-Elw/exec";
+var SHEETS_LOG_URL = "https://script.google.com/macros/s/AKfycbxREtMXNxpoNfbeHNKlmZKhIHRtr1v6R3HUJr5JpV_QNbrjex0mLyqZl73f101wA-VTiQ/exec";
 
 /* Send one row to the sheet. Never throws and never blocks the site.
  *  - keepalive: the request survives the page navigating away right after

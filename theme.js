@@ -75,7 +75,7 @@
         Array.prototype.slice.call(links.children).forEach(function (el) {
             if (el.tagName !== 'A') return;
             var href = el.getAttribute('href') || '';
-            var isMock = /mock-exam\.html/.test(href);
+            var isMock = /mock-exam(\.html)?($|[?#])/.test(href);
             var pinned = isMock || el.classList.contains('btn-outline') ||
                 el.classList.contains('auth-nav-link') || el.classList.contains('admin-nav-link');
             if (pinned) {

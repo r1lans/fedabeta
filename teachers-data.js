@@ -1,6 +1,6 @@
 /* Built-in teachers (the five that used to be hard-coded), with hand-written
- * Uzbek and English translations. Used by about.html / teacher.html until the
- * admin switches teacher management on, and by admin.html to move them into
+ * Uzbek and English translations. Used by about / teacher until the
+ * admin switches teacher management on, and by admin to move them into
  * the database (translations included). */
 window.BUILTIN_TEACHERS = [
   {

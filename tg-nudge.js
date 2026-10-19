@@ -10,7 +10,7 @@
   T = T || {ru: 0}.x || ['Добавьте Telegram, чтобы получать напоминания об уроках и ссылку на занятие', 'Добавить', 'Позже'];
   function open() {
     if (window.ProfileEditor) window.ProfileEditor.open();
-    else location.href = 'dashboard.html?editprofile=1';
+    else location.href = 'dashboard?editprofile=1';
   }
   function run(p) {
     if (!p) return;

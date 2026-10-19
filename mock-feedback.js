@@ -1,4 +1,4 @@
-/* TheStarth — shared HTML for an IELTS Writing evaluation (used on mock-exam.html for students and in the teacher cabinet).
+/* TheStarth — shared HTML for an IELTS Writing evaluation (used on mock-exam for students and in the teacher cabinet).
  * MockFeedback.html(fb, { taskType })  ->  string. All text is Russian (translated by i18n-extra.js when the language is switched).
  * fb = { overall, criteria:{ ta|cc|lr|gra: {band, comment} }, strengths[], weaknesses[], corrections[{original,better,why}], advice[], wordCountNote, teacherNote }
  */
