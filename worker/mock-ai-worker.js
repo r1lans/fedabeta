@@ -236,7 +236,12 @@ async function assistant(request, env, body, json, useCF) {
     if (!msgs.length || msgs[msgs.length - 1].role !== 'user') return json({ error: 'Пустой вопрос' }, 400);
     const lang = ['ru', 'uz', 'en'].includes(body.lang) ? body.lang : 'ru';
     const page = String(body.page || '').slice(0, 120);
-    const voiceRules = body.voice ? '\nVOICE CALL: this is a live voice conversation, your reply will be read aloud. Talk like a friendly, natural human consultant on the phone: 1–3 short sentences, simple spoken language, no lists, no markdown, no links or emojis. Say prices like "108 долларов в месяц". You may end with a short question to keep the conversation going.' : '';
+    const voiceRules = body.voice ? '\nVOICE CALL: this is a live phone-like conversation and your reply is read aloud by a speech engine. Sound like a warm, natural human consultant, not a robot: ' +
+        '1–3 short sentences, simple everyday spoken language, contractions/colloquial but polite ("вы" / "Siz"), no lists, no markdown, no links, no emojis, no brackets. ' +
+        'Write everything the way it is SPOKEN in the reply language: in Russian write foreign names in Cyrillic (Зе Старз, айелтс, телеграм, инстаграм, спикинг, сат), in Uzbek use natural Uzbek Latin (Ze Starz, ayelts, telegram, spiking), in English write The Starz. ' +
+        'Write numbers and prices in words when short (Russian: "сто восемь долларов в месяц", "семь с половиной"; Uzbek: "bir yuz sakkiz dollar", "yetti yarim"; English: "a hundred and eight dollars a month"). ' +
+        'Never spell out web addresses; say "в нашем телеграме" / "Telegram kanalimizda" / "on our Telegram" instead. You may end with a short friendly question to keep the conversation going. ' +
+        'Uzbek must be natural modern Uzbek (Latin script) as people in Tashkent speak, not a word-by-word translation.' : '';
     const system = ASSIST_RULES + voiceRules + '\nSite language: ' + lang + (page ? '. The visitor is on: ' + page : '') + '\n\nFACTS:\n' + KB + '\n\n' + (await siteFacts(env));
 
     if (useCF) {

@@ -338,16 +338,31 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
     const cleanSpeech = (text) => String(text).replace(/\*\*/g, '').replace(/https?:\/\/\S+/g, '').replace(/\b(?:t\.me|instagram\.com)\/\S+/g, '').replace(/[•#*_]/g, '').replace(/\s*\n+\s*[-–]?\s*/g, '. ').replace(/\s+/g, ' ').trim();
     // How the voice should pronounce our words and numbers (otherwise "TheStarth" sounds like "тистарт", "IELTS" letter by letter,
     // and "7.5" gets a pause in the middle).
+    // Pronunciation dictionary: how each voice should SAY our words. Russian uses a stress mark (´) where voices
+    // often stress the wrong syllable. Add a line here if the voice mispronounces something.
+    const W = (w) => new RegExp('(^|[^A-Za-zА-Яа-яЁёʻ\'’])(' + w + ')(?=$|[^A-Za-zА-Яа-яЁё])', 'gi');
     const SAY = {
-        ru: [[/the\s?starth/gi, 'Зе Старз'], [/\bIELTS\b/g, 'айелтс'], [/\bSAT\b/g, 'сат'], [/\bMock\b/gi, 'мок'], [/\bSpeaking\b/g, 'спикинг'], [/\bWriting\b/g, 'райтинг'], [/\bReading\b/g, 'ридинг'], [/\bListening\b/g, 'лиснинг'],
-            [/(\d+)[.,]5\b/g, '$1 с половиной'], [/(\d+)[.,](\d)\b/g, '$1 и $2'], [/\$\s?(\d+)/g, '$1 долларов'], [/(\d+)\s?\$/g, '$1 долларов'], [/1-на-1/g, 'один на один'], [/\bTelegram\b/gi, 'телеграм'], [/\bPayme\b/gi, 'пэйми'], [/\bClick\b/g, 'клик']],
-        uz: [[/the\s?starth/gi, 'Ze Starz'], [/\bIELTS\b/g, 'ayelts'], [/\bSAT\b/g, 'sat'], [/(\d+)[.,]5\b/g, '$1 yarim'], [/(\d+)[.,](\d)\b/g, '$1 butun $2'], [/\$\s?(\d+)/g, '$1 dollar'], [/(\d+)\s?\$/g, '$1 dollar']],
-        en: [[/the\s?starth/gi, 'The Starz'], [/\$\s?(\d+)/g, '$1 dollars'], [/1-on-1/gi, 'one on one']],
+        ru: [[/the\s?starth/gi, 'Зе Ста́рз'], [/зе\s?старз/gi, 'Зе Ста́рз'],
+            ['IELTS', 'а́йелтс'], ['SAT Math', 'сат мэс'], ['SAT', 'сат'], ['Math', 'мэс'], ['Mock Exam', 'мок экза́м'], ['Mock', 'мок'], ['mock-?тест\\w*', 'мок тест'],
+            ['Speaking', 'спи́кинг'], ['Writing', 'ра́йтинг'], ['Reading', 'ри́динг'], ['Listening', 'ли́снинг'], ['Band', 'бэнд'], ['Task', 'таск'], ['Part', 'парт'],
+            ['General English', 'дже́нерал и́нглиш'], ['English', 'и́нглиш'], ['Academic', 'акаде́мик'], ['Cambridge', 'ке́мбридж'],
+            ['Telegram', 'телегра́м'], ['телеграм\\w*', (m) => m.replace(/^телеграм/i, 'телегра́м')], ['Instagram', 'инстагра́м'], ['WhatsApp', 'вотса́п'],
+            ['Payme', 'пэ́йми'], ['Click', 'клик'], ['Zoom', 'зум'], ['Google Meet', 'гугл мит'], ['Google', 'гугл'], ['online', 'онла́йн'], ['email', 'имэ́йл'], ['e-mail', 'имэ́йл'],
+            ['PDF', 'пэдээ́ф'], ['ID', 'айди́'], ['Standard', 'станда́рт'], ['Intensive', 'интенси́в'],
+            [/(\d+)[.,]5\b/g, '$1 с полови́ной'], [/(\d+)[.,](\d)\b/g, '$1 и $2'], [/\$\s?(\d+)/g, '$1 до́лларов'], [/(\d+)\s?\$/g, '$1 до́лларов'], [/(\d+)\s?%/g, '$1 проце́нтов'],
+            [/1-на-1/g, 'оди́н на оди́н'], [/\+998/g, 'плюс девятьсо́т девяно́сто во́семь,'], [/(\d)\s?мин\b/g, '$1 мину́т']],
+        uz: [[/the\s?starth/gi, 'Ze Starz'], ['IELTS', 'ayelts'], ['SAT Math', 'sat mes'], ['SAT', 'sat'], ['Math', 'mes'], ['Mock Exam', 'mok ekzam'], ['Mock', 'mok'],
+            ['Speaking', 'spiking'], ['Writing', 'rayting'], ['Reading', 'riding'], ['Listening', 'lisning'], ['Band', 'bend'], ['General English', 'jeneral ingliş'], ['English', 'ingliş'],
+            ['Telegram', 'telegram'], ['Instagram', 'instagram'], ['WhatsApp', 'vatsap'], ['Payme', 'peymi'], ['online', 'onlayn'], ['email', 'imeyl'],
+            [/(\d+)[.,]5\b/g, '$1 yarim'], [/(\d+)[.,](\d)\b/g, '$1 butun $2'], [/\$\s?(\d+)/g, '$1 dollar'], [/(\d+)\s?\$/g, '$1 dollar'], [/(\d+)\s?%/g, '$1 foiz'],
+            [/1-ga-1/g, 'birga bir'], [/\+998/g, 'plyus to‘qqiz yuz to‘qson sakkiz,']],
+        en: [[/the\s?starth/gi, 'The Starz'], ['IELTS', 'eye-elts'], [/\$\s?(\d+)/g, '$1 dollars'], [/1-on-1/gi, 'one on one'], [/\+998/g, 'plus nine nine eight,']],
     };
-    function speechText(text) {
+    Object.keys(SAY).forEach((l) => { SAY[l] = SAY[l].map(([re, to]) => (typeof re === 'string' ? [W(re), typeof to === 'function' ? (m, a, w) => a + to(w) : '$1' + to] : [re, to])); });
+    function speechText(text, premiumVoice) {
         const l = vlang(); let t = cleanSpeech(text); (SAY[l] || []).forEach(([re, to]) => { t = t.replace(re, to); });
         // No Uzbek voice on this device: a Turkish voice reads Uzbek Latin text almost right once the letters are mapped.
-        if (l === 'uz' && !exactVoice('uz') && exactVoice('tr')) t = t.replace(/[gG][ʻ'’`‘]/g, 'ğ').replace(/[oO][ʻ'’`‘]/g, 'o').replace(/sh/g, 'ş').replace(/Sh/g, 'Ş').replace(/ch/g, 'ç').replace(/Ch/g, 'Ç').replace(/j/g, 'c').replace(/J/g, 'C').replace(/x/g, 'h').replace(/X/g, 'H').replace(/q/g, 'k').replace(/Q/g, 'K');
+        if (!premiumVoice && l === 'uz' && !exactVoice('uz') && exactVoice('tr')) t = t.replace(/[gG][ʻ'’`‘]/g, 'ğ').replace(/[oO][ʻ'’`‘]/g, 'o').replace(/sh/g, 'ş').replace(/Sh/g, 'Ş').replace(/ch/g, 'ç').replace(/Ch/g, 'Ç').replace(/j/g, 'c').replace(/J/g, 'C').replace(/x/g, 'h').replace(/X/g, 'H').replace(/q/g, 'k').replace(/Q/g, 'K');
         return t;
     }
     // Split only at real sentence ends (punctuation followed by a space), and glue short sentences together: fewer pauses.
@@ -364,7 +379,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         const clean = speechText(text); if (!clean) return fin();
         if (premium !== false && audio) {
             try {
-                const r = await fetch(window.MOCK_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'tts', lang: vlang(), text: cleanSpeech(text).slice(0, 700) }) });
+                const r = await fetch(window.MOCK_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'tts', lang: vlang(), text: speechText(text, true).slice(0, 700) }) });
                 if (my !== sayToken) return;
                 if (r.ok && /audio/.test(r.headers.get('Content-Type') || '')) {
                     premium = true; store.set('saTTS', true);
