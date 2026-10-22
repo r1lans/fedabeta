@@ -75,6 +75,7 @@
     let cur = null;               // group being viewed
     let gradesCache = [];         // grades of the current group
     let attCache = [];            // attendance docs of the current group
+    let absCache = [];            // «не смогу прийти» notices for the current group
     let tab = 'students';
     let attDate = todayStr();
     let attMarks = {};
@@ -107,6 +108,8 @@
         ]);
         gradesCache = []; gs.forEach((d) => gradesCache.push(Object.assign({ id: d.id }, d.data())));
         attCache = []; as.forEach((d) => attCache.push(Object.assign({ id: d.id }, d.data())));
+        absCache = [];
+        try { const ab = await col('absences').where('teacherUid', '==', user.uid).get(); ab.forEach((d) => { const a = d.data(); if (a.groupId === g.id) absCache.push(a); }); } catch (e) {}
     }
 
     function avgFor(nick) {
@@ -212,13 +215,13 @@
         }
     }
 
-    async function openGroup(id) {
+    async function openGroup(id, openTab, date) {
         cur = groups.find((g) => g.id === id);
         if (!cur) return renderList();
         root.innerHTML = '<div class="tc-empty">Загрузка…</div>';
         try { await loadGroupData(cur); } catch (err) { console.warn(err); gradesCache = []; attCache = []; }
-        tab = 'students';
-        attDate = todayStr();
+        tab = openTab || 'students';
+        attDate = date || todayStr();
         loadAttForDate();
         renderGroup();
     }
@@ -319,8 +322,8 @@
                 <div class="tc-msg" id="tcAddMsg">Ученик должен быть зарегистрирован на сайте — никнейм он видит в своём кабинете.</div>
             </form>
             <div class="tc-actions" style="margin:0 0 .6rem;">
-                <button class="tc-btn" type="button" id="tcCsvAtt">Скачать посещаемость (CSV)</button>
-                <button class="tc-btn" type="button" id="tcCsvGr">Скачать оценки (CSV)</button>
+                <button class="tc-btn" type="button" id="tcCsvAtt">Скачать посещаемость (Excel)</button>
+                <button class="tc-btn" type="button" id="tcCsvGr">Скачать оценки (Excel)</button>
             </div>
             <div class="tc-card" id="tcStudList"></div>`;
         document.getElementById('tcCsvAtt').onclick = () => window.CsvExport && window.CsvExport.attendance(cur, attCache);
@@ -417,7 +420,7 @@
             row.className = 'tc-student';
             row.innerHTML = `
                 <div class="tc-avatar">${esc(initials(m))}</div>
-                <div class="tc-who"><strong>${esc(m.name || '@' + m.nickname)}</strong><span class="tc-meta">@${esc(m.nickname)}</span></div>
+                <div class="tc-who"><strong>${esc(m.name || '@' + m.nickname)}</strong><span class="tc-meta">@${esc(m.nickname)}</span>${(() => { const a = absCache.find((x) => x.date === attDate && (x.uid === m.uid || x.nickname === m.nickname)); return a ? `<span class="tc-warn" style="display:block;margin-top:2px;color:${a.excused ? '#2e9a43' : '#b07a0e'}">${esc(X(a.excused ? 'Предупредил за 24 ч+ — не оплачивается' : 'Предупредил меньше чем за 24 ч'))}${a.reason ? ' · «' + esc(a.reason) + '»' : ''}</span>` : ''; })()}</div>
                 <div class="tc-seg" data-nick="${esc(m.nickname)}">
                     ${Object.keys(ST).map((k) => `<button type="button" data-s="${k}" class="${cur_ === k ? 'on-' + k : ''}">${ic(ST[k].icon)} ${ST[k].label}</button>`).join('')}
                 </div>`;
@@ -574,6 +577,9 @@
 
     // ── public ──────────────────────────────────────────────────────────────
     window.TeacherCabinet = {
+        /** open a group straight on a tab (used by the cabinet home: «отметить посещаемость за 20.10») */
+        async openGroup(id, openTab, date) { if (!groups.length) { try { await loadGroups(); } catch (e) {} } return openGroup(id, openTab, date); },
+        newGroup() { renderList(); const b = document.getElementById('tcNewBtn'); if (b) b.click(); },
         async init(u, p) {
             user = u; profile = p || {};
             root = document.getElementById('tcGroupsRoot');

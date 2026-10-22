@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="theme.js?v=57"></script>
-    <script src="sheets-config.js?v=57"></script>
+    <script src="theme.js?v=60"></script>
+    <script src="sheets-config.js?v=60"></script>
     <title>Личный кабинет — TheStarth</title>
     <meta name="robots" content="noindex, nofollow">
     <meta name="description" content="Личный кабинет TheStarth: ваши результаты тестов, реферальная программа и бонусы.">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=57">
+    <link rel="stylesheet" href="styles.css?v=60">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         body.dash-wait footer { display: none; }
@@ -234,6 +234,60 @@
         }
         .tch-hw-save { margin-top: 0.6rem; padding: 0.5rem 1.1rem; border-radius: 8px; font-size: 0.85rem; }
         .tch-hw-saved { color: var(--ink-soft); font-size: 0.8rem; margin-left: 0.75rem; }
+        /* ── Cabinet shell (sidebar + panels), same language as the admin panel ── */
+        main.dash-main { padding: 88px 0 0; max-width: none; }
+        .cab-shell { display: grid; grid-template-columns: 264px minmax(0, 1fr); max-width: 1400px; margin: 0 auto; min-height: calc(100vh - 88px); }
+        .cab-side { position: sticky; top: 88px; height: calc(100vh - 88px); overflow-y: auto; display: flex; flex-direction: column; padding: 1.2rem .8rem 1rem; border-right: 1px solid var(--rule); background: var(--surface); }
+        .cab-user { display: flex; align-items: center; gap: .7rem; padding: .3rem .55rem 1rem; border-bottom: 1px solid var(--rule); margin-bottom: .4rem; }
+        .cab-av { width: 42px; height: 42px; border-radius: 12px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-family: var(--font-heading); font-weight: 800; font-size: 1.15rem; flex-shrink: 0; }
+        .cab-user b { display: block; font-size: .98rem; line-height: 1.2; }
+        .cab-user small { display: block; color: var(--ink-soft); font-size: .78rem; }
+        .cab-grp { font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); padding: 1rem .7rem .35rem; }
+        .cab-item { display: flex; align-items: center; gap: .7rem; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: .5rem .65rem; font: inherit; font-size: .93rem; color: var(--ink); cursor: pointer; transition: background .15s, color .15s; }
+        .cab-item .ti { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--paper-alt); color: var(--ink-soft); flex-shrink: 0; }
+        .cab-item .ti svg { width: 17px; height: 17px; }
+        .cab-item:hover { background: var(--paper-alt); }
+        .cab-item.active { background: var(--accent-tint); color: var(--accent); font-weight: 700; }
+        .cab-item.active .ti { background: var(--accent); color: var(--on-accent); }
+        .cab-badge { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; background: var(--accent-warm); color: #fff; font-size: .7rem; font-weight: 800; display: inline-grid; place-items: center; }
+        .cab-badge[hidden] { display: none; }
+        .cab-foot { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--rule); }
+        .cab-out { width: 100%; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 10px; padding: .55rem; font: inherit; font-weight: 600; cursor: pointer; }
+        .cab-out:hover { border-color: var(--accent-warm); color: var(--accent-warm); }
+        .cab-content { min-width: 0; padding: 1.8rem 2.2rem 4rem; }
+        .cab-head { margin-bottom: 1.4rem; }
+        .cab-crumb { font-size: .74rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: .25rem; }
+        .cab-head h2 { font-size: 1.8rem; margin: 0; line-height: 1.15; }
+        .cab-head p { color: var(--ink-soft); font-size: .92rem; line-height: 1.55; margin: .4rem 0 0; max-width: 75ch; }
+        .cab-panel { display: none; }
+        .cab-panel.active { display: block; animation: cabIn .2s ease; }
+        @keyframes cabIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+        .cab-hero { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .cab-hero h1 { font-size: 2rem; margin: 0 0 .3rem; }
+        .cab-hero p { color: var(--ink-soft); margin: 0; }
+        .cab-sub { font-size: 1.1rem; margin: 1.8rem 0 .8rem; }
+        body.cab-teacher #studentHome, body.cab-student #teacherHome { display: none; }
+        body.cab-teacher #backBtn, body.cab-student #backBtn { display: none !important; }
+        .cab-mtop, .cab-scrim { display: none; }
+        .cab-guide { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.5rem; align-items: center; background: var(--surface); border: 1px solid var(--rule); border-radius: 18px; padding: 1.4rem; }
+        .cab-guide-cover img { width: 100%; border-radius: 12px; display: block; border: 1px solid var(--rule); box-shadow: 0 12px 30px rgba(var(--shadow-rgb), .12); }
+        .cab-guide h3 { font-size: 1.4rem; margin: 0 0 .5rem; }
+        .cab-guide p { color: var(--ink-soft); line-height: 1.55; margin: 0 0 1rem; }
+        .cab-guide-acts { display: flex; gap: .6rem; flex-wrap: wrap; }
+        .cab-guide-acts a { text-decoration: none; padding: .7rem 1.2rem; border-radius: 10px; }
+        @media (max-width: 760px) { .cab-guide { grid-template-columns: 1fr; } }
+        @media (max-width: 900px) {
+            .cab-shell { grid-template-columns: 1fr; }
+            .cab-side { position: fixed; left: 0; top: 0; bottom: 0; height: auto; width: min(300px, 86vw); z-index: 1200; transform: translateX(-105%); transition: transform .25s ease; box-shadow: 0 0 40px rgba(0,0,0,.25); }
+            .cab-open .cab-side { transform: none; }
+            .cab-open .cab-scrim { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 1100; }
+            .cab-mtop { display: flex; align-items: center; gap: .7rem; position: sticky; top: 76px; z-index: 40; background: var(--nav-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); padding: .6rem 1rem; margin: -1.2rem -1rem 1rem; }
+            .cab-mtop button { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 10px; padding: .5rem .8rem; font: inherit; font-weight: 600; cursor: pointer; }
+            .cab-mtop span { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .cab-content { padding: 1.2rem 1rem 4rem; }
+            .cab-hero h1 { font-size: 1.5rem; }
+            .cab-head h2 { font-size: 1.4rem; }
+        }
     </style>
 </head>
 <body class="dash-wait">
@@ -276,51 +330,55 @@
 
     <!-- Dashboard content, shown only when logged in -->
     <main class="dash-main" id="dashContent" style="display: none;">
-
-        <div class="dash-header">
-            <div>
-                <h1>С возвращением, <span class="text-premium" id="dashUserName">студент</span>!</h1>
-                <p id="dashSubtitle">Здесь собраны ваши результаты, бонусы и статус обучения в TheStarth.</p>
+      <div class="cab-shell" id="cabShell">
+        <aside class="cab-side" id="cabSide" aria-label="Разделы кабинета">
+            <div class="cab-user">
+                <div class="cab-av" id="cabAvatar">S</div>
+                <div><b id="cabName">—</b><small id="cabRole">Ученик</small></div>
             </div>
-            <button class="btn-outline" onclick="starthLogout()">Выйти</button>
-        </div>
-
-        <!-- Profile -->
-        <div class="profile-card">
-            <div class="profile-avatar" id="dashAvatar">S</div>
-            <div class="profile-details">
-                <div class="p-name" id="dashProfileName">—</div>
-                <div class="p-contact" id="dashProfileNickname" style="color: var(--accent); font-weight: 600;"></div>
-                <div class="p-contact" id="dashProfileId" style="font-weight: 600;"></div>
-                <div class="p-contact" id="dashProfileContact">—</div>
+            <nav id="cabNav"></nav>
+            <div class="cab-foot">
+                <button type="button" class="cab-out" onclick="starthLogout()">Выйти</button>
             </div>
-            <div class="profile-actions">
-                <button type="button" class="btn-outline" id="dashEditProfile" onclick="window.ProfileEditor && ProfileEditor.open()">✏️ Редактировать профиль</button>
-                <a href="payment" id="dashPayLink" class="btn-primary" style="white-space: nowrap;">Оплатить курс</a>
+        </aside>
+        <div class="cab-scrim" onclick="Cabinet.menu(false)"></div>
+        <section class="cab-content">
+            <div class="cab-mtop"><button type="button" onclick="Cabinet.menu(true)" aria-label="Открыть меню"><svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg> Меню</button><span id="cabMTitle">Главная</span></div>
+            <div class="cab-head" id="cabHead"><div class="cab-crumb" id="cabCrumb"></div><h2 id="cabTitle">Главная</h2><p id="cabHint"></p></div>
+
+            <!-- HOME -->
+            <div class="cab-panel" data-p="home">
+                <div class="cab-hero">
+                    <div>
+                        <h1>С возвращением, <span class="text-premium" id="dashUserName">студент</span>!</h1>
+                        <p id="dashSubtitle">Здесь собраны ваши уроки, оценки и прогресс в TheStarth.</p>
+                    </div>
+                </div>
+                <div id="studentHome"><div id="stHome"></div><div id="remindersSection"></div></div>
+                <div id="teacherHome"><div id="tcHome"></div></div>
             </div>
-        </div>
 
-        <!-- ═══ STUDENT VIEW (hidden for teachers) ═══ -->
-        <div id="studentOnly">
-            <div id="remindersSection"></div>
-            <div id="gameSection"></div>
-            <div id="dashMyGroupsSection" style="display:none;">
-                <h2 class="dash-section-title">Мои группы, оценки и посещаемость</h2>
-                <div id="dashMyGroups"></div>
+            <!-- STUDENT -->
+            <div class="cab-panel" data-p="progress">
+                <div id="stProgress"></div>
+                <div id="gameSection"></div>
+                <div id="dashMyGroupsSection" style="display:none;">
+                    <h3 class="cab-sub">Мои группы</h3>
+                    <div id="dashMyGroups"></div>
+                </div>
             </div>
-        <!-- Test results -->
-        <!-- My schedule -->
-        <h2 class="dash-section-title">Моё расписание</h2>
-        <div id="dashSchedule"><p style="color: var(--ink-soft); font-size: 0.9rem;">Загрузка…</p></div>
-
-        <!-- Homework left by the teacher — only shown once at least one lesson has some -->
-        <div id="dashHomeworkSection" style="display:none;">
-            <h2 class="dash-section-title">Домашние задания</h2>
-            <div id="dashHomework"></div>
-        </div>
-
-        <h2 class="dash-section-title">Результаты тестов</h2>
-        <div class="dash-grid">
+            <div class="cab-panel" data-p="lessons">
+                <h3 class="cab-sub" style="margin-top:0">Ближайшие уроки · «Не смогу прийти»</h3>
+                <div id="stAbsence"></div>
+                <h3 class="cab-sub">Индивидуальные уроки</h3>
+                <div id="dashSchedule"><p style="color: var(--ink-soft); font-size: 0.9rem;">Загрузка…</p></div>
+                <div id="dashHomeworkSection" style="display:none;">
+                    <h3 class="cab-sub">Домашние задания</h3>
+                    <div id="dashHomework"></div>
+                </div>
+            </div>
+            <div class="cab-panel" data-p="tests">
+                <div class="dash-grid">
             <div class="result-card" id="levelTestCard">
                 <div class="r-icon"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z"/></svg></div>
                 <h3>Тест уровня английского</h3>
@@ -346,10 +404,11 @@
             </div>
         </div>
 
-        <div id="refSection"></div>
-
+            </div>
+            <div class="cab-panel" data-p="bonus">
+                <div id="refSection"></div>
         <!-- Rewards -->
-        <h2 class="dash-section-title">Привилегии и бонусы</h2>
+        <h2 class="dash-section-title">Квесты и бонусы</h2>
         <div class="loyalty-grid">
             <div class="loyalty-card">
                 <span class="loyalty-badge">Бонусы</span>
@@ -377,46 +436,51 @@
             </div>
         </div>
 
+            </div>
+            <div class="cab-panel" data-p="review">
         <!-- Leave a review -->
-        <h2 class="dash-section-title">Оставить отзыв</h2>
         <div class="result-card" style="max-width: 600px;">
             <p style="color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 1rem;">Ваш отзыв появится на сайте после проверки администратором.</p>
             <select id="dashReviewRating" style="width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); margin-bottom: 0.75rem;">
-                <option value="5">5 ★★★★★</option>
-                <option value="4">4 ★★★★</option>
-                <option value="3">3 ★★★</option>
+                <option value="5">5 из 5</option>
+                <option value="4">4 из 5</option>
+                <option value="3">3 из 5</option>
             </select>
             <textarea id="dashReviewText" placeholder="Расскажите, как проходит обучение..." style="width: 100%; min-height: 100px; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font-family: var(--font-main); margin-bottom: 0.75rem;"></textarea>
             <button class="btn-primary" onclick="submitDashReview()">Отправить отзыв</button>
             <div id="dashReviewStatus" style="font-size: 0.85rem; margin-top: 0.75rem;"></div>
         </div>
+            </div>
+
+            <!-- TEACHER -->
+            <div class="cab-panel" data-p="groups"><div id="tcGroupsRoot"></div></div>
+            <div class="cab-panel" data-p="journal"><div id="tcJournalRoot"></div></div>
+            <div class="cab-panel" data-p="salary"><div id="tcSalaryRoot"></div></div>
+            <div class="cab-panel" data-p="absences"><div id="tcAbsRoot"></div></div>
+            <div class="cab-panel" data-p="tlessons"><div id="dashTeacherSchedule"></div></div>
+            <div class="cab-panel" data-p="writing"><div id="tcWritingRoot"></div></div>
+
+            <!-- SHARED -->
+            <div class="cab-panel" data-p="guide"><div id="cabGuide"></div></div>
+            <div class="cab-panel" data-p="profile">
+        <!-- Profile -->
+        <div class="profile-card">
+            <div class="profile-avatar" id="dashAvatar">S</div>
+            <div class="profile-details">
+                <div class="p-name" id="dashProfileName">—</div>
+                <div class="p-contact" id="dashProfileNickname" style="color: var(--accent); font-weight: 600;"></div>
+                <div class="p-contact" id="dashProfileId" style="font-weight: 600;"></div>
+                <div class="p-contact" id="dashProfileContact">—</div>
+            </div>
+            <div class="profile-actions">
+                <button type="button" class="btn-outline" id="dashEditProfile" onclick="window.ProfileEditor && ProfileEditor.open()"><svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Редактировать профиль</button>
+                <a href="payment" id="dashPayLink" class="btn-primary" style="white-space: nowrap;">Оплатить курс</a>
+            </div>
         </div>
 
-        <!-- ═══ TEACHER VIEW (shown only for accounts with the teacher role) ═══ -->
-        <div id="dashTeacherSection" style="display:none;">
-            <div class="tc-tabs" role="tablist">
-                <button class="tc-tab active" type="button" data-main="groups">Мои группы</button>
-                <button class="tc-tab" type="button" data-main="journal">Журнал</button>
-                <button class="tc-tab" type="button" data-main="lessons">Уроки по расписанию</button>
-                <button class="tc-tab" type="button" data-main="writing">Проверка Writing</button>
             </div>
-            <div id="tcMainGroups">
-                <p style="color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1.25rem;">Создавайте группы, добавляйте учеников по никнейму, отмечайте посещаемость, ставьте оценки и проводите урок с общей доской — писать на ней смогут только те, кому вы разрешите.</p>
-                <div id="tcGroupsRoot"></div>
-            </div>
-            <div id="tcMainJournal" style="display:none;">
-                <p style="color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1.25rem;">Все ваши ученики по всем группам: оценки, посещаемость и как меняется успеваемость. Нажмите на ученика — откроются график оценок, все отметки и пропуски.</p>
-                <div id="tcJournalRoot"></div>
-            </div>
-            <div id="tcMainWriting" style="display:none;">
-                <p style="color: var(--ink-soft); font-size: 0.9rem; margin: 0 0 1.25rem;">Работы Writing, которые ученики написали в Mock-тестах. Прочитайте работу, поставьте оценку по критериям IELTS, добавьте комментарий и отправьте разбор ученику.</p>
-                <div id="tcWritingRoot"></div>
-            </div>
-            <div id="tcMainLessons" style="display:none;">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin: 0 0 1.25rem;">Индивидуальные уроки, которые назначил куратор. Отмечайте урок после занятия и оставляйте домашнее задание — ученик увидит его в своём кабинете.</p>
-                <div id="dashTeacherSchedule"></div>
-            </div>
-        </div>
+        </section>
+      </div>
     </main>
 
     <script>
@@ -551,24 +615,30 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js?v=57"></script>
-    <script src="admin-nav.js?v=57"></script>
-    <script src="translations.js?v=57"></script>
-    <script src="content-i18n.js?v=57"></script>
-    <script src="icons.js?v=57"></script>
-    <script src="app.js?v=57"></script>
-    <script src="mock-engine.js?v=57"></script>
-    <script src="mock-feedback.js?v=57"></script>
-    <script src="teacher-cabinet.js?v=57"></script>
-    <script src="teacher-writing.js?v=57"></script>
-    <script src="profile-editor.js?v=57"></script>
-    <script src="cert-art.js?v=57"></script>
-    <script src="gamification.js?v=57"></script>
-    <script src="i18n-extra.js?v=57"></script>
-    <script src="csv-export.js?v=57"></script>
-    <script src="journal.js?v=57"></script>
-    <script src="reminders.js?v=57"></script>
-    <script src="dashboard-student.js?v=57"></script>
+    <script src="firebase-config.js?v=60"></script>
+    <script src="admin-nav.js?v=60"></script>
+    <script src="translations.js?v=60"></script>
+    <script src="content-i18n.js?v=60"></script>
+    <script src="icons.js?v=60"></script>
+    <script src="app.js?v=60"></script>
+    <script src="mock-engine.js?v=60"></script>
+    <script src="mock-feedback.js?v=60"></script>
+    <script src="teacher-cabinet.js?v=60"></script>
+    <script src="teacher-writing.js?v=60"></script>
+    <script src="profile-editor.js?v=60"></script>
+    <script src="cert-art.js?v=60"></script>
+    <script src="gamification.js?v=60"></script>
+    <script src="i18n-extra.js?v=60"></script>
+    <script src="csv-export.js?v=60"></script>
+    <script src="journal.js?v=60"></script>
+    <script src="salary.js?v=60"></script>
+    <script src="absence.js?v=60"></script>
+    <script src="teacher-salary.js?v=60"></script>
+    <script src="teacher-home.js?v=60"></script>
+    <script src="student-progress.js?v=60"></script>
+    <script src="cabinet.js?v=60"></script>
+    <script src="reminders.js?v=60"></script>
+    <script src="dashboard-student.js?v=60"></script>
     <script>
         async function loadStudentSchedule(nickname) {
             const wrap = document.getElementById('dashSchedule');
@@ -667,13 +737,13 @@
                         </div>
                         ${isPast ? `
                         <div class="tch-status-btns">
-                            <button type="button" data-status="done" class="${status === 'done' ? 'active' : ''}">✓ Урок проведён</button>
-                            <button type="button" data-status="missed" class="${status === 'missed' ? 'active' : ''}">✗ Ученик не пришёл</button>
+                            <button type="button" data-status="done" class="${status === 'done' ? 'active' : ''}"><svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="m5 12.5 4.5 4.5L19 7"/></svg> Урок проведён</button>
+                            <button type="button" data-status="missed" class="${status === 'missed' ? 'active' : ''}"><svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="M18 6 6 18M6 6l12 12"/></svg> Ученик не пришёл</button>
                         </div>` : ''}
                         <textarea placeholder="Домашнее задание для этого урока…">${escapeHtml(s.homework || '')}</textarea>
                         <div>
                             <button type="button" class="btn-primary tch-hw-save">Сохранить задание</button>
-                            <span class="tch-hw-saved" style="display:none;">Сохранено ✓</span>
+                            <span class="tch-hw-saved" style="display:none;">Сохранено <svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="m5 12.5 4.5 4.5L19 7"/></svg></span>
                         </div>
                     `;
                     card.querySelectorAll('.tch-status-btns button').forEach(btn => {
@@ -745,12 +815,11 @@
             }
 
             const isTeacher = !!(profile && profile.role === 'teacher');
-            document.getElementById('studentOnly').style.display = isTeacher ? 'none' : 'block';
-            document.getElementById('dashTeacherSection').style.display = isTeacher ? 'block' : 'none';
+            if (window.Cabinet) window.Cabinet.setup(isTeacher ? 'teacher' : 'student', user, profile);
 
             if (isTeacher) {
                 // Teacher cabinet: no payments, tests, bonuses or reviews — groups, students, grades, attendance
-                document.getElementById('dashSubtitle').textContent = 'Ваши группы, ученики, оценки и посещаемость.';
+                document.getElementById('dashSubtitle').textContent = 'Ваши уроки на сегодня, что нужно сделать и заработок за месяц.';
                 document.getElementById('dashPayLink').style.display = 'none';
                 document.getElementById('dashProfileId').style.display = 'none';
                 if (window.TeacherCabinet) window.TeacherCabinet.init(user, profile);
@@ -789,19 +858,6 @@
             }
         }
 
-        document.querySelectorAll('[data-main]').forEach((b) => b.addEventListener('click', () => {
-            document.querySelectorAll('[data-main]').forEach((x) => x.classList.toggle('active', x === b));
-            document.getElementById('tcMainGroups').style.display = b.dataset.main === 'groups' ? 'block' : 'none';
-            document.getElementById('tcMainLessons').style.display = b.dataset.main === 'lessons' ? 'block' : 'none';
-            document.getElementById('tcMainWriting').style.display = b.dataset.main === 'writing' ? 'block' : 'none';
-            document.getElementById('tcMainJournal').style.display = b.dataset.main === 'journal' ? 'block' : 'none';
-            if (b.dataset.main === 'journal' && window.StarthJournal) {
-                const u = (typeof auth !== 'undefined' && auth.currentUser) || window.currentAuthUser;
-                const root = document.getElementById('tcJournalRoot');
-                if (u && root) { if (root._jr) root._jr.reload(); else root._jr = window.StarthJournal.mount(root, { mode: 'teacher', uid: u.uid }); }
-            }
-        }));
-
         // app.js dispatches this once Firebase has resolved the login state
         window.addEventListener('starth-auth-ready', (e) => {
             renderDashboard(e.detail.user, e.detail.profile);
@@ -822,9 +878,9 @@
         setTimeout(() => { const dl = document.getElementById('dashLoading'); if (dl && dl.style.display !== 'none') renderDashboard(null, null); }, 10000);
     </script>
     
-    <script src="back-btn.js?v=57"></script>
-    <script src="phone-prefix.js?v=57"></script>
-    <script src="mock-config.js?v=57"></script>
-    <script src="assistant.js?v=57"></script>
+    <script src="back-btn.js?v=60"></script>
+    <script src="phone-prefix.js?v=60"></script>
+    <script src="mock-config.js?v=60"></script>
+    <script src="assistant.js?v=60"></script>
 </body>
 </html>

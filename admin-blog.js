@@ -140,10 +140,10 @@
     function shell() {
         var root = $('blog-root');
         root.innerHTML =
-            '<div class="adm-addbar"><button class="btn-primary" id="blg-add-btn" type="button">＋ Новая статья</button>' +
+            '<div class="adm-addbar"><button class="btn-primary" id="blg-add-btn" type="button"><svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="M12 5v14M5 12h14"/></svg> Новая статья</button>' +
                 '<span class="adm-muted" id="blg-usage"></span></div>' +
             '<div class="admin-form adm-collapsible" id="blg-form" hidden>' +
-                '<div class="adm-form-head"><h3 id="blg-form-title">Новая статья</h3><button type="button" class="adm-x" id="blg-close" aria-label="Свернуть">✕</button></div>' +
+                '<div class="adm-form-head"><h3 id="blg-form-title">Новая статья</h3><button type="button" class="adm-x" id="blg-close" aria-label="Свернуть"><svg class="ico" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-0.15em"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>' +
                 '<div class="adm-split">' +
                 '<div class="adm-split-main">' +
                     '<div class="adm-step"><span>1</span> Текст</div>' +
@@ -270,7 +270,7 @@
         $('blg-count').textContent = posts.length ? posts.length : '';
         var used = sizeOf(posts);
         $('blg-usage').textContent = 'Место под статьи: ' + kb(used) + ' из ' + kb(MAX_DOC) + (used > MAX_DOC * 0.8 ? ' — почти заполнено, удалите старые статьи' : '');
-        if (!posts.length) { wrap.innerHTML = '<div class="empty-state">Статей пока нет — нажмите «＋ Новая статья». Пока статей нет, блок блога на главной скрыт.</div>'; return; }
+        if (!posts.length) { wrap.innerHTML = '<div class="empty-state">Статей пока нет — нажмите «Новая статья». Пока статей нет, блок блога на главной скрыт.</div>'; return; }
         wrap.innerHTML = posts.map(function (p, i) {
             var cover = StarthBlog.safeUrl(p.cover);
             return '<div class="adm-item' + (p.published === false ? ' is-off' : '') + '">' +

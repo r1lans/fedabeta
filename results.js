@@ -24,7 +24,7 @@
         return v <= 9 ? 9 : v <= 100 ? 100 : v <= 800 ? 800 : 1600;
     }
     function num(v) { var n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? null : n; }
-    function initials(n) { return String(n || '').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || '★'; }
+    function initials(n) { return String(n || '').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase() || 'TS'; }
 
     function ringHTML(r, overallLabel) {
         var v = num(r.overall), R = 42, C = 2 * Math.PI * R;

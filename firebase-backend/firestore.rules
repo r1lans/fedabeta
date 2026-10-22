@@ -127,10 +127,14 @@ service cloud.firestore {
       allow read: if isSignedIn() && (isAdmin() ||
         resource.data.teacherUid == request.auth.uid ||
         request.auth.uid in resource.data.memberUids);
+      // format / priceOverride decide the teacher's pay — only an admin sets them.
       allow create: if isSignedIn() && (isAdmin() ||
-        (isTeacher() && request.resource.data.teacherUid == request.auth.uid));
+        (isTeacher() && request.resource.data.teacherUid == request.auth.uid &&
+         !('format' in request.resource.data) && !('priceOverride' in request.resource.data)));
       allow update: if isSignedIn() && (isAdmin() ||
-        (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid));
+        (resource.data.teacherUid == request.auth.uid && request.resource.data.teacherUid == request.auth.uid &&
+         request.resource.data.get('format', '') == resource.data.get('format', '') &&
+         request.resource.data.get('priceOverride', 0) == resource.data.get('priceOverride', 0)));
       allow delete: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
     }
 
@@ -372,6 +376,47 @@ service cloud.firestore {
       allow update: if (isAdmin() || isTeacher()) &&
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedback', 'status', 'checkedBy', 'checkedAt']);
       allow delete: if isAdmin();
+    }
+
+    // «Не смогу прийти»: a student warns the teacher about missing a lesson (site or Telegram bot).
+    // Excused (= the lesson is not paid to the teacher) only when the notice is made at least 24 h before the lesson —
+    // checked here against the server clock, so it cannot be faked. The Telegram worker writes with a service account.
+    match /absences/{id} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.uid == request.auth.uid || resource.data.teacherUid == request.auth.uid);
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'nickname', 'name', 'groupId', 'scheduleId', 'teacherUid', 'date', 'dateNum', 'time', 'lessonAt', 'title', 'reason', 'excused', 'createdAt', 'via']) &&
+        request.resource.data.via == 'site' &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.lessonAt is timestamp &&
+        request.resource.data.lessonAt > request.time &&
+        request.resource.data.lessonAt < request.time + duration.value(60, 'd') &&
+        request.resource.data.excused == (request.resource.data.lessonAt >= request.time + duration.value(24, 'h')) &&
+        request.resource.data.dateNum == (request.resource.data.lessonAt + duration.value(5, 'h')).year() * 10000 + (request.resource.data.lessonAt + duration.value(5, 'h')).month() * 100 + (request.resource.data.lessonAt + duration.value(5, 'h')).day() &&
+        request.resource.data.reason is string && request.resource.data.reason.size() <= 200 &&
+        (
+          (request.resource.data.groupId is string && request.resource.data.groupId != '' &&
+           request.auth.uid in get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.memberUids &&
+           request.resource.data.teacherUid == get(/databases/$(database)/documents/groups/$(request.resource.data.groupId)).data.teacherUid &&
+           id == request.resource.data.groupId + '_' + request.resource.data.date + '_' + request.auth.uid)
+          ||
+          (request.resource.data.scheduleId is string && request.resource.data.scheduleId != '' &&
+           get(/databases/$(database)/documents/schedule/$(request.resource.data.scheduleId)).data.studentNickname == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.nickname &&
+           request.resource.data.teacherUid == get(/databases/$(database)/documents/schedule/$(request.resource.data.scheduleId)).data.teacherUid &&
+           id == 's_' + request.resource.data.scheduleId + '_' + request.resource.data.date + '_' + request.auth.uid)
+        );
+      allow update: if isAdmin();
+      allow delete: if isSignedIn() && (isAdmin() || (resource.data.uid == request.auth.uid && resource.data.lessonAt > request.time));
+    }
+
+    // Teacher pay: bonuses / fines and «paid» marks. The teacher reads their own; only an admin writes.
+    match /salaryAdjust/{id} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+      allow write: if isAdmin();
+    }
+    match /payouts/{id} {
+      allow read: if isSignedIn() && (isAdmin() || resource.data.teacherUid == request.auth.uid);
+      allow write: if isAdmin();
     }
 
     // Admin allowlist: existing admins can promote/demote other admins

@@ -18,7 +18,7 @@
             fName: 'Ваше имя', fPhone: 'Телефон', fMsg: 'Ваш вопрос', fSend: 'Отправить вопрос', fThanks: 'Спасибо! Вопрос отправлен — куратор свяжется с вами в течение рабочего дня.', fNeed: 'Укажите имя и телефон.',
             noMic: 'Ваш браузер не поддерживает голосовой ввод. Попробуйте Chrome или напишите текстом.', micDenied: 'Нет доступа к микрофону. Разрешите его в настройках браузера.',
             book: 'Записаться на бесплатный урок', tg: 'Написать в Telegram',
-            call: 'Голосовой звонок', callChip: '📞 Поговорить голосом', listenS: 'Слушаю…', thinkS: 'Думаю…', speakS: 'Говорю… нажмите, чтобы перебить', pausedS: 'Нажмите на круг и говорите', mutedS: 'Микрофон выключен',
+            call: 'Голосовой звонок', callChip: 'Поговорить голосом', listenS: 'Слушаю…', thinkS: 'Думаю…', speakS: 'Говорю… нажмите, чтобы перебить', pausedS: 'Нажмите на круг и говорите', mutedS: 'Микрофон выключен',
             end: 'Завершить', mute: 'Выключить микрофон', unmute: 'Включить микрофон', callHi: 'Здравствуйте! Я помощник TheStarth. Чем могу помочь?',
             noCall: 'Голосовой звонок работает в Chrome, Edge и Safari. Откройте сайт в одном из них.',
             q: ['Сколько стоит обучение?', 'Как проходят уроки?', 'Как записаться на пробный урок?', 'Какие есть учителя?'] },
@@ -31,7 +31,7 @@
             fName: 'Ismingiz', fPhone: 'Telefon', fMsg: 'Savolingiz', fSend: 'Savolni yuborish', fThanks: 'Rahmat! Savol yuborildi — kurator ish kuni davomida siz bilan bog\'lanadi.', fNeed: 'Ism va telefonni kiriting.',
             noMic: 'Brauzeringiz ovozli kiritishni qo\'llab-quvvatlamaydi. Chrome\'ni sinab ko\'ring yoki matn bilan yozing.', micDenied: 'Mikrofonga ruxsat yo\'q. Uni brauzer sozlamalarida yoqing.',
             book: 'Bepul darsga yozilish', tg: 'Telegram\'da yozish',
-            call: 'Ovozli qo\'ng\'iroq', callChip: '📞 Ovoz bilan gaplashish', listenS: 'Eshityapman…', thinkS: 'O\'ylayapman…', speakS: 'Gapiryapman… bo\'lish uchun bosing', pausedS: 'Doirani bosing va gapiring', mutedS: 'Mikrofon o\'chirilgan',
+            call: 'Ovozli qo\'ng\'iroq', callChip: 'Ovoz bilan gaplashish', listenS: 'Eshityapman…', thinkS: 'O\'ylayapman…', speakS: 'Gapiryapman… bo\'lish uchun bosing', pausedS: 'Doirani bosing va gapiring', mutedS: 'Mikrofon o\'chirilgan',
             end: 'Tugatish', mute: 'Mikrofonni o\'chirish', unmute: 'Mikrofonni yoqish', callHi: 'Assalomu alaykum! Men TheStarth yordamchisiman. Sizga qanday yordam bera olaman?',
             noCall: 'Ovozli qo\'ng\'iroq Chrome, Edge va Safari\'da ishlaydi. Saytni ulardan birida oching.',
             q: ['O\'qish qancha turadi?', 'Darslar qanday o\'tadi?', 'Sinov darsiga qanday yozilaman?', 'Qanday o\'qituvchilar bor?'] },
@@ -44,7 +44,7 @@
             fName: 'Your name', fPhone: 'Phone', fMsg: 'Your question', fSend: 'Send question', fThanks: 'Thank you! Your question has been sent — a curator will contact you within a working day.', fNeed: 'Please enter your name and phone.',
             noMic: 'Your browser doesn\'t support voice input. Try Chrome or type your question.', micDenied: 'No access to the microphone. Allow it in your browser settings.',
             book: 'Book a free lesson', tg: 'Message on Telegram',
-            call: 'Voice call', callChip: '📞 Talk by voice', listenS: 'Listening…', thinkS: 'Thinking…', speakS: 'Speaking… tap to interrupt', pausedS: 'Tap the circle and speak', mutedS: 'Microphone is off',
+            call: 'Voice call', callChip: 'Talk by voice', listenS: 'Listening…', thinkS: 'Thinking…', speakS: 'Speaking… tap to interrupt', pausedS: 'Tap the circle and speak', mutedS: 'Microphone is off',
             end: 'End', mute: 'Mute microphone', unmute: 'Unmute microphone', callHi: 'Hi! I\'m the TheStarth assistant. How can I help?',
             noCall: 'Voice calls work in Chrome, Edge and Safari. Please open the site in one of them.',
             q: ['How much does it cost?', 'How do lessons work?', 'How do I book a trial lesson?', 'Who are the teachers?'] },
@@ -227,7 +227,7 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         bubble('sa-bot', fmt(t.hi));
         if (!history.length) {
             const c = document.createElement('div'); c.className = 'sa-chips';
-            if (SR) { const cc = document.createElement('button'); cc.type = 'button'; cc.className = 'sa-chip call'; cc.textContent = t.callChip; cc.onclick = startCall; c.appendChild(cc); }
+            if (SR) { const cc = document.createElement('button'); cc.type = 'button'; cc.className = 'sa-chip call'; cc.innerHTML = I.phone.replace('<svg ', '<svg width="15" height="15" style="vertical-align:-3px;margin-right:4px" '); cc.appendChild(document.createTextNode(t.callChip)); cc.onclick = startCall; c.appendChild(cc); }
             t.q.forEach((q) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'sa-chip'; b.textContent = q; b.onclick = () => ask(q); c.appendChild(b); });
             list.appendChild(c);
         }

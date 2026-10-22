@@ -313,7 +313,7 @@
     function renderFinal() {
         const el = $('mxResult'); el.hidden = false;
         const L = seq.summary.find((x) => x.t.skill === 'listening'), R = seq.summary.find((x) => x.t.skill === 'reading'), W = seq.summary.find((x) => x.kind === 'writing');
-        const card = (name, x) => x ? `<div class="mx-sum"><small>${name}</small><b>${x.kind === 'writing' ? (x.failed ? '—' : '✓') : bandText(x.b.band, x.b.estimated)}</b><small>${x.kind === 'writing' ? (x.failed ? 'не отправлено' : 'на проверке у учителя') : x.correct + ' / ' + x.total}</small></div>` : '';
+        const card = (name, x) => x ? `<div class="mx-sum"><small>${name}</small><b>${x.kind === 'writing' ? (x.failed ? '—' : (window.Icons ? Icons.svg('check') : '+')) : bandText(x.b.band, x.b.estimated)}</b><small>${x.kind === 'writing' ? (x.failed ? 'не отправлено' : 'на проверке у учителя') : x.correct + ' / ' + x.total}</small></div>` : '';
         const lr = E.overallBand([L && L.b.band, R && R.b.band].filter((v) => v != null));
         el.innerHTML = `<div class="mx-res-top"><div class="mx-score"><b>${esc(seq.title)}</b><small>Полный мок завершён</small></div>${lr != null ? `<div class="mx-band"><small>Среднее Listening и Reading</small><b>${lr}</b></div>` : ''}</div>
             <div class="mx-sumgrid">${card('Listening', L)}${card('Reading', R)}${card('Writing', W)}</div>
@@ -344,7 +344,7 @@
             <h3 class="mx-rev-title">Разбор ответов</h3>
             <div class="mx-rev">${review.map((x) => {
                 const ok = x.res.ok, part = !ok && x.res.got > 0;
-                return `<div class="mx-rv ${ok ? 'ok' : part ? 'part' : 'bad'}"><span class="mx-rvn">${qNum(x.it)}</span><div><div class="mx-rvq">${esc(x.it.text || '').replace(/_{3,}/g, '____')}</div><div class="mx-rva">Ваш ответ: <b>${esc(fmt(x.given))}</b>${ok ? '' : ` · Верно: <b>${esc(x.res.expected || '—')}</b>`}</div></div><span class="mx-rvm">${ok ? '✓' : part ? '½' : '✕'}</span></div>`;
+                return `<div class="mx-rv ${ok ? 'ok' : part ? 'part' : 'bad'}"><span class="mx-rvn">${qNum(x.it)}</span><div><div class="mx-rvq">${esc(x.it.text || '').replace(/_{3,}/g, '____')}</div><div class="mx-rva">Ваш ответ: <b>${esc(fmt(x.given))}</b>${ok ? '' : ` · Верно: <b>${esc(x.res.expected || '—')}</b>`}</div></div><span class="mx-rvm">${ok ? (window.Icons ? Icons.svg('check') : '+') : part ? '½' : (window.Icons ? Icons.svg('x') : '-')}</span></div>`;
             }).join('')}</div>
             <div class="mx-foot"><button type="button" class="btn-primary" id="mxAgain">Пройти ещё раз</button><button type="button" class="btn-outline" id="mxOther">Выбрать другой тест</button></div>`;
         $('mxAgain').onclick = start;

@@ -240,8 +240,8 @@
                 '<div><label>' + esc(X('Порядок')) + '</label><select data-k="sort">' +
                     [['attention', 'Сначала требуют внимания'], ['name', 'По имени'], ['avg', 'Сначала низкий балл'], ['avgdesc', 'Сначала высокий балл'], ['att', 'Сначала мало ходят'], ['group', 'По группе']].map(function (p) { return '<option value="' + p[0] + '"' + (st.sort === p[0] ? ' selected' : '') + '>' + esc(X(p[1])) + '</option>'; }).join('') + '</select></div>' +
                 '<label class="jr-chk"><input type="checkbox" data-k="archived"' + (st.archived ? ' checked' : '') + '> ' + esc(X('Архивные группы')) + '</label>' +
-                '<button type="button" class="jr-btn" data-act="csv">CSV</button>' +
-                '<button type="button" class="jr-btn" data-act="reload" title="' + esc(X('Обновить')) + '">↻</button>' +
+                '<button type="button" class="jr-btn" data-act="csv">' + (window.Icons ? Icons.svg('download') : '') + ' Excel</button>' +
+                '<button type="button" class="jr-btn" data-act="reload" title="' + esc(X('Обновить')) + '" aria-label="' + esc(X('Обновить')) + '">' + (window.Icons ? Icons.svg('refresh') : '') + '</button>' +
             '</div>';
         }
 
@@ -288,7 +288,7 @@
                     : r.trend <= -0.3 ? '<span class="jr-trend down">↓ ' + fmtS(r.trend) + '</span>'
                     : '<span class="jr-trend flat">→ 0</span>';
                 var flags = (r.left ? '<span class="jr-flag gray">' + esc(X('вышел из группы')) + '</span>' : '') +
-                    (!r.left && r.reasons.length ? '<span class="jr-flag" title="' + esc(r.reasons.join(', ')) + '">⚠ ' + esc(r.reasons[0]) + '</span>' : '');
+                    (!r.left && r.reasons.length ? '<span class="jr-flag" title="' + esc(r.reasons.join(', ')) + '">' + (window.Icons ? Icons.svg('alert') : '') + ' ' + esc(r.reasons[0]) + '</span>' : '');
                 var isOpen = openKey === r.key;
                 return '<div class="jr-row jr-item' + (isOpen ? ' open' : '') + '" data-key="' + esc(r.key) + '" tabindex="0" role="button" aria-expanded="' + isOpen + '">' +
                     '<div class="jr-name"><b>' + esc(r.name || '@' + r.nick) + flags + '</b><small>@' + esc(r.nick) + '</small></div>' +
@@ -317,7 +317,7 @@
                     r.trend == null ? '' : fmtS(r.trend), r.lastMock ? (r.lastMock.band != null ? r.lastMock.band : '') : '', r.left ? 'вышел из группы' : r.reasons.join(', ')]);
             });
             var d = new Date();
-            if (window.CsvExport) window.CsvExport.download('zhurnal_' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '.csv', out);
+            if (window.CsvExport) window.CsvExport.download('zhurnal_' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '', out, { sheet: 'Журнал' });
         }
 
         root.addEventListener('input', function (e) {

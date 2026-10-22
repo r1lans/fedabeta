@@ -102,7 +102,7 @@ function renderReviews() {
         if (i >= 6 && !window.__reviewsExpanded) card.style.display = 'none';
         card.dataset.reviewIndex = i;
         card.innerHTML = `
-            <div class="stars" aria-label="${t('reviews.rating_label').replace('{n}', rating)}">${'★'.repeat(rating)}<span style="opacity:.28">${'★'.repeat(5 - rating)}</span></div>
+            <div class="stars" aria-label="${t('reviews.rating_label').replace('{n}', rating)}">${'<svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align:-0.12em"><path fill="currentColor" d="m12 3 2.7 5.9 6.3.6-4.8 4.2 1.4 6.3L12 16.9 6.4 20l1.4-6.3-4.8-4.2 6.3-.6z"/></svg>'.repeat(rating)}<span style="opacity:.28">${'<svg width="1em" height="1em" viewBox="0 0 24 24" aria-hidden="true" style="vertical-align:-0.12em"><path fill="currentColor" d="m12 3 2.7 5.9 6.3.6-4.8 4.2 1.4 6.3L12 16.9 6.4 20l1.4-6.3-4.8-4.2 6.3-.6z"/></svg>'.repeat(5 - rating)}</span></div>
             <p style="margin-bottom: 1.25rem;">${escapeHtml(pickText(r, 'text'))}</p>
             <div class="review-author">
                 <div class="review-avatar">${escapeHtml((name[0] || '?').toUpperCase())}</div>
