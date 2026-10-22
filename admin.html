@@ -3,45 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="theme.js?v=53"></script>
+    <script src="theme.js?v=57"></script>
     <title>Админ-панель — TheStarth</title>
     <meta name="robots" content="noindex, nofollow">
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-    <link rel="stylesheet" href="styles.css?v=53">
+    <link rel="stylesheet" href="styles.css?v=57">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
     <style>
         body { background: var(--paper-alt); }
-        .admin-wrap { max-width: 1240px; margin: 0 auto; padding: 2rem 1.5rem 5rem; }
-        .admin-header { padding-right: 56px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .admin-header h1 { font-size: 1.6rem; }
-        .admin-hd-left { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; min-width: 0; }
-        .admin-back { text-decoration: none; white-space: nowrap; display: inline-block; }
-        .admin-hint { color: var(--ink-soft); font-size: .88rem; line-height: 1.5; margin: -.4rem 0 1.1rem; max-width: 70ch; }
-        @media (max-width: 560px) { .admin-header { flex-wrap: wrap; gap: .6rem; } .admin-header h1 { font-size: 1.25rem; } }
+        .admin-wrap { min-height: 100vh; }
+        .admin-hint { color: var(--ink-soft); font-size: .92rem; line-height: 1.55; margin: .35rem 0 0; max-width: 72ch; }
 
-        #login-screen { max-width: 380px; margin: 6rem auto; text-align: center; }
+        /* ── Login / setup ── */
+        #login-screen { max-width: 400px; margin: 0 auto; padding: 6rem 1.25rem 3rem; text-align: center; }
+        #login-screen .login-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 20px; padding: 2rem 1.6rem; box-shadow: 0 20px 50px rgba(var(--shadow-rgb), .08); margin-top: 1rem; }
         #login-screen input {
-            width: 100%; padding: 0.9rem; border-radius: 8px; border: 1px solid var(--rule);
-            background: var(--surface); color: var(--ink); font-size: 1rem; margin: 0.75rem 0;
+            width: 100%; padding: 0.9rem; border-radius: 10px; border: 1px solid var(--rule);
+            background: var(--paper); color: var(--ink); font-size: 1rem; margin: 0.4rem 0;
         }
         #login-error { color: var(--accent-warm); font-size: 0.85rem; min-height: 1.2em; margin: 0.5rem 0; }
         #setup-warning {
             display: none; max-width: 500px; margin: 4rem auto; text-align: center;
-            background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 2rem;
+            background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 2rem;
         }
 
+        /* ── Shell: sidebar + main ── */
         #dashboard { display: none; }
-        .admin-layout { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 1.75rem; align-items: start; }
-        .admin-side { position: sticky; top: 1rem; display: flex; flex-direction: column; gap: 2px; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 0.6rem; }
-        .admin-grp { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-soft); padding: 0.8rem 0.7rem 0.3rem; }
-        .admin-grp:first-child { padding-top: 0.4rem; }
-        .admin-side .admin-tab { text-align: left; background: none; border: 0; border-radius: 9px; padding: 0.55rem 0.7rem; font: inherit; font-size: 0.92rem; color: var(--ink); cursor: pointer; border-bottom: 0; }
-        .admin-side .admin-tab:hover { background: var(--accent-tint); }
-        .admin-side .admin-tab.active { background: var(--accent); color: var(--on-accent); font-weight: 700; }
-        .admin-ptitle { font-size: 1.35rem; margin: 0 0 1rem; }
-        .admin-content { min-width: 0; }
-        .admin-row { display: flex; align-items: center; gap: 1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 0.8rem 1rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+        .adm-shell { display: grid; grid-template-columns: 264px minmax(0, 1fr); min-height: 100vh; }
+        .admin-side {
+            position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column;
+            background: var(--surface); border-right: 1px solid var(--rule); padding: 1.1rem .8rem 1rem;
+        }
+        .adm-brand { display: flex; align-items: center; gap: .7rem; padding: .3rem .55rem 1.1rem; text-decoration: none; color: var(--ink); }
+        .adm-brand-logo { width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex-shrink: 0; }
+        .adm-brand-logo svg { width: 22px; height: 22px; }
+        .adm-brand b { display: block; font-family: var(--font-heading); font-size: 1.15rem; line-height: 1.1; }
+        .adm-brand small { display: block; color: var(--ink-soft); font-size: .75rem; letter-spacing: .02em; }
+        .admin-grp { font-size: .68rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); padding: 1rem .7rem .35rem; opacity: .85; }
+        .admin-side .admin-tab {
+            display: flex; align-items: center; gap: .7rem; width: 100%; text-align: left; background: none; border: 0;
+            border-radius: 10px; padding: .52rem .65rem; font: inherit; font-size: .93rem; color: var(--ink); cursor: pointer;
+            transition: background .15s, color .15s; position: relative;
+        }
+        .admin-side .admin-tab .ti { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--paper-alt); color: var(--ink-soft); flex-shrink: 0; transition: inherit; }
+        .admin-side .admin-tab .ti svg { width: 17px; height: 17px; }
+        .admin-side .admin-tab:hover { background: var(--paper-alt); }
+        .admin-side .admin-tab.active { background: var(--accent-tint); color: var(--accent); font-weight: 700; }
+        .admin-side .admin-tab.active .ti { background: var(--accent); color: var(--on-accent); }
+        .admin-side .admin-tab .new { margin-left: auto; font-size: .62rem; font-weight: 800; background: var(--accent); color: var(--on-accent); border-radius: 99px; padding: 1px 7px; letter-spacing: .04em; }
+        .adm-side-foot { margin-top: auto; padding-top: 1rem; display: flex; gap: .5rem; border-top: 1px solid var(--rule); margin-left: .3rem; margin-right: .3rem; }
+        .adm-side-foot > * { flex: 1; text-align: center; text-decoration: none; }
+
+        .admin-content { min-width: 0; padding: 1.8rem 4.6rem 5rem 2.4rem; max-width: 1220px; width: 100%; }
+        .adm-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin: 0 0 1.6rem; }
+        .adm-crumb { font-size: .74rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: .25rem; }
+        .admin-ptitle { font-size: 1.85rem; margin: 0; line-height: 1.15; }
+        .adm-mtop { display: none; }
+        .adm-scrim { display: none; }
+
+        @media (max-width: 900px) {
+            .adm-shell { grid-template-columns: 1fr; }
+            .admin-side { position: fixed; left: 0; top: 0; bottom: 0; width: min(300px, 86vw); z-index: 60; transform: translateX(-105%); transition: transform .25s ease; box-shadow: 0 0 40px rgba(0,0,0,.25); }
+            .adm-open .admin-side { transform: none; }
+            .adm-open .adm-scrim { display: block; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 55; }
+            .adm-mtop { display: flex; align-items: center; gap: .7rem; position: sticky; top: 0; z-index: 40; background: var(--nav-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--rule); padding: .65rem 64px .65rem .9rem; margin: -1.2rem -1rem 1rem; }
+            .adm-mtop button { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 10px; padding: .5rem .8rem; font: inherit; font-weight: 600; cursor: pointer; }
+            .adm-mtop span { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .admin-content { padding: 1.2rem 1rem 4rem; }
+            .adm-head { padding-right: 0; }
+            .admin-ptitle { font-size: 1.45rem; }
+        }
+
+        .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+        .admin-panel { display: none; }
+        .admin-panel.active { display: block; animation: admIn .2s ease; }
+        @keyframes admIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        /* ── Home ── */
+        .adm-hello { background: linear-gradient(135deg, var(--accent-tint), var(--surface)); border: 1px solid var(--rule); border-radius: 18px; padding: 1.5rem 1.6rem; margin-bottom: 1.6rem; }
+        .adm-hello h3 { font-size: 1.3rem; margin: 0 0 .3rem; }
+        .adm-hello p { color: var(--ink-soft); margin: 0 0 1rem; }
+        .adm-quick { display: flex; flex-wrap: wrap; gap: .55rem; }
+        .adm-quick button { border: 1px solid var(--accent); background: var(--surface); color: var(--accent); border-radius: 999px; padding: .5rem 1rem; font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+        .adm-quick button:hover { background: var(--accent); color: var(--on-accent); }
+        .adm-home-grp { font-size: .78rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin: 1.6rem 0 .7rem; }
+        .adm-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: .8rem; }
+        .adm-tile { display: flex; gap: .85rem; align-items: flex-start; text-align: left; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 1rem; cursor: pointer; font: inherit; color: var(--ink); transition: border-color .15s, transform .15s, box-shadow .15s; }
+        .adm-tile:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 24px rgba(var(--shadow-rgb), .07); }
+        .adm-tile .ti { width: 40px; height: 40px; border-radius: 11px; background: var(--accent-tint); color: var(--accent); display: grid; place-items: center; flex-shrink: 0; }
+        .adm-tile .ti svg { width: 20px; height: 20px; }
+        .adm-tile b { display: block; font-size: .98rem; margin-bottom: .15rem; }
+        .adm-tile small { display: block; color: var(--ink-soft); font-size: .82rem; line-height: 1.4; }
+
+        /* ── Add bar / forms ── */
+        .adm-addbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .adm-addbar .btn-primary { padding: .75rem 1.3rem; }
+        .adm-muted { color: var(--ink-soft); font-size: .85rem; }
+        .adm-form-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin: -.2rem 0 .6rem; }
+        .adm-form-head h3 { font-size: 1.15rem; margin: 0; }
+        .adm-x { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--rule); background: var(--paper); color: var(--ink-soft); cursor: pointer; font-size: .9rem; flex-shrink: 0; }
+        .adm-x:hover { color: var(--ink); border-color: var(--ink-soft); }
+        .adm-listhead { display: flex; align-items: center; gap: .5rem; font-size: 1.05rem; margin: 1.8rem 0 .8rem; }
+        .adm-count { font-family: var(--font-main); font-size: .78rem; background: var(--paper); border: 1px solid var(--rule); border-radius: 99px; padding: 1px 9px; color: var(--ink-soft); }
+        .adm-count:empty { display: none; }
+        #blg-list { margin-top: .8rem; }
+        .adm-help, .admin-form p.adm-help { color: var(--ink-soft); font-size: .8rem; line-height: 1.45; margin: .35rem 0 0; }
+        .adm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+        .admin-form .adm-grid2 > div > label { margin-top: .95rem; }
+        @media (max-width: 640px) { .adm-grid2 { grid-template-columns: 1fr; } }
+        .adm-step { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: .95rem; margin: 1.3rem 0 .1rem; color: var(--ink); }
+        .adm-step:first-child { margin-top: 0; }
+        .adm-step span { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: .78rem; display: grid; place-items: center; }
+        .adm-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 12px; padding: 4px; margin: .7rem 0 .2rem; }
+        .adm-seg button { border: 0; background: none; color: var(--ink-soft); border-radius: 9px; padding: .45rem .85rem; font: inherit; font-size: .86rem; font-weight: 600; cursor: pointer; }
+        .adm-seg button.on { background: var(--surface); color: var(--accent); box-shadow: 0 1px 4px rgba(var(--shadow-rgb), .12); }
+        .adm-check { display: flex !important; align-items: center; gap: .55rem; color: var(--ink) !important; font-size: .92rem !important; margin-top: 1.2rem !important; cursor: pointer; }
+        .adm-check input { width: 18px !important; height: 18px; accent-color: var(--accent); }
+        .adm-actions { display: flex; gap: .75rem; margin-top: 1.2rem; flex-wrap: wrap; align-items: center; }
+        .adm-split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 1.8rem; align-items: start; }
+        .adm-split-side { position: sticky; top: 1rem; }
+        .adm-preview-label { font-size: .74rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: .6rem; }
+        .adm-blog-preview .blog-card:hover { transform: none; }
+        .adm-blog-preview .blog-body { padding: 1.4rem; }
+        @media (max-width: 1100px) { .adm-split { grid-template-columns: 1fr; } .adm-split-side { position: static; max-width: 380px; } }
+        .adm-flash { padding: .7rem 1rem; border-radius: 10px; background: var(--accent-tint); margin: 0 0 .8rem; }
+
+        /* ── List items ── */
+        .adm-item { display: flex; gap: 1rem; align-items: flex-start; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 1rem; margin-bottom: .75rem; transition: border-color .15s; }
+        .adm-item:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
+        .adm-item.is-off { opacity: .62; }
+        .adm-item-cover { width: 168px; aspect-ratio: 1200 / 632; object-fit: cover; border-radius: 10px; background: var(--paper-alt); border: 1px solid var(--rule); flex-shrink: 0; }
+        .adm-item-main { flex: 1; min-width: 0; }
+        .adm-item-main h3 { font-size: 1.02rem; margin: .35rem 0 .2rem; }
+        .adm-item-main .meta { color: var(--ink-soft); font-size: .82rem; margin-bottom: .7rem; word-break: break-word; }
+        .adm-item-top { display: flex; gap: .3rem; flex-wrap: wrap; align-items: center; }
+        .adm-pill { font-size: .7rem; font-weight: 700; border-radius: 99px; padding: 2px 9px; }
+        .adm-pill.on { background: rgba(46, 160, 67, .14); color: #2e9a43; }
+        .adm-pill.off { background: var(--paper-alt); color: var(--ink-soft); border: 1px solid var(--rule); }
+        @media (max-width: 600px) { .adm-item { flex-direction: column; } .adm-item-cover { width: 100%; } }
+
+        .admin-row { display: flex; align-items: center; gap: 1rem; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 0.85rem 1rem; margin-bottom: 0.6rem; flex-wrap: wrap; transition: border-color .15s; }
+        .admin-row:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
         .admin-row .ar-av { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: inline-flex; align-items: center; justify-content: center; font-weight: 800; flex-shrink: 0; }
         .admin-row .ar-main { flex: 1 1 260px; min-width: 0; }
         .admin-row .ar-actions { display: flex; gap: .5rem; align-items: center; flex-wrap: wrap; }
@@ -51,64 +154,62 @@
         .admin-row .ar-main small { color: var(--ink-soft); font-size: 0.8rem; word-break: break-word; }
         .admin-row .ar-extra { font-size: 0.8rem; color: var(--ink-soft); }
         .admin-row select { max-width: 170px; }
-        @media (max-width: 860px) {
-            .admin-layout { grid-template-columns: 1fr; gap: 1rem; }
-            .admin-side { position: static; flex-direction: row; flex-wrap: nowrap; overflow-x: auto; gap: 4px; padding: 0.4rem; -webkit-overflow-scrolling: touch; }
-            .admin-grp { display: none; }
-            .admin-side .admin-tab { white-space: nowrap; flex: 0 0 auto; }
-            .admin-wrap { padding: 1rem 0.9rem 4rem; }
-        }
-        .admin-tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
-        .admin-tab {
-            padding: 0.8rem 1.3rem; background: none; border: none; cursor: pointer;
-            font-family: var(--font-heading); font-weight: 700; color: var(--ink-soft);
-            border-bottom: 2px solid transparent; margin-bottom: -1px; font-size: 0.95rem;
-        }
-        .admin-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-        .admin-panel { display: none; }
-        .admin-panel.active { display: block; }
 
         .admin-card {
-            background: var(--surface); border: 1px solid var(--rule); border-radius: 12px;
-            padding: 1.5rem; margin-bottom: 1.25rem;
+            background: var(--surface); border: 1px solid var(--rule); border-radius: 14px;
+            padding: 1.15rem 1.25rem; margin-bottom: .75rem; transition: border-color .15s;
         }
-        .admin-card h3 { font-size: 1rem; margin-bottom: 0.25rem; }
-        .admin-card .meta { color: var(--ink-soft); font-size: 0.8rem; margin-bottom: 0.75rem; }
-        .admin-card p { color: var(--ink); font-size: 0.92rem; line-height: 1.6; margin-bottom: 1rem; }
-        .admin-card-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .admin-card:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--rule)); }
+        .admin-card h3 { font-size: 1.02rem; margin-bottom: 0.25rem; }
+        .admin-card .meta { color: var(--ink-soft); font-size: 0.82rem; margin-bottom: 0.6rem; }
+        .admin-card p { color: var(--ink); font-size: 0.92rem; line-height: 1.6; margin-bottom: .9rem; }
+        .admin-card-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
         .btn-small {
-            font-size: 0.82rem; padding: 0.4rem 0.9rem; border-radius: 6px; cursor: pointer;
-            border: 1px solid var(--rule); background: var(--paper); color: var(--ink);
+            display: inline-flex; align-items: center; justify-content: center; gap: .35rem;
+            font: inherit; font-size: 0.83rem; font-weight: 600; padding: 0.42rem 0.85rem; border-radius: 8px; cursor: pointer;
+            border: 1px solid var(--rule); background: var(--surface); color: var(--ink); transition: background .15s, border-color .15s, color .15s;
         }
-        .btn-small.danger { color: var(--accent-warm); border-color: var(--accent-warm); }
-        .btn-small.primary { color: var(--accent); border-color: var(--accent); }
+        .btn-small:hover:not(:disabled) { border-color: var(--ink-soft); }
+        .btn-small:disabled { opacity: .4; cursor: default; }
+        .btn-small.danger { color: var(--accent-warm); border-color: color-mix(in srgb, var(--accent-warm) 45%, var(--rule)); }
+        .btn-small.danger:hover:not(:disabled) { background: var(--accent-warm); color: #fff; border-color: var(--accent-warm); }
+        .btn-small.primary { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 55%, var(--rule)); background: var(--accent-tint); }
+        .btn-small.primary:hover:not(:disabled) { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
         .pending-badge {
-            display: inline-block; background: var(--accent-warm); color: var(--on-accent); font-size: 0.7rem;
+            display: inline-block; background: var(--accent-warm); color: #fff; font-size: 0.7rem;
             padding: 2px 8px; border-radius: 10px; margin-left: 0.5rem; vertical-align: middle;
         }
 
-        .admin-form { background: var(--surface); border: 1px dashed var(--rule); border-radius: 12px; padding: 1.5rem; margin-bottom: 2rem; }
-        .admin-form label { display: block; font-size: 0.85rem; color: var(--ink-soft); margin: 0.9rem 0 0.3rem; }
+        .admin-form { background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 1.4rem 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 6px 22px rgba(var(--shadow-rgb), .05); }
+        .admin-form[hidden] { display: none !important; }
+        .admin-form label { display: block; font-size: 0.84rem; font-weight: 600; color: var(--ink); margin: 0.95rem 0 0.35rem; }
         .admin-form label:first-child { margin-top: 0; }
         .admin-form input, .admin-form textarea, .admin-form select {
-            width: 100%; padding: 0.7rem; border-radius: 8px; border: 1px solid var(--rule);
-            background: var(--paper); color: var(--ink); font-family: var(--font-main); font-size: 0.95rem;
+            width: 100%; padding: 0.68rem 0.8rem; border-radius: 10px; border: 1px solid var(--rule);
+            background: var(--paper); color: var(--ink); font-family: var(--font-main); font-size: 0.95rem; transition: border-color .15s, box-shadow .15s;
         }
+        .admin-form input:focus, .admin-form textarea:focus, .admin-form select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+        .admin-form input[type=file] { padding: .5rem; }
         .admin-form textarea { min-height: 90px; resize: vertical; }
-        .status-msg { font-size: 0.85rem; margin-top: 0.75rem; min-height: 1.2em; }
+        .admin-form > p:not(.adm-help) { color: var(--ink-soft) !important; font-size: .8rem !important; line-height: 1.45; }
+        .admin-form.adm-filter { display: flex; gap: .75rem; flex-wrap: wrap; align-items: flex-end; padding: .9rem 1rem; box-shadow: none; margin-bottom: 1rem; }
+        .admin-form.adm-filter label { margin-top: 0; font-size: .78rem; color: var(--ink-soft); }
+        .status-msg { font-size: 0.86rem; margin-top: 0.75rem; min-height: 1.2em; }
         .status-msg.ok { color: var(--accent); }
         .status-msg.error { color: var(--accent-warm); }
         .toggle-row { display: flex; align-items: center; gap: 0.6rem; margin: 0.9rem 0 0.3rem; }
-        .empty-state { color: var(--ink-soft); text-align: center; padding: 2rem; font-size: 0.9rem; }
-            .score-rows { display: grid; grid-template-columns: 1fr 100px; gap: 0.5rem; }
-        .img-preview img { display: block; max-width: 100%; max-height: 180px; margin-top: 0.75rem; border-radius: 8px; border: 1px solid var(--rule); background: #fff; }
+        .empty-state { color: var(--ink-soft); text-align: center; padding: 2.2rem 1rem; font-size: 0.9rem; background: var(--surface); border: 1px dashed var(--rule); border-radius: 14px; }
+        .score-rows { display: grid; grid-template-columns: 1fr 100px; gap: 0.5rem; }
+        .img-preview img { display: block; max-width: 100%; max-height: 180px; margin-top: 0.75rem; border-radius: 10px; border: 1px solid var(--rule); background: #fff; }
         .vid-progress { height: 8px; background: var(--paper-alt); border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; margin-top: 1rem; }
         .vid-progress-bar { height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
         .admin-vid-thumb { width: 72px; aspect-ratio: 9 / 16; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule); background: #0b0b0b; flex-shrink: 0; }
-        .admin-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 10px; border: 1px solid var(--rule); background: var(--paper-alt); flex-shrink: 0; }
+        .admin-thumb { width: 84px; height: 84px; object-fit: cover; border-radius: 12px; border: 1px solid var(--rule); background: var(--paper-alt); flex-shrink: 0; }
         .admin-card-row { display: flex; gap: 1rem; align-items: flex-start; }
         .admin-card-row > div { flex: 1; min-width: 0; }
-        .chip { display: inline-block; font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; background: var(--accent-tint); color: var(--accent); border: 1px solid var(--accent); margin-right: 4px; }
+        .admin-content select, .admin-content input[type=search] { padding: .45rem .6rem; border-radius: 9px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); font: inherit; font-size: .88rem; }
+        .admin-content select:focus, .admin-content input[type=search]:focus { outline: none; border-color: var(--accent); }
+        .chip { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; background: var(--accent-tint); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent); margin-right: 4px; }
     </style>
 </head>
 <body>
@@ -126,8 +227,10 @@
 
         <div id="login-screen">
             <a class="btn-small" href="./" style="text-decoration:none;display:inline-block;margin-bottom:1rem">← Назад на сайт</a>
-            <h1 style="font-size: 1.8rem;">Вход в админ-панель</h1>
-            <p style="color: var(--ink-soft); margin-top: 0.5rem;">TheStarth · CMS</p>
+            <div class="login-card">
+            <span class="adm-brand-logo" style="margin:0 auto 1rem;width:52px;height:52px;border-radius:15px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"/></svg></span>
+            <h1 style="font-size: 1.6rem;">Вход в админ-панель</h1>
+            <p style="color: var(--ink-soft); margin: 0.4rem 0 1rem;">TheStarth</p>
             <input type="email" id="login-email" placeholder="Email администратора" autocomplete="username">
             <input type="password" id="login-password" placeholder="Пароль" autocomplete="current-password">
             <div id="login-error"></div>
@@ -136,43 +239,91 @@
                 Это тот же аккаунт, которым вы зарегистрировались на сайте —
                 просто он должен быть добавлен в список админов (см. FIREBASE_SETUP.md, шаг 6).
             </p>
+            </div>
         </div>
 
         <div id="dashboard">
-            <div class="admin-header">
-                <div class="admin-hd-left"><a class="btn-small admin-back" href="./" onclick="if(history.length>1&&document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();return false}">← Назад на сайт</a>
-                <h1>Админ-панель <span class="text-premium">TheStarth</span></h1></div>
-                <button class="btn-small" onclick="logout()">Выйти</button>
+            <div class="adm-shell" id="adm-shell">
+            <nav class="admin-side" id="admin-side" aria-label="Разделы админ-панели">
+                <a class="adm-brand" href="./"><span class="adm-brand-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"/></svg></span><span><b>TheStarth</b><small>Админ-панель</small></span></a>
+                <button class="admin-tab active" data-tab="home" data-grp="" onclick="switchTab('home')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="tl">Главная</span></button>
+                <div class="admin-grp">Сайт</div>
+                <button class="admin-tab" data-tab="catalog" data-grp="Сайт" onclick="switchTab('catalog')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><span class="tl">Курсы и цены</span></button>
+                <button class="admin-tab" data-tab="teachers" data-grp="Сайт" onclick="switchTab('teachers')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span><span class="tl">Учителя на сайте</span></button>
+                <button class="admin-tab" data-tab="blog" data-grp="Сайт" onclick="switchTab('blog')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg></span><span class="tl">Блог и статьи</span></button>
+                <button class="admin-tab" data-tab="news" data-grp="Сайт" onclick="switchTab('news')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v10a2 2 0 0 1-2 2"/><path d="M8 9h5M8 13h5M8 17h3"/></svg></span><span class="tl">Новости</span></button>
+                <button class="admin-tab" data-tab="reviews" data-grp="Сайт" onclick="switchTab('reviews')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span><span class="tl">Отзывы</span></button>
+                <button class="admin-tab" data-tab="results" data-grp="Сайт" onclick="switchTab('results')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 7 5-3 5 3-1.5-7"/></svg></span><span class="tl">Результаты учеников</span></button>
+                <button class="admin-tab" data-tab="videos" data-grp="Сайт" onclick="switchTab('videos')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m22 8-5 4 5 4z"/></svg></span><span class="tl">Видео на главной</span></button>
+                <button class="admin-tab" data-tab="announcement" data-grp="Сайт" onclick="switchTab('announcement')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></span><span class="tl">Баннер сверху</span></button>
+                <button class="admin-tab" data-tab="promo" data-grp="Сайт" onclick="switchTab('promo')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a2 2 0 0 1 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg></span><span class="tl">Промокоды</span></button>
+                <div class="admin-grp">Ученики и уроки</div>
+                <button class="admin-tab" data-tab="students" data-grp="Ученики и уроки" onclick="switchTab('students')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.8 3.5 6"/></svg></span><span class="tl">Ученики и роли</span></button>
+                <button class="admin-tab" data-tab="journal" data-grp="Ученики и уроки" onclick="switchTab('journal')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12"/><path d="m8.5 10 2 2 4-4.5"/></svg></span><span class="tl">Журнал оценок</span></button>
+                <button class="admin-tab" data-tab="groups" data-grp="Ученики и уроки" onclick="switchTab('groups')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span class="tl">Группы</span></button>
+                <button class="admin-tab" data-tab="schedule" data-grp="Ученики и уроки" onclick="switchTab('schedule')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span class="tl">Расписание</span></button>
+                <button class="admin-tab" data-tab="lessons" data-grp="Ученики и уроки" onclick="switchTab('lessons')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg></span><span class="tl">Журнал уроков</span></button>
+                <button class="admin-tab" data-tab="mocks" data-grp="Ученики и уроки" onclick="switchTab('mocks')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><span class="tl">Mock-тесты</span></button>
+                <button class="admin-tab" data-tab="referrals" data-grp="Ученики и уроки" onclick="switchTab('referrals')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg></span><span class="tl">Рефералы</span></button>
+                <div class="admin-grp">Настройки</div>
+                <button class="admin-tab" data-tab="design" data-grp="Настройки" onclick="switchTab('design')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.3"/><circle cx="17.5" cy="10.5" r="1.3"/><circle cx="8.5" cy="7.5" r="1.3"/><circle cx="6.5" cy="12.5" r="1.3"/><path d="M12 2a10 10 0 0 0 0 20c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H16a6 6 0 0 0 6-6C22 6 17.5 2 12 2z"/></svg></span><span class="tl">Оформление</span></button>
+                <div class="adm-side-foot"><a class="btn-small admin-back" href="./" onclick="if(history.length>1&&document.referrer&&document.referrer.indexOf(location.host)>-1){history.back();return false}">← На сайт</a><button class="btn-small" onclick="logout()">Выйти</button></div>
+            </nav>
+            <div class="adm-scrim" onclick="admMenu(false)"></div>
+            <main class="admin-content">
+            <div class="adm-mtop"><button type="button" onclick="admMenu(true)" aria-label="Открыть меню">☰ Меню</button><span id="adm-mtitle">Главная</span></div>
+            <div class="adm-head"><div><div class="adm-crumb" id="adm-crumb"></div><h2 class="admin-ptitle" id="admin-ptitle">Главная</h2><p class="admin-hint" id="admin-phint"></p></div></div>
+
+            <!-- HOME -->
+            <div class="admin-panel active" id="panel-home">
+                <div class="adm-hello">
+                    <h3>Здравствуйте! Что хотите сделать?</h3>
+                    <p>Самое частое — в один клик. Всё остальное — в разделах ниже или в меню слева.</p>
+                    <div class="adm-quick">
+                        <button type="button" onclick="admQuick('blog')">＋ Статья в блог</button>
+                        <button type="button" onclick="admQuick('news')">＋ Новость</button>
+                        <button type="button" onclick="admQuick('teachers')">＋ Учитель</button>
+                        <button type="button" onclick="admQuick('schedule')">＋ Урок в расписание</button>
+                        <button type="button" onclick="admQuick('results')">＋ Результат ученика</button>
+                        <button type="button" onclick="switchTab('catalog')">Изменить цены</button>
+                    </div>
+                </div>
+                <div class="adm-home-grp">Сайт</div>
+                <div class="adm-tiles">
+                    <button type="button" class="adm-tile" onclick="switchTab('catalog')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg></span><span><b>Курсы и цены</b><small>Цены, форматы и описания курсов на главной</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('teachers')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></span><span><b>Учителя на сайте</b><small>Карточки учителей, фото, видео, порядок</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('blog')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12l4 4v12H4z"/><path d="M8 10h8M8 14h8M8 18h5"/></svg></span><span><b>Блог и статьи</b><small>Статьи «Академический блог и советы» на главной</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('news')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h13v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M17 9h3v10a2 2 0 0 1-2 2"/><path d="M8 9h5M8 13h5M8 17h3"/></svg></span><span><b>Новости</b><small>Записи на странице «Новости»</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('reviews')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></span><span><b>Отзывы</b><small>Проверка и публикация отзывов учеников</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('results')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 7 5-3 5 3-1.5-7"/></svg></span><span><b>Результаты учеников</b><small>Сертификаты и баллы на странице «Результаты»</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('videos')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m22 8-5 4 5 4z"/></svg></span><span><b>Видео на главной</b><small>Карусель видео в самом верху главной</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('announcement')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg></span><span><b>Баннер сверху</b><small>Короткое объявление на всех страницах</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('promo')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a2 2 0 0 1 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M14 5v14" stroke-dasharray="2 2"/></svg></span><span><b>Промокоды</b><small>Скидки для блока цен</small></span></button>
+                </div>
+                <div class="adm-home-grp">Ученики и уроки</div>
+                <div class="adm-tiles">
+                    <button type="button" class="adm-tile" onclick="switchTab('students')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2.2.6 3.5 2.8 3.5 6"/></svg></span><span><b>Ученики и роли</b><small>Все аккаунты: найти, сделать учителем или админом</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('journal')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h12a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M5 17a2 2 0 0 1 2-2h12"/><path d="m8.5 10 2 2 4-4.5"/></svg></span><span><b>Журнал оценок</b><small>Оценки, посещаемость и прогресс каждого ученика по всем группам</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('groups')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span><span><b>Группы</b><small>Группы учителей: передать, архив, CSV</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('schedule')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></span><span><b>Расписание</b><small>Назначить урок ученику и учителю</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('lessons')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg></span><span><b>Журнал уроков</b><small>Кто и сколько был на видеоуроках</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('mocks')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><span><b>Mock-тесты</b><small>Тесты IELTS и результаты учеников</small></span></button>
+                    <button type="button" class="adm-tile" onclick="switchTab('referrals')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><rect x="2" y="7" width="20" height="5" rx="1"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7z"/></svg></span><span><b>Рефералы</b><small>Приглашённые друзья и скидки</small></span></button>
+                </div>
+                <div class="adm-home-grp">Настройки</div>
+                <div class="adm-tiles">
+                    <button type="button" class="adm-tile" onclick="switchTab('design')"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.3"/><circle cx="17.5" cy="10.5" r="1.3"/><circle cx="8.5" cy="7.5" r="1.3"/><circle cx="6.5" cy="12.5" r="1.3"/><path d="M12 2a10 10 0 0 0 0 20c1 0 1.7-.8 1.7-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H16a6 6 0 0 0 6-6C22 6 17.5 2 12 2z"/></svg></span><span><b>Оформление</b><small>Цвет сайта и логотип</small></span></button>
+                </div>
             </div>
 
-            <div class="admin-layout">
-            <nav class="admin-side" id="admin-side" aria-label="Разделы админ-панели">
-                <div class="admin-grp">Люди</div>
-                <button class="admin-tab" data-tab="students" onclick="switchTab('students')">Ученики и роли</button>
-                <button class="admin-tab" data-tab="groups" onclick="switchTab('groups')">Группы</button>
-                <button class="admin-tab" data-tab="teachers" onclick="switchTab('teachers')">Учителя на сайте</button>
-                <div class="admin-grp">Обучение</div>
-                <button class="admin-tab" data-tab="lessons" onclick="switchTab('lessons')">Журнал уроков</button>
-                <button class="admin-tab" data-tab="mocks" onclick="switchTab('mocks')">Mock-тесты</button>
-                <button class="admin-tab" data-tab="schedule" onclick="switchTab('schedule')">Расписание</button>
-                <button class="admin-tab" data-tab="referrals" onclick="switchTab('referrals')">Рефералы</button>
-                <div class="admin-grp">Что видят посетители</div>
-                <button class="admin-tab active" data-tab="news" onclick="switchTab('news')">Новости</button>
-                <button class="admin-tab" data-tab="announcement" onclick="switchTab('announcement')">Баннер сверху</button>
-                <button class="admin-tab" data-tab="catalog" onclick="switchTab('catalog')">Курсы и цены</button>
-                <button class="admin-tab" data-tab="promo" onclick="switchTab('promo')">Промокоды</button>
-                <button class="admin-tab" data-tab="reviews" onclick="switchTab('reviews')">Отзывы</button>
-                <button class="admin-tab" data-tab="results" onclick="switchTab('results')">Результаты</button>
-                <button class="admin-tab" data-tab="videos" onclick="switchTab('videos')">Видео на главной</button>
-                <div class="admin-grp">Вид сайта</div>
-                <button class="admin-tab" data-tab="design" onclick="switchTab('design')">Оформление</button>
-            </nav>
-            <div class="admin-content">
-            <h2 class="admin-ptitle" id="admin-ptitle">Новости</h2>
-            <p class="admin-hint" id="admin-phint">Записи на странице «Новости» (news): заголовок, текст, дата. Остаются в списке, пока вы их не удалите.</p>
+            <!-- JOURNAL -->
+            <div class="admin-panel" id="panel-journal"><div id="journal-root"></div></div>
+
+            <!-- BLOG -->
+            <div class="admin-panel" id="panel-blog"><div id="blog-root"><div class="empty-state">Загрузка…</div></div></div>
 
             <!-- NEWS -->
-            <div class="admin-panel active" id="panel-news">
+            <div class="admin-panel" id="panel-news">
                 <div class="admin-form">
                     <label>Заголовок</label>
                     <input type="text" id="news-title" placeholder="Например: Новый поток стартует 1 октября">
@@ -197,10 +348,6 @@
 
             <!-- REVIEWS -->
             <div class="admin-panel" id="panel-reviews">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Отзывы, оставленные посетителями сайта напрямую, попадают сюда со статусом
-                    «На проверке» — опубликуйте их, если всё в порядке. Ниже можно и добавить отзыв вручную.
-                </p>
                 <div class="admin-form">
                     <label>Имя ученика</label>
                     <input type="text" id="review-name" placeholder="Например: Азиза, Ташкент">
@@ -225,17 +372,14 @@
 
             <!-- RESULTS -->
             <div class="admin-panel" id="panel-results">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Здесь вы добавляете сертификаты и баллы учеников — они появляются на странице «Результаты».
-                    Посетитель наводит курсор на сертификат, и он увеличивается лупой.
-                </p>
                 <div class="admin-form">
-                    <label>Экзамен</label>
-                    <input type="text" id="res-exam" list="res-exam-list" value="IELTS" maxlength="30" oninput="applyExamTemplate()">
-                    <datalist id="res-exam-list"><option value="IELTS"><option value="SAT"><option value="TOEFL"><option value="CEFR"></datalist>
-
-                    <label>Общий балл</label>
-                    <input type="text" id="res-overall" placeholder="Например: 8.5" maxlength="12">
+                    <div class="adm-grid2">
+                        <div><label>Экзамен</label>
+                        <input type="text" id="res-exam" list="res-exam-list" value="IELTS" maxlength="30" oninput="applyExamTemplate()">
+                        <datalist id="res-exam-list"><option value="IELTS"><option value="SAT"><option value="TOEFL"><option value="CEFR"></datalist></div>
+                        <div><label>Общий балл</label>
+                        <input type="text" id="res-overall" placeholder="Например: 8.5" maxlength="12"></div>
+                    </div>
 
                     <label>Баллы по частям (пустые строки не показываются)</label>
                     <div class="score-rows" id="res-score-rows">
@@ -261,11 +405,6 @@
 
             <!-- HERO VIDEOS -->
             <div class="admin-panel" id="panel-videos">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Видео на главной странице показываются каруселью: когда одно заканчивается, сайт сам переключает на следующее.
-                    Посетитель может листать стрелками, точками или свайпом. Первым всегда идёт основное видео сайта, ваши — после него.
-                    Лучше всего подходит вертикальное видео 9:16 (как в Instagram Reels) — другое будет обрезано по краям.
-                </p>
                 <div class="admin-form">
                     <label>Название (только для вас, на сайте не показывается)</label>
                     <input type="text" id="vid-title" placeholder="Например: Отзыв Азизы про IELTS 8.0" maxlength="80">
@@ -294,30 +433,39 @@
                 </div>
 
                 <div class="admin-form" id="teacher-form">
-                    <h3 id="teacher-form-title" style="margin-bottom: 0.5rem;">Добавить учителя</h3>
-                    <label>Имя и фамилия *</label>
-                    <input type="text" id="tch-name" placeholder="Например: Каримов Алишер" maxlength="80" oninput="tchNameHint()">
-                    <label>Имя латиницей — для узбекской и английской версий (необязательно)</label>
-                    <input type="text" id="tch-name-lat" placeholder="Например: Karimov Alisher" maxlength="80">
-                    <p style="color: var(--ink-soft); font-size: 0.8rem; margin-top: 0.4rem;">Если оставить пустым, имя на кириллице само напишется латиницей (<span id="tch-name-auto">—</span>). Заполните, если хотите точное написание.</p>
-                    <label>Специализация *</label>
-                    <input type="text" id="tch-role" placeholder="Например: IELTS Writing Expert" maxlength="100">
-                    <label>Балл на значке (необязательно)</label>
-                    <input type="text" id="tch-badge" placeholder="Например: IELTS 7.5" maxlength="30">
-                    <label>Теги через запятую (необязательно)</label>
-                    <input type="text" id="tch-tags" placeholder="Например: 5 лет опыта, Speaking" maxlength="160">
-                    <label>Язык, на котором вы пишете тексты ниже</label>
-                    <select id="tch-lang">
-                        <option value="ru">Русский</option>
-                        <option value="uz">O'zbekcha</option>
-                        <option value="en">English</option>
-                    </select>
-                    <p style="color: var(--ink-soft); font-size: 0.8rem; margin-top: 0.4rem;">Сайт автоматически переведёт специализацию, теги, описание и названия сертификатов на два других языка при сохранении. Имя не переводится — на UZ/EN оно показывается латиницей.</p>
+                    <div class="adm-form-head"><h3 id="teacher-form-title">Добавить учителя</h3><button type="button" class="adm-x" onclick="admCloseForm('teachers')" aria-label="Свернуть">✕</button></div>
+                    <div class="adm-step"><span>1</span> Кто это</div>
+                    <div class="adm-grid2">
+                        <div><label>Имя и фамилия *</label>
+                        <input type="text" id="tch-name" placeholder="Например: Каримов Алишер" maxlength="80" oninput="tchNameHint()"></div>
+                        <div><label>Имя латиницей (для UZ / EN)</label>
+                        <input type="text" id="tch-name-lat" placeholder="Например: Karimov Alisher" maxlength="80"></div>
+                    </div>
+                    <p class="adm-help">Если латиницу не заполнить, имя напишется само: <span id="tch-name-auto">—</span></p>
+                    <div class="adm-grid2">
+                        <div><label>Специализация *</label>
+                        <input type="text" id="tch-role" placeholder="Например: IELTS Writing Expert" maxlength="100"></div>
+                        <div><label>Балл на значке</label>
+                        <input type="text" id="tch-badge" placeholder="Например: IELTS 7.5" maxlength="30"></div>
+                    </div>
+                    <div class="adm-grid2">
+                        <div><label>Теги через запятую</label>
+                        <input type="text" id="tch-tags" placeholder="Например: 5 лет опыта, Speaking" maxlength="160"></div>
+                        <div><label>Язык, на котором пишете</label>
+                        <select id="tch-lang">
+                            <option value="ru">Русский</option>
+                            <option value="uz">O'zbekcha</option>
+                            <option value="en">English</option>
+                        </select></div>
+                    </div>
+                    <p class="adm-help">При сохранении всё само переведётся на два других языка.</p>
+                    <div class="adm-step"><span>2</span> Описание</div>
                     <label>Коротко о преподавателе * (на карточке)</label>
                     <textarea id="tch-bio" placeholder="Чем занимается, в чём сильнее всего, результаты учеников..." maxlength="600"></textarea>
                     <label>Подробное описание (необязательно — на странице профиля)</label>
                     <textarea id="tch-bio-full" placeholder="Если оставить пустым, на странице профиля покажется короткое описание." maxlength="1500"></textarea>
 
+                    <div class="adm-step"><span>3</span> Видео, фото, сертификаты</div>
                     <label>Видео-визитка (необязательно)</label>
                     <input type="text" id="tch-video" placeholder="Ссылка на YouTube / Instagram Reel или прямую .mp4 (https://…)" maxlength="300">
                     <p style="color: var(--ink-soft); font-size: 0.8rem; margin-top: 0.4rem;">Если указать, на карточке в «Команде экспертов» появится значок ▶ — по клику видео откроется на весь экран.</p>
@@ -335,7 +483,7 @@
 
                     <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
                         <button class="btn-primary" id="tch-save-btn" onclick="saveTeacher()">Добавить учителя</button>
-                        <button class="btn-small" id="tch-cancel-btn" style="display: none;" onclick="resetTeacherForm()">Отмена</button>
+                        <button class="btn-small" id="tch-cancel-btn" style="display: none;" onclick="resetTeacherForm(); admCloseForm('teachers')">Отмена</button>
                     </div>
                     <div class="status-msg" id="tch-status"></div>
                 </div>
@@ -371,9 +519,6 @@
                 <div id="mk-editor" style="display:none"></div>
             </div>
             <div class="admin-panel" id="panel-schedule">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Найдите ученика по его никнейму (это и есть его логин — он его выбирал при регистрации). Ученик увидит урок в своём личном кабинете, преподаватель — на своей странице расписания.
-                </p>
                 <div class="admin-form">
                     <label>Преподаватель</label>
                     <select id="sch-teacher">
@@ -391,10 +536,12 @@
                     <input type="text" id="sch-nickname" placeholder="Например: aziz_2010">
                     <div id="sch-nickname-status" style="font-size: 0.82rem; margin-top: 0.4rem;"></div>
 
-                    <label>Дата</label>
-                    <input type="date" id="sch-date">
-                    <label>Время</label>
-                    <input type="time" id="sch-time">
+                    <div class="adm-grid2">
+                        <div><label>Дата</label>
+                        <input type="date" id="sch-date"></div>
+                        <div><label>Время</label>
+                        <input type="time" id="sch-time"></div>
+                    </div>
                     <label>Тема урока (необязательно)</label>
                     <input type="text" id="sch-subject" placeholder="Например: Writing Task 2">
 
@@ -406,9 +553,9 @@
 
             <!-- STUDENTS -->
             <div class="admin-panel" id="panel-students">
-                <div class="admin-form">
+                <div class="admin-form adm-filter"><div style="flex:1 1 260px;">
                     <label>Поиск по имени, никнейму, телефону или email</label>
-                    <input type="text" id="student-search" placeholder="Начните вводить..." oninput="filterStudents()">
+                    <input type="text" id="student-search" placeholder="Начните вводить..." oninput="filterStudents()"></div>
                 </div>
                 <div style="display:flex; gap:0.6rem; align-items:center; flex-wrap:wrap; margin-bottom:0.8rem;">
                     <select id="student-role" onchange="filterStudents()" style="max-width:200px;"><option value="all">Все роли</option><option value="student">Ученики</option><option value="teacher">Преподаватели</option><option value="admin">Администраторы</option></select>
@@ -420,10 +567,7 @@
 
             <!-- LESSONS (journal of held video lessons) -->
             <div class="admin-panel" id="panel-lessons">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Журнал проведённых видеоуроков: чей урок, с какого и до какого времени, сколько просидел учитель и каждый ученик. Запись появляется, когда учитель заходит в комнату, и закрывается кнопкой «Закончить урок».
-                </p>
-                <div class="admin-form" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+                <div class="admin-form adm-filter">
                     <div style="flex:1 1 220px;"><label>Поиск по учителю, группе или ученику</label>
                         <input type="text" id="les-search" placeholder="Начните вводить..." oninput="renderLessons()"></div>
                     <div style="flex:0 1 200px;"><label>Период</label>
@@ -439,10 +583,7 @@
 
             <!-- GROUPS -->
             <div class="admin-panel" id="panel-groups">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Все группы преподавателей. Можно передать группу другому преподавателю (вместе с историей посещаемости и оценок), отправить в архив, скачать CSV или удалить.
-                </p>
-                <div class="admin-form" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+                <div class="admin-form adm-filter">
                     <div style="flex:1 1 220px;"><label>Поиск по названию, преподавателю или ученику</label>
                         <input type="text" id="grp-search" placeholder="Начните вводить..." oninput="renderAdminGroups()"></div>
                     <div style="flex:0 1 200px;"><label>Показать</label>
@@ -455,12 +596,7 @@
             </div>
 
             <div class="admin-panel" id="panel-referrals">
-                <p style="color: var(--ink-soft); font-size: 0.85rem; margin-bottom: 1rem;">
-                    Ученик приглашает друга по своей ссылке. Друг регистрируется → вы видите его здесь как «Зарегистрировался» (ему положена скидка 10% на первый месяц).
-                    Когда друг <strong>оплатил первый месяц</strong>, нажмите «Друг оплатил» — пригласившему положена скидка 20% на следующий месяц.
-                    Когда вы применили скидку при его оплате — нажмите «Скидка применена».
-                </p>
-                <div class="admin-form" style="display:flex; gap:0.75rem; flex-wrap:wrap; align-items:flex-end;">
+                <div class="admin-form adm-filter">
                     <div style="flex:1 1 220px;"><label>Поиск по никнейму или имени</label>
                         <input type="text" id="ref-search" placeholder="Начните вводить..." oninput="renderReferrals()"></div>
                     <div style="flex:0 1 220px;"><label>Статус</label>
@@ -509,7 +645,7 @@
                     <div class="status-msg" id="ann-status"></div>
                 </div>
             </div>
-            </div></div>
+            </main></div>
         </div>
     </div>
 
@@ -517,13 +653,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-    <script src="firebase-config.js?v=53"></script>
-    <script src="video-embed.js?v=53"></script>
-    <script src="csv-export.js?v=53"></script>
-    <script src="mock-config.js?v=53"></script>
-    <script src="mock-engine.js?v=53"></script>
-    <script src="content-i18n.js?v=53"></script>
-    <script src="teachers-data.js?v=53"></script>
+    <script src="firebase-config.js?v=57"></script>
+    <script src="video-embed.js?v=57"></script>
+    <script src="csv-export.js?v=57"></script>
+    <script src="journal.js?v=57"></script>
+    <script src="mock-config.js?v=57"></script>
+    <script src="mock-engine.js?v=57"></script>
+    <script src="content-i18n.js?v=57"></script>
+    <script src="teachers-data.js?v=57"></script>
+    <script src="blog.js?v=57"></script>
+    <script src="admin-blog.js?v=57"></script>
     <script>
         function escapeHtml(str) {
             if (str === undefined || str === null) return '';
@@ -584,6 +723,75 @@
             loadLessons();
             if (window.loadMocks) loadMocks();
             loadDesign();
+            let last = 'home'; try { last = sessionStorage.getItem('admTab') || 'home'; } catch (e) {}
+            switchTab(document.getElementById('panel-' + last) ? last : 'home');
+        }
+
+        const ADM_HINTS = {
+            home: '',
+            catalog: 'Курсы, цены и описания на главной. Нажмите «Сохранить» — и всё сразу обновится на сайте.',
+            teachers: 'Карточки в «Команде экспертов» и страницы учителей. Порядок меняется стрелками ↑ ↓.',
+            blog: 'Статьи в блоке «Академический блог и советы» на главной. Картинку можно сделать прямо здесь — в том же стиле, что и сейчас.',
+            news: 'Записи на странице «Новости»: заголовок, текст, дата. Остаются, пока вы их не удалите.',
+            reviews: 'Отзывы с сайта приходят сюда «На проверке» — опубликуйте, если всё в порядке. Можно добавить отзыв и вручную.',
+            results: 'Сертификаты и баллы учеников на странице «Результаты». Закройте на фото номер и штрихкод.',
+            videos: 'Карусель видео вверху главной: листается сама. Лучше всего вертикальные видео 9:16 (как Reels).',
+            announcement: 'Одна строка СВЕРХУ на каждой странице (например: «Набор открыт — осталось 5 мест»). Можно выключить в любой момент.',
+            promo: 'Промокоды для блока цен: скидка в процентах или бесплатно, с датой окончания по желанию.',
+            students: 'Все аккаунты сайта. Здесь же можно сделать человека учителем или админом.',
+            journal: 'Все ученики всех учителей: группа, каждая оценка, посещаемость, динамика и mock-тесты. Нажмите на ученика — откроется график и вся история. Можно скачать CSV.',
+            groups: 'Группы учителей: передать другому учителю (с историей), отправить в архив, скачать CSV или удалить.',
+            schedule: 'Найдите ученика по никнейму. Урок появится у ученика в кабинете и у учителя в расписании.',
+            lessons: 'Журнал видеоуроков: кто вёл, с какого и до какого времени, сколько был каждый ученик.',
+            mocks: 'Mock-тесты IELTS: создать тест, посмотреть результаты учеников.',
+            referrals: 'Друг зарегистрировался по ссылке → скидка 10% ему. Оплатил первый месяц → нажмите «Друг оплатил», пригласившему положено 20%.',
+            design: 'Акцентный цвет и логотип всего сайта.'
+        };
+        const ADM_ADD = {
+            news: ['＋ Новая новость', 'Новая новость', 'news-items', 'Все новости'],
+            reviews: ['＋ Добавить отзыв вручную', 'Отзыв вручную', 'review-items', 'Все отзывы'],
+            results: ['＋ Добавить результат', 'Новый результат ученика', 'result-items', 'Результаты на сайте'],
+            videos: ['＋ Добавить видео', 'Новое видео на главную', 'video-items', 'Видео в карусели'],
+            teachers: ['＋ Добавить учителя', null, 'teacher-items', 'Учителя на сайте'],
+            schedule: ['＋ Добавить урок', 'Новый урок в расписание', 'schedule-items', 'Уроки в расписании']
+        };
+        function admForm(tab) { const pnl = document.getElementById('panel-' + tab); return pnl && pnl.querySelector(tab === 'teachers' ? '#teacher-form' : '.admin-form'); }
+        function admOpenForm(tab) {
+            const f = admForm(tab), bar = document.getElementById('adm-add-' + tab);
+            if (!f) return;
+            f.hidden = false; if (bar) bar.hidden = true;
+            const first = f.querySelector('input:not([type=file]):not([type=checkbox]), textarea');
+            setTimeout(() => { f.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (first) first.focus({ preventScroll: true }); }, 60);
+        }
+        function admCloseForm(tab) {
+            const f = admForm(tab), bar = document.getElementById('adm-add-' + tab);
+            if (f) f.hidden = true; if (bar) bar.hidden = false;
+        }
+        (function admEnhance() {
+            Object.keys(ADM_ADD).forEach(tab => {
+                const [btn, title, listId, listTitle] = ADM_ADD[tab];
+                const f = admForm(tab); if (!f) return;
+                const bar = document.createElement('div');
+                bar.className = 'adm-addbar'; bar.id = 'adm-add-' + tab;
+                bar.innerHTML = '<button type="button" class="btn-primary">' + btn + '</button>';
+                bar.firstChild.onclick = () => admOpenForm(tab);
+                f.before(bar); f.hidden = true;
+                if (title) {
+                    const head = document.createElement('div');
+                    head.className = 'adm-form-head';
+                    head.innerHTML = '<h3>' + title + '</h3><button type="button" class="adm-x" aria-label="Свернуть">✕</button>';
+                    head.lastChild.onclick = () => admCloseForm(tab);
+                    f.prepend(head);
+                }
+                const list = document.getElementById(listId);
+                if (list) { const h = document.createElement('h3'); h.className = 'adm-listhead'; h.textContent = listTitle; (tab === 'teachers' ? document.getElementById('tch-retranslate-row') || list : list).before(h); }
+            });
+        })();
+        function admMenu(open) { document.getElementById('adm-shell').classList.toggle('adm-open', !!open); }
+        function admQuick(tab) {
+            switchTab(tab);
+            if (tab === 'blog') { const go = () => { const b = document.getElementById('blg-add-btn'); if (b) b.click(); else setTimeout(go, 150); }; go(); }
+            else admOpenForm(tab);
         }
 
         function switchTab(tab) {
@@ -591,7 +799,17 @@
             document.querySelectorAll('.admin-panel').forEach(p => p.classList.toggle('active', p.id === `panel-${tab}`));
             if (tab === 'catalog' && window.loadCatalog) window.loadCatalog();
             if (tab === 'promo' && window.loadPromo) window.loadPromo();
-            const act = document.querySelector('.admin-tab.active'); const pt = document.getElementById('admin-ptitle'); if (pt && act) pt.textContent = act.textContent; const ph = document.getElementById('admin-phint'); if (ph) { const H = { news: 'Записи на странице «Новости» (news): заголовок, текст, дата. Остаются в списке, пока вы их не удалите.', announcement: 'Одна короткая строка-баннер СВЕРХУ на каждой странице сайта (например: «Набор открыт — осталось 5 мест»). Можно добавить ссылку и в любой момент выключить.', catalog: 'Курсы, цены и описания на главной. Сохраните — и всё сразу обновится на сайте.', promo: 'Промокоды для блока цен на главной: скидка в процентах или полностью бесплатно, с необязательной датой окончания.' }; ph.textContent = H[tab] || ''; ph.style.display = H[tab] ? '' : 'none'; }
+            if (tab === 'blog' && window.loadBlogAdmin) window.loadBlogAdmin();
+            if (tab === 'journal' && window.StarthJournal) { const jr = document.getElementById('journal-root'); if (jr._jr) jr._jr.reload(); else jr._jr = StarthJournal.mount(jr, { mode: 'admin' }); }
+            const act = document.querySelector('.admin-tab.active');
+            const name = act ? (act.querySelector('.tl') || act).textContent : '';
+            document.getElementById('admin-ptitle').textContent = name;
+            document.getElementById('adm-mtitle').textContent = name;
+            document.getElementById('adm-crumb').textContent = act ? act.dataset.grp || '' : '';
+            const ph = document.getElementById('admin-phint'); ph.textContent = ADM_HINTS[tab] || ''; ph.style.display = ADM_HINTS[tab] ? '' : 'none';
+            admMenu(false);
+            window.scrollTo({ top: 0 });
+            try { sessionStorage.setItem('admTab', tab); } catch (e) {}
         }
 
         if (typeof FIREBASE_READY !== 'undefined' && FIREBASE_READY) {
@@ -1107,11 +1325,27 @@
             }
         }
 
+        // Same video under two teachers = visitors see the wrong person in the player.
+        function videoKey(v) {
+            const i = v && window.parseVideoLink ? parseVideoLink(v) : null;
+            if (!i) return '';
+            return i.type === 'youtube' ? 'yt:' + i.id : i.type === 'instagram' ? 'ig:' + i.code : 'f:' + i.url;
+        }
+        function videoTwin(video, selfId) {
+            const k = videoKey(video);
+            if (!k) return null;
+            return Object.values(teachersCache).find(o => doc_id(o.id) !== selfId && videoKey(o.video) === k) || null;
+        }
+
         function renderTeachers(list) {
             const wrap = document.getElementById('teacher-items');
             if (!list.length) { wrap.innerHTML = '<div class="empty-state">Учителей пока нет — добавьте первого выше.</div>'; return; }
             wrap.innerHTML = '';
             list.forEach((t, idx) => {
+                const twin = videoTwin(t.video, doc_id(t.id));
+                const videoLine = t.video
+                    ? `<div class="meta" style="margin-top:4px;">🎬 Видео: <a href="${escapeHtml(t.video)}" target="_blank" rel="noopener" style="word-break:break-all;">${escapeHtml(t.video)}</a>${twin ? ` <span style="color:#e5484d;font-weight:600;">— такое же видео, как у «${escapeHtml(twin.name)}». Вставьте ссылку на видео этого учителя.</span>` : ''}</div>`
+                    : '<div class="meta" style="margin-top:4px;opacity:.7;">🎬 Видео не добавлено</div>';
                 const card = document.createElement('div');
                 card.className = 'admin-card';
                 const photo = /^(data:image\/|https?:\/\/|images\/)/i.test(t.photo || '') ? `<img class="admin-thumb" src="${escapeHtml(t.photo)}" alt="" onerror="this.style.visibility='hidden'">` : '<div class="admin-thumb"></div>';
@@ -1123,6 +1357,7 @@
                             <h3>${teachersManaged ? `<span class="chip" title="Место на сайте">№${idx + 1}</span> ` : ''}${escapeHtml(t.name)} ${t.badge ? `<span class="chip">${escapeHtml(t.badge)}</span>` : ''}${t.i18n ? '<span class="chip" title="Есть переводы на другие языки">UZ · EN</span>' : ''}</h3>
                             <div class="meta">${escapeHtml(t.role)}</div>
                             <p>${escapeHtml(t.bio)}</p>
+                            ${videoLine}
                             ${teachersManaged ? `<div class="admin-card-actions">
                                 <button class="btn-small" onclick="moveTeacher('${id}', -1)" ${idx === 0 ? 'disabled style="opacity:.4;cursor:default"' : ''} title="Показывать раньше">↑ Выше</button>
                                 <button class="btn-small" onclick="moveTeacher('${id}', 1)" ${idx === list.length - 1 ? 'disabled style="opacity:.4;cursor:default"' : ''} title="Показывать позже">↓ Ниже</button>
@@ -1197,6 +1432,7 @@
         function editTeacher(id) {
             const t = teachersCache[id];
             if (!t) return;
+            admOpenForm('teachers');
             editingTeacherId = id;
             document.getElementById('tch-lang').value = t.srcLang || 'ru';
             document.getElementById('tch-name').value = t.name || '';
@@ -1217,7 +1453,7 @@
             document.getElementById('teacher-form-title').textContent = 'Изменить: ' + (t.name || '');
             document.getElementById('tch-save-btn').textContent = 'Сохранить изменения';
             document.getElementById('tch-cancel-btn').style.display = 'inline-block';
-            document.getElementById('teacher-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
         }
 
         async function saveTeacher() {
@@ -1238,6 +1474,8 @@
             if (certs.some(c => !/^(https?:\/\/|images\/)/i.test(c.href))) return setStatus('tch-status', 'Ссылка на сертификат должна начинаться с https://', false);
 
             if (video && !(window.parseVideoLink && parseVideoLink(video))) return setStatus('tch-status', 'Ссылка на видео не распознана: нужна https-ссылка на YouTube, Instagram или .mp4.', false);
+            const twin = videoTwin(video, editingTeacherId);
+            if (twin && !confirm('Это видео уже стоит у учителя «' + twin.name + '». На сайте у обоих будет одно и то же видео. Всё равно сохранить?')) return;
 
             try {
                 // First change ever: move the built-in 5 into the database so they don't disappear.
@@ -1764,10 +2002,10 @@
             } catch (err) { statusEl.textContent = 'Ошибка: ' + err.message; statusEl.className = 'status-msg error'; }
         }
     </script>
-    <script src="catalog-defaults.js?v=53"></script>
-    <script src="presence.js?v=53"></script>
-    <script src="admin-catalog.js?v=53"></script>
-    <script src="admin-promo.js?v=53"></script>
-    <script src="admin-mock.js?v=53"></script>
+    <script src="catalog-defaults.js?v=57"></script>
+    <script src="presence.js?v=57"></script>
+    <script src="admin-catalog.js?v=57"></script>
+    <script src="admin-promo.js?v=57"></script>
+    <script src="admin-mock.js?v=57"></script>
 </body>
 </html>

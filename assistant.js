@@ -363,6 +363,8 @@ body.cookie-open .sa-fab{bottom:calc(18px + var(--cookie-h,0px))}
         const l = vlang(); let t = cleanSpeech(text); (SAY[l] || []).forEach(([re, to]) => { t = t.replace(re, to); });
         // No Uzbek voice on this device: a Turkish voice reads Uzbek Latin text almost right once the letters are mapped.
         if (!premiumVoice && l === 'uz' && !exactVoice('uz') && exactVoice('tr')) t = t.replace(/[gG][ʻ'’`‘]/g, 'ğ').replace(/[oO][ʻ'’`‘]/g, 'o').replace(/sh/g, 'ş').replace(/Sh/g, 'Ş').replace(/ch/g, 'ç').replace(/Ch/g, 'Ç').replace(/j/g, 'c').replace(/J/g, 'C').replace(/x/g, 'h').replace(/X/g, 'H').replace(/q/g, 'k').replace(/Q/g, 'K');
+        // Stress marks help premium voices, but some browser voices break the word apart on them ("Ста-рз") — drop them there.
+        if (!premiumVoice) t = t.normalize('NFC').replace(/\u0301/g, '');
         return t;
     }
     // Split only at real sentence ends (punctuation followed by a space), and glue short sentences together: fewer pauses.
