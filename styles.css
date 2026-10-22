@@ -2704,10 +2704,6 @@ html.vbox-lock,html.vbox-lock body{overflow:hidden}
 /* ══════════════════════════════════════════════════════════
    NAV v61 — one clear menu on every page (built by theme.js)
    ══════════════════════════════════════════════════════════ */
-.nav-quick { display: none; align-items: center; gap: 1.5rem; margin-right: .4rem; }
-.nav-quick a { font-size: .95rem; font-weight: 500; color: var(--ink); white-space: nowrap; }
-.nav-quick a:hover, .nav-quick a.is-current { color: var(--accent); }
-@media (min-width: 1360px) { .nav-quick { display: flex; } }
 
 .nav-links > a.nav-pin--mock { display: inline-flex; align-items: center; gap: 6px; color: var(--accent); font-weight: 700; white-space: nowrap; }
 .nav-new { font-size: .6rem; font-weight: 800; letter-spacing: .05em; line-height: 1.35; background: #D9363E; color: #fff; border-radius: 999px; padding: 2px 6px; }
@@ -2737,6 +2733,8 @@ html.vbox-lock,html.vbox-lock body{overflow:hidden}
 .nav-menu a.nm-item:hover, .nav-menu a.nm-item:focus-visible { background: var(--paper-alt); color: var(--ink); border-radius: 12px; }
 .nav-menu a.nm-item:hover .nm-go, .nav-menu a.nm-item:focus-visible .nm-go { opacity: 1; transform: none; color: var(--accent); }
 .nav-menu a.nm-item.is-current { background: var(--accent-tint); }
+/* Mock Exam is already a button in the bar on a computer — don't repeat it in the menu */
+@media (min-width: 1201px) { .nav-menu a.nm-item[data-nav="mock"] { display: none; } }
 .nav-menu a.nm-item.is-current .nm-txt b { color: var(--accent); }
 .nav-menu a.nm-item.is-current .nm-ico { background: var(--accent); color: var(--on-accent); }
 
@@ -2748,7 +2746,7 @@ html.vbox-lock,html.vbox-lock body{overflow:hidden}
   .nav-links > a.nav-pin--pay { order: 2; }
   .nav-links > .nav-menu { order: 4; }
   .nav-links > .lang-switch { order: 5; }
-  .nav-links > a.nav-pin--mock, .nav-quick { display: none !important; }
+  .nav-links > a.nav-pin--mock { display: none !important; }
   .nav-links { padding-top: 1rem; }
   .nav-links > a.nav-pin { border-radius: 12px; font-weight: 600; }
   .nav-menu { width: auto; flex-direction: column; gap: 1rem; padding: .75rem 0 0; margin-top: .25rem; border: 0; border-top: 1px solid var(--rule); border-radius: 0; background: none; box-shadow: none; }

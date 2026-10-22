@@ -64,7 +64,7 @@
         '<svg class="mi-close" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
     /* ── Navigation: the SAME clear menu on every page ──
-       Bar (computer): quick links · Mock Exam · Оплата · Личный кабинет · languages · theme · «Меню».
+       Bar (computer): Mock Exam · Оплата · Личный кабинет · languages · theme · «Меню».
        «Меню» opens a card with two groups («Учёба», «О школе»): icon + title + one-line hint.
        Phone: «Меню» slides a side panel in: account buttons first, then the same groups, then languages. */
     var SV = function (inner) { return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; };
@@ -89,7 +89,7 @@
         en: { menu: 'Menu', close: 'Close', g1: 'Learning', g2: 'About the school', pay: 'Payment', cab: 'Dashboard', home: 'Home' }
     };
     var NAV_ITEMS = [
-        { g: 1, id: 'courses', href: '#pricing', icon: 'book', quick: true, t: {
+        { g: 1, id: 'courses', href: '#pricing', icon: 'book', t: {
             ru: ['Курсы и цены', 'Направления, форматы и стоимость'], uz: ['Kurslar va narxlar', 'Yo‘nalishlar, formatlar va narxlar'], en: ['Courses & prices', 'Subjects, formats and prices'] } },
         { g: 1, id: 'level', href: 'level-test', icon: 'target', t: {
             ru: ['Тест уровня английского', 'Бесплатно узнайте свой уровень'], uz: ['Ingliz tili darajasi testi', 'Darajangizni bepul aniqlang'], en: ['English level test', 'Find out your level for free'] } },
@@ -101,9 +101,9 @@
             ru: ['Сертификаты', 'Проверить сертификат по номеру'], uz: ['Sertifikatlar', 'Sertifikatni raqami bo‘yicha tekshirish'], en: ['Certificates', 'Verify a certificate by its number'] } },
         { g: 2, id: 'home', href: './', icon: 'home', t: {
             ru: ['Главная', 'Курсы, цены и запись на урок'], uz: ['Bosh sahifa', 'Kurslar, narxlar va darsga yozilish'], en: ['Home', 'Courses, prices and sign-up'] } },
-        { g: 2, id: 'results', href: 'results', icon: 'trend', quick: true, t: {
+        { g: 2, id: 'results', href: 'results', icon: 'trend', t: {
             ru: ['Результаты', 'Баллы и истории наших учеников'], uz: ['Natijalar', 'O‘quvchilarimiz ballari va hikoyalari'], en: ['Results', 'Our students’ scores and stories'] } },
-        { g: 2, id: 'about', href: 'about', icon: 'team', quick: true, t: {
+        { g: 2, id: 'about', href: 'about', icon: 'team', t: {
             ru: ['О нас', 'Команда и преподаватели'], uz: ['Biz haqimizda', 'Jamoa va o‘qituvchilar'], en: ['About us', 'Our team and teachers'] } },
         { g: 2, id: 'news', href: 'news', icon: 'news', t: {
             ru: ['Новости', 'Объявления и полезные статьи'], uz: ['Yangiliklar', 'E’lonlar va foydali maqolalar'], en: ['News', 'Announcements and useful articles'] } },
@@ -119,7 +119,7 @@
     }
     function isHere(it) { return it.href.charAt(0) !== '#' && ((it.id === 'home' && isHome()) || pageName() === it.href); }
 
-    function buildMenu(menu, quick) {
+    function buildMenu(menu) {
         var lang = navLang(), L = NT[lang];
         var html = '';
         [1, 2].forEach(function (g) {
@@ -135,12 +135,6 @@
             html += '</div>';
         });
         menu.innerHTML = html;
-        if (quick) {
-            quick.innerHTML = NAV_ITEMS.filter(function (it) { return it.quick; }).map(function (it) {
-                var tx = it.t[lang] || it.t.ru;
-                return '<a href="' + hrefOf(it) + '"' + (isHere(it) ? ' class="is-current"' : '') + '>' + tx[0] + '</a>';
-            }).join('');
-        }
     }
 
     function setupMenu(container, links, burger) {
@@ -170,12 +164,10 @@
         if (pageName() === 'mock-exam') mock.classList.add('is-current');
         if (pageName() === 'payment') pay.classList.add('is-current');
 
-        var quick = document.createElement('div'); quick.className = 'nav-quick';
         var menu = document.createElement('div'); menu.className = 'nav-menu'; menu.id = 'navMenu';
-        buildMenu(menu, quick);
+        buildMenu(menu);
         var lsw = links.querySelector('.lang-switch');
-        links.insertBefore(quick, links.firstChild);
-        links.insertBefore(mock, quick.nextSibling);
+        links.insertBefore(mock, links.firstChild);
         links.insertBefore(pay, mock.nextSibling);
         links.insertBefore(cab, lsw || null);
         links.appendChild(menu);
@@ -192,7 +184,7 @@
         burger.setAttribute('aria-label', L.menu);
         burger.setAttribute('aria-expanded', 'false');
         burger.setAttribute('aria-controls', 'navMenu');
-        window.addEventListener('starth-lang-changed', function () { buildMenu(menu, quick); burgerHtml(); });
+        window.addEventListener('starth-lang-changed', function () { buildMenu(menu); burgerHtml(); });
 
         var backdrop = document.createElement('div');
         backdrop.className = 'nav-backdrop';
