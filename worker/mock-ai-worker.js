@@ -10,6 +10,10 @@
  *                      берёт из Firebase сам (обновляются автоматически). Есть лимит сообщений, чтобы не злоупотребляли.
  *   mode "tts"       — «живой» голос для голосового звонка с помощником (необязательно): голоса Microsoft Azure, есть узбекский.
  *                      Нужны AZURE_SPEECH_KEY (Secret) и AZURE_SPEECH_REGION (Text, например westeurope). Без них сайт говорит голосом браузера.
+ *   mode "speak_turn" / "speak_eval" — ИИ-партнёр по Speaking (страница speaking.html): реплика в разговоре и итоговая
+ *                      оценка IELTS Speaking. Только для вошедших учеников, которые состоят хотя бы в одной группе
+ *                      (а также учителей и админов). Модели: SPEAK_MODEL для реплик (по умолчанию claude-haiku-5-5, дёшево),
+ *                      MODEL для оценки. Необязательно: KV-привязка LIMITS — дневной лимит SPEAK_DAILY занятий на ученика (по умолчанию 5).
  *   mode "build"     — составить тест из файла (Админ-панель → Mock-тесты) — только вошедший админ
  *                      (посредник проверяет его через Firebase, запросом в Firestore от его имени).
  *
@@ -52,6 +56,8 @@ export default {
 
         const who = await authenticate(request, env);
         if (!who) return json({ error: 'Войдите в аккаунт на сайте и повторите' }, 401);
+
+        if (mode === 'speak_turn' || mode === 'speak_eval') return speaking(request, env, body, json, useCF, who, mode);
 
         let messages, maxTokens;
         if (mode === 'build') {
@@ -206,11 +212,11 @@ function limited(ip, max) {
 }
 
 // Premium voice (Microsoft Azure neural voices). Free tier has a monthly character allowance — see ASSISTANT_SETUP.md.
-const VOICES = { ru: ['ru-RU', 'ru-RU-SvetlanaNeural'], uz: ['uz-UZ', 'uz-UZ-MadinaNeural'], en: ['en-US', 'en-US-AvaMultilingualNeural'] };
+const VOICES = { ru: ['ru-RU', 'ru-RU-SvetlanaNeural'], uz: ['uz-UZ', 'uz-UZ-MadinaNeural'], en: ['en-US', 'en-US-AvaMultilingualNeural'], gb: ['en-GB', 'en-GB-SoniaNeural'] };
 async function tts(request, env, body, json, cors) {
     if (!env.AZURE_SPEECH_KEY) return json({ error: 'tts-off' }, 501);
     const ip = request.headers.get('CF-Connecting-IP') || 'x';
-    if (limited('tts:' + ip, 40)) return json({ error: 'limit' }, 429);
+    if (limited('tts:' + ip, body.purpose === 'speaking' ? 150 : 40)) return json({ error: 'limit' }, 429);
     const lang = VOICES[body.lang] ? body.lang : 'ru';
     const text = String(body.text || '').slice(0, 700).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
     if (!text.trim()) return json({ error: 'empty' }, 400);
@@ -262,4 +268,141 @@ async function assistant(request, env, body, json, useCF) {
     const data = await r.json().catch(() => ({}));
     if (!r.ok) return json({ error: 'ai' }, 502);
     return json({ text: (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('').trim() });
+}
+
+
+// ───────────────────────── IELTS Speaking partner ─────────────────────────
+const SPEAK_RUBRIC = `Use the official public IELTS Speaking band descriptors. Score four criteria, each 0–9 in steps of 0.5:
+"fc" Fluency and Coherence — 9 fluent, rare hesitation, fully coherent; 7 speaks at length without noticeable effort, some hesitation/repetition, flexible use of discourse markers; 6 willing to speak at length but loses coherence at times, some repetition/self-correction/hesitation; 5 usually keeps going but relies on repetition, self-correction or slow speech, overuses certain connectives; 4 cannot respond without noticeable pauses, simple linking only.
+"lr" Lexical Resource — 9 full flexibility and precision, idiomatic; 7 flexible, some less common and idiomatic vocabulary with awareness of style and collocation, some inappropriate choices; 6 wide enough vocabulary to discuss topics at length, meaning clear despite inappropriacies, paraphrases generally successfully; 5 manages familiar and unfamiliar topics with limited flexibility, attempts paraphrase with mixed success; 4 sufficient for familiar topics only, frequent errors in word choice.
+"gra" Grammatical Range and Accuracy — 9 full range, naturally and accurately; 7 range of complex structures with some flexibility, frequent error-free sentences, some errors persist; 6 mix of simple and complex structures but limited flexibility, frequent errors in complex structures that rarely impede communication; 5 basic sentence forms reasonably accurate, limited complex structures with errors; 4 basic forms, errors frequent.
+"pr" Pronunciation — you only have an automatic SPEECH-RECOGNITION TRANSCRIPT, not audio. Estimate cautiously from intelligibility signals: how well the recogniser understood the speaker (average confidence is given), garbled or obviously mis-recognised words, and fluency. Never go above 7.5 or below 4 for pronunciation; when unsure stay close to the other three criteria.
+The transcript has no reliable punctuation and may contain recognition slips (homophones, missing small words): do not penalise those. Very short answers (a few words) must lower FC and LR. Be realistic and strict like a real examiner; do not inflate — most candidates score 5–7.`;
+
+const EXPL = { ru: 'Russian', uz: 'Uzbek (Latin script, natural modern Uzbek)', en: 'English' };
+const MEMBERS = new Map();
+function bearer(request) { const m = (request.headers.get('Authorization') || '').match(/^Bearer\s+(.+)$/i); return m ? m[1] : ''; }
+/** Students may use the speaking partner only if they belong to at least one group (teachers and admins always can). */
+async function canSpeak(request, env, who) {
+    if (who.admin || who.teacher) return true;
+    const c = MEMBERS.get(who.uid); if (c && Date.now() - c.at < 10 * 60 * 1000) return c.ok;
+    const base = 'https://firestore.googleapis.com/v1/projects/' + (env.FIREBASE_PROJECT_ID || 'thestarth-b7620') + '/databases/(default)/documents';
+    let ok = false;
+    try {
+        const r = await fetch(base + ':runQuery', { method: 'POST', headers: { Authorization: 'Bearer ' + bearer(request), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ structuredQuery: { from: [{ collectionId: 'groups' }], where: { fieldFilter: { field: { fieldPath: 'memberUids' }, op: 'ARRAY_CONTAINS', value: { stringValue: who.uid } } }, limit: 1 } }) });
+        if (r.ok) { const rows = await r.json(); ok = Array.isArray(rows) && rows.some((x) => x && x.document); }
+    } catch (e) { ok = false; }
+    MEMBERS.set(who.uid, { ok, at: Date.now() }); if (MEMBERS.size > 5000) MEMBERS.clear();
+    return ok;
+}
+/** Optional daily limit (needs a KV binding named LIMITS). Counts distinct sessions per student per day (Tashkent date). */
+async function dailyOk(env, who, session) {
+    if (!env.LIMITS || who.admin || who.teacher || !session) return true;
+    const day = new Date(Date.now() + 5 * 3600000).toISOString().slice(0, 10), key = 'spk:' + who.uid + ':' + day;
+    let list = []; try { list = JSON.parse((await env.LIMITS.get(key)) || '[]'); } catch (e) { list = []; }
+    if (list.indexOf(session) !== -1) return true;
+    if (list.length >= (+env.SPEAK_DAILY || 5)) return false;
+    list.push(session); await env.LIMITS.put(key, JSON.stringify(list), { expirationTtl: 2 * 86400 });
+    return true;
+}
+async function llm(env, useCF, system, messages, maxTokens, model) {
+    if (useCF) {
+        const out = await env.AI.run(env.CF_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast', { messages: [{ role: 'system', content: system }].concat(messages), max_tokens: Math.min(maxTokens, 4096), temperature: 0.4 });
+        let t = out && out.response; if (t && typeof t === 'object') t = JSON.stringify(t); return String(t || '');
+    }
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model, max_tokens: maxTokens, system, messages }) });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error('ai ' + r.status + ' ' + ((data.error && data.error.message) || ''));
+    return (data.content || []).filter((b) => b.type === 'text').map((b) => b.text).join('');
+}
+export function parseJsonLoose(text) {
+    const s = String(text || ''); const a = s.indexOf('{'), b = s.lastIndexOf('}');
+    if (a === -1 || b <= a) return null;
+    try { return JSON.parse(s.slice(a, b + 1)); } catch (e) { return null; }
+}
+const clip = (v, n) => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, n);
+const band = (v) => { const n = Math.round(Number(v) * 2) / 2; return isFinite(n) ? Math.max(0, Math.min(9, n)) : null; };
+/** IELTS overall: mean of the four, rounded to the nearest half band (.25 → up to .5, .75 → up to the next whole). */
+export function overallBand(fc, lr, gra, pr) { const m = (fc + lr + gra + pr) / 4; return Math.floor(m * 2 + 0.5 + 1e-9) / 2; }
+const fixList = (a, n) => (Array.isArray(a) ? a : []).slice(0, n).map((f) => ({ wrong: clip(f && f.wrong, 200), right: clip(f && f.right, 200), why: clip(f && f.why, 240) })).filter((f) => f.wrong && f.right && f.wrong.toLowerCase() !== f.right.toLowerCase());
+
+export function cleanTurn(o) {
+    if (!o || typeof o !== 'object') return null;
+    const say = clip(o.say, 600); if (!say) return null;
+    const b = o.better && typeof o.better === 'object' ? { from: clip(o.better.from, 200), to: clip(o.better.to, 220) } : null;
+    return { say, fixes: fixList(o.fixes, 3), better: b && b.from && b.to ? b : null };
+}
+export function cleanEval(o) {
+    if (!o || typeof o !== 'object') return null;
+    const fc = band(o.fc), lr = band(o.lr), gra = band(o.gra); let pr = band(o.pr);
+    if ([fc, lr, gra, pr].some((x) => x == null)) return null;
+    pr = Math.max(4, Math.min(7.5, pr));
+    const strs = (a, n, len) => (Array.isArray(a) ? a : []).slice(0, n).map((x) => clip(x, len)).filter(Boolean);
+    const parts = {}; ['1', '2', '3'].forEach((k) => { if (o.parts && o.parts[k]) parts[k] = clip(o.parts[k], 300); });
+    const sample = o.sample && o.sample.answer ? { question: clip(o.sample.question, 240), answer: clip(o.sample.answer, 1200) } : null;
+    return { fc, lr, gra, pr, overall: overallBand(fc, lr, gra, pr), summary: clip(o.summary, 600), strengths: strs(o.strengths, 4, 240), improve: strs(o.improve, 5, 260),
+        mistakes: fixList(o.mistakes, 8), vocab: (Array.isArray(o.vocab) ? o.vocab : []).slice(0, 6).map((v) => ({ phrase: clip(v && v.phrase, 80), use: clip(v && v.use, 200) })).filter((v) => v.phrase),
+        sample, parts };
+}
+
+async function speaking(request, env, body, json, useCF, who, mode) {
+    if (!(await canSpeak(request, env, who))) return json({ error: 'not_member' }, 403);
+    const lang = EXPL[body.lang] ? body.lang : 'ru';
+    const session = clip(body.session, 40);
+    if (!(await dailyOk(env, who, session))) return json({ error: 'daily' }, 429);
+
+    if (mode === 'speak_turn') {
+        if (limited('st:' + who.uid, 90)) return json({ error: 'limit' }, 429);
+        const topic = clip(body.topic, 120) || 'everyday life';
+        const hist = (Array.isArray(body.history) ? body.history : []).slice(-24)
+            .map((m) => ({ role: m && m.role === 'assistant' ? 'assistant' : 'user', content: clip(m && m.text, 1200) })).filter((m) => m.content);
+        while (hist.length && hist[0].role !== 'user') hist.shift();
+        const msgs = hist.length ? hist.map((m) => m.role === 'assistant' ? { role: 'assistant', content: JSON.stringify({ say: m.content }) } : m)
+            : [{ role: 'user', content: '(The learner has just joined. Start the conversation.)' }];
+        if (msgs[msgs.length - 1].role !== 'user') return json({ error: 'Пустой ответ' }, 400);
+        const system = `You are Emma, a warm and patient English speaking partner for a learner preparing for IELTS Speaking. Conversation topic: "${topic}".
+The learner's messages come from automatic speech recognition: ignore punctuation, capital letters and obvious recognition slips (homophones, a missing article the recogniser dropped). Never correct those.
+Every turn:
+1) "say": react briefly and naturally to what the learner said (1–2 short spoken sentences) and ask ONE open follow-up question that makes them speak more (why / how / example / compare). Stay on the topic, vary the questions, IELTS Part 1 and Part 3 style. Use clear B1–B2 English unless the learner is clearly advanced. No emojis, no markdown, no lists.
+   If the learner has not spoken yet, greet them in one sentence and ask the first question.
+2) "fixes": look ONLY at the learner's LAST message. Up to 3 real grammar or vocabulary mistakes: "wrong" (their words), "right" (corrected), "why" (very short reason in ${EXPL[lang]}). Empty list if there are no real mistakes.
+3) "better": optionally one more natural / higher-band way to say something from their last message: {"from": their phrase, "to": better phrase}, or null.
+Answer with ONE JSON object only: {"say":"...","fixes":[{"wrong":"...","right":"...","why":"..."}],"better":{"from":"...","to":"..."}}`;
+        let out;
+        try { out = cleanTurn(parseJsonLoose(await llm(env, useCF, system, msgs, 700, env.SPEAK_MODEL || 'claude-haiku-5-5'))); }
+        catch (e) { return json({ error: 'ai' }, 502); }
+        if (!out) return json({ error: 'ai' }, 502);
+        return json(out);
+    }
+
+    // speak_eval
+    if (limited('se:' + who.uid, 8)) return json({ error: 'limit' }, 429);
+    const kind = body.kind === 'practice' ? 'practice' : 'exam';
+    const tr = (Array.isArray(body.transcript) ? body.transcript : []).slice(0, 140)
+        .map((m) => ({ who: m && m.role === 'student' ? 'Candidate' : 'Examiner', part: [1, 2, 3].indexOf(+(m && m.part)) !== -1 ? +m.part : 0, text: clip(m && m.text, 2600) })).filter((m) => m.text);
+    const words = tr.filter((m) => m.who === 'Candidate').reduce((n, m) => n + m.text.split(/\s+/).length, 0);
+    if (words < 40) return json({ error: 'too_short' }, 400);
+    let text = tr.map((m) => (m.part ? '[Part ' + m.part + '] ' : '') + m.who + ': ' + m.text).join('\n');
+    if (text.length > 30000) text = text.slice(0, 30000);
+    const conf = Number(body.confidence), wpm = Number(body.wpm);
+    const stats = 'Recogniser average confidence: ' + (isFinite(conf) && conf > 0 ? conf.toFixed(2) : 'unknown') + '. Candidate speaking speed: ' + (isFinite(wpm) && wpm > 0 ? Math.round(wpm) + ' words per minute' : 'unknown') + '. Candidate words in total: ' + words + '.';
+    const system = `You are an experienced IELTS Speaking examiner. ${kind === 'exam' ? 'Assess this full mock IELTS Speaking test (Part 1, Part 2 long turn, Part 3 discussion).' : 'Assess the learner\'s English in this practice conversation as if it were IELTS Speaking (the questions came from a practice partner, not a full test).'}
+${SPEAK_RUBRIC}
+Write "summary", "strengths", "improve", every "why", every "use" and the "parts" comments in ${EXPL[lang]}. Keep "wrong", "right", "phrase" and the sample answer in English.
+Answer with ONE JSON object only:
+{"fc":6,"lr":6,"gra":6,"pr":6,"summary":"2–3 sentences: overall level and the single most important thing to work on",
+"strengths":["up to 4 concrete strengths with short quotes"],"improve":["up to 5 concrete, actionable tips"],
+"mistakes":[{"wrong":"exact words of the candidate","right":"corrected","why":"short reason"}],
+"vocab":[{"phrase":"band 7+ word or phrase useful for THESE answers","use":"when and how to use it"}],
+"sample":{"question":"one question the candidate answered weakly","answer":"a natural band 7.5 answer to it, 70–120 words"},
+"parts":{"1":"one sentence on Part 1","2":"one sentence on Part 2","3":"one sentence on Part 3"}}
+Up to 8 mistakes (the most important real ones), up to 6 vocab items. Include "parts" keys only for parts present in the transcript.`;
+    let out;
+    try { out = cleanEval(parseJsonLoose(await llm(env, useCF, system, [{ role: 'user', content: stats + '\n\nTRANSCRIPT:\n' + text }], 3000, env.MODEL || 'claude-sonnet-5-5'))); }
+    catch (e) { return json({ error: 'ai' }, 502); }
+    if (!out) return json({ error: 'ai' }, 502);
+    out.kind = kind; out.words = words;
+    return json(out);
 }

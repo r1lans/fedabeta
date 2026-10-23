@@ -80,6 +80,7 @@
         news: SV('<path d="M4 5h12v14a2 2 0 0 0 2 2H6a2 2 0 0 1-2-2z"/><path d="M16 9h4v10a2 2 0 0 1-2 2M8 9h4M8 13h4M8 17h2"/>'),
         work: SV('<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/>'),
         card: SV('<rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6 15h4"/>'),
+        mic: SV('<rect x="9" y="2" width="6" height="12" rx="3"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/>'),
         user: SV('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>'),
         arrow: SV('<path d="m9 6 6 6-6 6"/>')
     };
@@ -95,6 +96,8 @@
             ru: ['Тест уровня английского', 'Бесплатно узнайте свой уровень'], uz: ['Ingliz tili darajasi testi', 'Darajangizni bepul aniqlang'], en: ['English level test', 'Find out your level for free'] } },
         { g: 1, id: 'mock', href: 'mock-exam', icon: 'exam', t: {
             ru: ['Mock Exam', 'Пробный IELTS-экзамен онлайн'], uz: ['Mock Exam', 'Onlayn IELTS sinov imtihoni'], en: ['Mock Exam', 'Online IELTS practice test'] } },
+        { g: 1, id: 'speaking', href: 'speaking', icon: 'mic', t: {
+            ru: ['Speaking с ИИ', 'Тренировка разговорной речи для учеников'], uz: ['AI bilan Speaking', 'O‘quvchilar uchun og‘zaki nutq mashqi'], en: ['Speaking with AI', 'Speaking practice for our students'] } },
         { g: 1, id: 'math', href: 'math-test', icon: 'math', t: {
             ru: ['Тест по математике', 'SAT Math: проверьте свой уровень'], uz: ['Matematika testi', 'SAT Math: darajangizni tekshiring'], en: ['Math test', 'SAT Math: check your level'] } },
         { g: 1, id: 'cert', href: '#certificates', icon: 'award', t: {

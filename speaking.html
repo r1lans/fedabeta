@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="theme.js?v=63"></script>
+    <title>IELTS Speaking с ИИ — TheStarth</title>
+    <meta name="description" content="Тренировка IELTS Speaking с ИИ для учеников TheStarth: пробный экзамен Part 1–3 с оценкой по 4 критериям и разговор на тему с исправлением ошибок.">
+    <meta name="robots" content="noindex">
+    <link rel="canonical" href="https://thestarth.com/speaking">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css?v=63">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Fraunces:opsz,wght@9..144,600..900&display=swap" rel="stylesheet">
+    <style>
+.spk-wrap{max-width:1000px;margin:0 auto;padding:7rem 0 3rem}
+.spk-h1{font-family:var(--font-heading);font-size:2.4rem;line-height:1.15;margin:0 0 .5rem;text-align:center}
+.spk-lead{text-align:center;color:var(--ink-soft);max-width:640px;margin:0 auto 2rem;line-height:1.55}
+#spkApp{display:flex;flex-direction:column;gap:1.2rem}
+#spkApp .ico{width:1.1em;height:1.1em;flex:0 0 auto}
+.spk-card{background:var(--paper-alt);border:1px solid var(--rule);border-radius:20px;padding:1.6rem}
+.spk-wait{display:flex;align-items:center;justify-content:center;gap:.8rem;color:var(--ink-soft);padding:2rem 0;text-align:center}.spk-wait.small{padding:.8rem 0;justify-content:flex-start}
+.spk-spin{width:22px;height:22px;border-radius:50%;border:3px solid var(--rule);border-top-color:var(--accent);animation:spkspin .8s linear infinite;flex:0 0 auto}
+@keyframes spkspin{to{transform:rotate(360deg)}}
+.spk-gate{display:flex;flex-direction:column;align-items:center;gap:1rem;text-align:center;padding:1.5rem .5rem}.spk-gate>.ico{width:44px;height:44px;color:var(--accent)}.spk-gate p{max-width:520px;margin:0;line-height:1.55}
+.spk-note{display:flex;gap:.6rem;align-items:flex-start;padding:.8rem 1rem;border-radius:14px;background:var(--accent-tint);border:1px solid var(--rule);line-height:1.45}.spk-note .ico{margin-top:.15em;color:var(--accent)}
+.spk-note.bad{background:rgba(194,65,12,.1);border-color:rgba(194,65,12,.35)}.spk-note.bad .ico{color:#C2410C}
+.spk-modes{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.spk-mode{background:var(--paper-alt);border:1px solid var(--rule);border-radius:20px;padding:1.5rem;display:flex;flex-direction:column;gap:.75rem}
+.spk-mode h2{margin:0;font-size:1.35rem}.spk-mode p{margin:0;color:var(--ink-soft);line-height:1.5}
+.spk-mode-ico{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;background:var(--accent-tint);color:var(--accent)}.spk-mode-ico .ico{width:28px!important;height:28px!important}
+.spk-meta{display:flex;align-items:center;gap:.4rem;font-size:.9rem;color:var(--ink-soft)}
+.spk-lbl{font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-top:.25rem}
+.spk-topics{display:flex;flex-wrap:wrap;gap:.4rem}
+.spk-topic{font:inherit;font-size:.88rem;padding:.4rem .75rem;border-radius:999px;border:1px solid var(--rule);background:var(--paper);color:var(--ink);cursor:pointer}
+.spk-topic:hover{border-color:var(--accent)}.spk-topic.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.spk-input,.spk-text{font:inherit;width:100%;box-sizing:border-box;padding:.75rem .9rem;border-radius:12px;border:1px solid var(--rule);background:var(--surface);color:var(--ink)}
+.spk-input:focus,.spk-text:focus{outline:2px solid var(--accent);outline-offset:1px}.spk-text{resize:vertical;min-height:96px;line-height:1.5}
+.spk-big{display:inline-flex;align-items:center;justify-content:center;gap:.55rem;padding:.85rem 1.4rem;font-size:1rem;border-radius:12px;margin-top:auto;cursor:pointer;border:0}
+.spk-btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.65rem 1.1rem;border-radius:12px;cursor:pointer;font:inherit;font-size:.95rem;text-decoration:none}
+.spk-link{display:inline-flex;align-items:center;gap:.4rem;background:none;border:0;color:var(--accent);font:inherit;font-size:.92rem;cursor:pointer;padding:.4rem .2rem}
+.spk-link:hover{text-decoration:underline}
+.spk-tools{display:flex;flex-wrap:wrap;gap:1rem;align-items:center;justify-content:space-between;background:var(--paper-alt);border:1px solid var(--rule);border-radius:16px;padding:.9rem 1.1rem}
+.spk-tool{display:flex;flex-wrap:wrap;gap:.8rem;align-items:center;min-width:0}
+.spk-micout{font-size:.92rem;color:var(--ink-soft);min-width:0}.spk-ok{display:inline-flex;gap:.35rem;align-items:center;color:#15803D;font-weight:600}[data-theme="dark"] .spk-ok{color:#4ADE80}
+.spk-heard{overflow-wrap:anywhere}
+.spk-switch{display:inline-flex;align-items:center;gap:.6rem;cursor:pointer;font-size:.95rem}
+.spk-switch input{position:absolute;opacity:0;width:0;height:0}.spk-switch span{width:40px;height:22px;border-radius:99px;background:var(--rule);position:relative;transition:background .2s;flex:0 0 auto}
+.spk-switch span::after{content:"";position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s}
+.spk-switch input:checked+span{background:var(--accent)}.spk-switch input:checked+span::after{transform:translateX(18px)}.spk-switch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.spk-tips{background:var(--paper-alt);border:1px solid var(--rule);border-radius:16px;padding:1rem 1.2rem}.spk-tips b{display:flex;align-items:center;gap:.45rem}.spk-tips .ico{color:var(--accent)}.spk-tips ul{margin:.5rem 0 0;padding-left:1.2rem;color:var(--ink-soft);line-height:1.6}
+.spk-hist{display:flex;flex-direction:column;gap:.8rem}.spk-hist h2{display:flex;align-items:center;gap:.5rem;font-size:1.25rem;margin:.5rem 0 0}.spk-hist h2 .ico{color:var(--accent)}
+.spk-run{display:flex;flex-direction:column;gap:1rem}
+.spk-bar{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap;background:var(--paper-alt);border:1px solid var(--rule);border-radius:16px;padding:.6rem .8rem;position:sticky;top:86px;z-index:5}
+.spk-parts{display:flex;gap:.35rem;flex-wrap:wrap;flex:1;min-width:0}
+.spk-pt{display:inline-flex;align-items:center;gap:.35rem;padding:.35rem .75rem;border-radius:999px;font-size:.85rem;font-weight:600;background:var(--paper);border:1px solid var(--rule);color:var(--ink-soft);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spk-pt.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}.spk-pt.done{color:var(--accent);border-color:var(--accent)}
+.spk-clock{font-variant-numeric:tabular-nums;font-weight:700;color:var(--ink-soft)}
+.spk-confirm{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;padding:.8rem 1rem;border-radius:14px;background:var(--accent-tint);border:1px solid var(--accent)}.spk-confirm span{flex:1;min-width:200px}
+.spk-stage{display:flex;flex-direction:column;gap:1rem}
+.spk-ex{display:flex;gap:1rem;align-items:flex-start;background:var(--paper-alt);border:1px solid var(--rule);border-radius:20px;padding:1.2rem 1.3rem}
+.spk-ava{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);flex:0 0 auto;position:relative}.spk-ava .ico{width:26px!important;height:26px!important}
+.spk-ava.sm{width:36px;height:36px}.spk-ava.sm .ico{width:18px!important;height:18px!important}
+.spk-ex.talk .spk-ava::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--accent);animation:spkpulse 1.2s ease-out infinite}
+@keyframes spkpulse{from{transform:scale(.9);opacity:1}to{transform:scale(1.25);opacity:0}}
+.spk-ex-body{flex:1;min-width:0}.spk-ex-name{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:.35rem}
+.spk-ex-text{font-size:1.25rem;line-height:1.45;font-weight:500;min-height:1.6em}.spk-hidden{display:inline-flex;align-items:center;gap:.4rem;color:var(--ink-soft);font-size:1rem}
+.spk-cue{background:var(--surface);border:2px solid var(--accent);border-radius:18px;padding:1.2rem 1.4rem;line-height:1.5}.spk-cue.compact{padding:.8rem 1rem;font-size:.92rem}
+.spk-cue-h{display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:.4rem}
+.spk-cue b{display:block;font-size:1.15rem}.spk-cue.compact b{font-size:1rem}.spk-cue-s{margin-top:.5rem;color:var(--ink-soft)}.spk-cue ul{margin:.25rem 0 0;padding-left:1.2rem}
+.spk-ans{display:flex;flex-direction:column;gap:.8rem;background:var(--paper-alt);border:1px solid var(--rule);border-radius:20px;padding:1.1rem 1.2rem}
+.spk-live{display:flex;align-items:center;gap:.6rem;color:var(--ink-soft);font-weight:600}.spk-live em{margin-left:auto;font-style:normal;font-variant-numeric:tabular-nums}
+.spk-live i{width:12px;height:12px;border-radius:50%;background:#DC2626;flex:0 0 auto;animation:spkblink 1s ease-in-out infinite}
+@keyframes spkblink{50%{opacity:.25}}
+.spk-said{min-height:3.2em;padding:.8rem .95rem;border-radius:14px;background:var(--surface);border:1px dashed var(--rule);font-size:1.05rem;line-height:1.5;color:var(--ink-soft)}
+.spk-said.has{color:var(--ink);border-style:solid}.spk-said.bad{color:#C2410C}
+.spk-row{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}.spk-row .spk-big{margin-top:0}
+.spk-end{justify-content:center}
+.spk-prep{display:flex;align-items:center;gap:.6rem;font-weight:700}.spk-prep span{display:flex;align-items:center;gap:.4rem}.spk-prep em{margin-left:auto;font-style:normal;font-size:1.6rem;color:var(--accent);font-variant-numeric:tabular-nums}
+.spk-chat{display:flex;flex-direction:column;gap:.8rem;max-height:56vh;overflow:auto;padding:.2rem}
+.spk-msg{display:flex;gap:.6rem;align-items:flex-end}.spk-msg.s{justify-content:flex-end}
+.spk-bub{max-width:min(80%,640px);padding:.75rem .95rem;border-radius:16px;line-height:1.5;background:var(--paper-alt);border:1px solid var(--rule)}
+.spk-msg.s .spk-bub{background:var(--accent-tint);border-color:var(--accent)}
+.spk-fixes{display:flex;flex-direction:column;gap:.35rem;margin-top:.6rem;padding-top:.55rem;border-top:1px solid var(--rule);font-size:.88rem}
+.spk-fix s{color:#C2410C}.spk-fix u{color:#15803D;text-decoration:none;font-weight:600}.spk-fix i{display:block;color:var(--ink-soft);font-style:normal}.spk-fix.good u{color:var(--accent)}
+[data-theme="dark"] .spk-fix s{color:#FB923C}[data-theme="dark"] .spk-fix u{color:#4ADE80}
+.spk-dots{display:inline-flex;gap:4px}.spk-dots i{width:7px;height:7px;border-radius:50%;background:var(--ink-soft);animation:spkblink 1s infinite}.spk-dots i:nth-child(2){animation-delay:.2s}.spk-dots i:nth-child(3){animation-delay:.4s}
+@media(max-width:820px){.spk-wrap{padding-top:5.6rem}.spk-h1{font-size:1.8rem}.spk-modes{grid-template-columns:1fr}.spk-bar{top:70px}.spk-ex-text{font-size:1.1rem}.spk-bub{max-width:88%}}
+@media(max-width:480px){.spk-card,.spk-mode{padding:1.1rem}.spk-ex{padding:1rem}.spk-big{width:100%}.spk-row .spk-big{width:100%}}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="./" style="text-decoration: none;">
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; letter-spacing: normal;">
+                    <img class="site-logo-full" src="images/logo-full.png" alt="TheStarth — Start with the best." style="height:53px;width:auto;object-fit:contain;display:block;">
+                </div>
+            </a>
+            <button class="mobile-toggle" aria-label="Toggle menu"><svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-0.15em;flex-shrink:0;"><path d="M4 6.5h16"/><path d="M4 12h16"/><path d="M4 17.5h16"/></svg></button>
+            <div class="nav-links">
+                <a href="./#pricing" data-i18n="nav.courses">Курсы</a>
+                <a href="results" data-i18n="nav.results">Результаты</a>
+                <a href="about" data-i18n="nav.about">О нас</a>
+                <a href="mock-exam" style="color: var(--accent); font-weight: bold; position: relative;">Mock Exam <span style="position: absolute; top: -12px; right: -15px; background: red; color: white; font-size: 0.55rem; padding: 2px 4px; border-radius: 4px; text-transform: uppercase;">New</span></a>
+                <a href="payment" class="btn-outline" style="border-color: var(--accent); color: var(--accent);" data-i18n="nav.payment">Оплата</a>
+                <a href="dashboard" class="btn-outline" data-i18n="nav.dashboard">Личный кабинет</a>
+                <div class="lang-switch">
+                    <a href="#" onclick="changeLanguage('ru'); return false;" class="lang-btn active">RU</a>
+                    <a href="#" onclick="changeLanguage('uz'); return false;" class="lang-btn">UZ</a>
+                    <a href="#" onclick="changeLanguage('en'); return false;" class="lang-btn">EN</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main style="padding: 0 1rem;">
+        <div class="spk-wrap">
+            <h1 class="spk-h1">IELTS <span class="text-premium">Speaking</span> с ИИ</h1>
+            <p class="spk-lead" id="spkLead">Говорите по-английски вслух — ИИ слушает, задаёт вопросы как на настоящем IELTS и оценивает ответ.</p>
+            <div id="spkApp"></div>
+        </div>
+    </main>
+
+    <footer style="margin-top: 4rem;">
+        <div class="footer-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; max-width: 1200px; margin: 0 auto 2rem auto;">
+            <div class="footer-col" style="text-align: center;">
+                <h4 data-i18n="footer.contacts">Контакты</h4>
+                <div class="social-icons" style="justify-content: center; margin-top: 1rem;">
+                    <a href="https://www.instagram.com/starths.official/" target="_blank" aria-label="Instagram">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                    </a>
+                    <a href="https://t.me/TheStarth" target="_blank" aria-label="Telegram">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.91 3.79c-.16-.83-.72-1.39-1.55-1.55C20.65 1.9 2.52 1.9.81 2.24c-.83.16-1.39.72-1.55 1.55C-.92 5.5-.92 18.5-.58 20.21c.16.83.72 1.39 1.55 1.55C2.75 22.1 20.88 22.1 22.59 21.76c.83-.16 1.39-.72 1.55-1.55.34-1.71.34-14.71 0-16.42zM9.54 15.56V8.44l6.85 3.56-6.85 3.56z"/></svg>
+                    </a>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--ink-soft);" data-i18n="footer.copyright">© 2026 TheStarth. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js?v=63"></script>
+    <script src="mock-config.js?v=63"></script>
+    <script src="admin-nav.js?v=63"></script>
+    <script src="translations.js?v=63"></script>
+    <script src="icons.js?v=63"></script>
+    <script src="speaking-bank.js?v=63"></script>
+    <script src="speaking-view.js?v=63"></script>
+    <script src="speaking.js?v=63"></script>
+    <script src="app.js?v=63"></script>
+    <script src="i18n-extra.js?v=63"></script>
+    <script src="back-btn.js?v=63"></script>
+</body>
+</html>

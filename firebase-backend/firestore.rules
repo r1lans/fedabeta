@@ -361,6 +361,25 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // IELTS Speaking with AI (speaking.html). A student saves their own result (the AI marks it, the page saves it);
+    // the student reads their own, teachers and admins read all; only admins edit or delete.
+    match /speakingResults/{id} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.keys().hasOnly(['uid', 'name', 'kind', 'topic', 'overall', 'fc', 'lr', 'gra', 'pr', 'words', 'wpm', 'secs',
+          'summary', 'strengths', 'improve', 'mistakes', 'vocab', 'sample', 'parts', 'transcript', 'ts']) &&
+        request.resource.data.kind in ['exam', 'practice'] &&
+        request.resource.data.name is string && request.resource.data.name.size() <= 80 &&
+        request.resource.data.topic is string && request.resource.data.topic.size() <= 120 &&
+        request.resource.data.overall is number && request.resource.data.overall >= 0 && request.resource.data.overall <= 9 &&
+        request.resource.data.summary is string && request.resource.data.summary.size() <= 700 &&
+        request.resource.data.transcript is list && request.resource.data.transcript.size() <= 120 &&
+        request.resource.data.mistakes is list && request.resource.data.mistakes.size() <= 8 &&
+        request.resource.data.vocab is list && request.resource.data.vocab.size() <= 6;
+      allow read: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin() || isTeacher());
+      allow update, delete: if isAdmin();
+    }
+
     // Writing work written on the site. A student adds their own work (always as 'new') and reads their own;
     // teachers and admins read all and add the evaluation (only the feedback fields can change); only admins delete.
     match /mockWritings/{id} {

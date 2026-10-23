@@ -63,6 +63,10 @@
         hourglass: 'M6 2h12M6 22h12M7 2v4.5L12 12l5-5.5V2M7 22v-4.5L12 12l5 5.5V22',
         minus: 'M5 12h14',
         wallet: '<rect x="2.5" y="6" width="19" height="13" rx="2"/><path d="M16 12.5h2M2.5 9.5h19M6 6l9-3 1 3"/>',
+        volume: 'M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13',
+        keyboard: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M6 9h.01M10 9h.01M14 9h.01M18 9h.01M6 13h.01M18 13h.01M10 13h4M7 16h10"/>',
+        bulb: 'M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z',
+        'arrow-right': 'M5 12h14M13 6l6 6-6 6',
         ticket: 'M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2zM13 5v2M13 17v2M13 11v2'
     };
     function body(n) { const p = P[n]; return p.charAt(0) === '<' ? p : '<path d="' + p + '"/>'; }

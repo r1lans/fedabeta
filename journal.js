@@ -57,6 +57,10 @@
         '.jr-mock{font-weight:700;font-size:.9rem}.jr-mock small{display:block;font-weight:400;color:var(--ink-soft);font-size:.7rem}' +
         '.jr-caret{color:var(--ink-soft);transition:transform .15s}.jr-row.open .jr-caret{transform:rotate(90deg)}' +
         '.jr-lbl{display:none}' +
+        '.jr-spk{display:block;font-weight:400;font-size:.72rem;color:var(--ink-soft);margin-top:.15rem}.jr-spk b{color:var(--accent)}' +
+        '.jr-spk-ov{position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;padding:4vh 12px;overflow:auto}' +
+        '.jr-spk-dlg{background:var(--paper);border:1px solid var(--rule);border-radius:20px;max-width:860px;width:100%;padding:1.1rem;box-shadow:0 24px 60px rgba(0,0,0,.35)}' +
+        '.jr-spk-top{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.8rem}.jr-spk-x{width:38px;height:38px;border-radius:10px;border:1px solid var(--rule);background:var(--paper-alt);color:var(--ink);cursor:pointer;display:grid;place-items:center;font-size:1.1rem}' +
         '.jr-detail{border-top:1px solid var(--rule);padding:1rem 1.1rem 1.2rem;background:var(--paper);display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:1.2rem}' +
         '.jr-detail h4{font-size:.8rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 .55rem}' +
         '.jr-box{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:.85rem .95rem}' +
@@ -112,7 +116,15 @@
             }
             Object.keys(mocks).forEach(function (u) { mocks[u].sort(function (a, b) { return (a.ts || 0) - (b.ts || 0); }); });
         } catch (e) { mocks = {}; }
-        return { groups: groups, grades: grades, att: att, mocks: mocks };
+        // AI Speaking results (speaking.html) — newest first.
+        var speak = {};
+        try {
+            if (window.SpeakingView) {
+                var su = {}; groups.forEach(function (g) { (g.memberUids || []).forEach(function (u) { su[u] = 1; }); });
+                (await window.SpeakingView.load(Object.keys(su))).forEach(function (d) { (speak[d.uid] = speak[d.uid] || []).push(d); });
+            }
+        } catch (e) { speak = {}; }
+        return { groups: groups, grades: grades, att: att, mocks: mocks, speak: speak };
     }
 
     /* One row per (group × student). Students who left a group but have grades there stay in the journal. */
@@ -150,10 +162,11 @@
                 if (avg != null && scores.length >= 2 && avg < 5) reasons.push(X('низкие оценки'));
                 if (trend != null && trend <= -1.5) reasons.push(X('оценки падают'));
                 var mk = p.uid && data.mocks[p.uid] ? data.mocks[p.uid] : [];
+                var sp = p.uid && data.speak && data.speak[p.uid] ? data.speak[p.uid] : [];
                 rows.push({
                     key: g.id + '|' + nick, group: g, nick: nick, name: p.name, uid: p.uid, left: p.left,
                     grades: gr, allGrades: allG, days: days, pr: pr, lt: lt, ab: ab, attPct: attPct, avg: avg, trend: trend,
-                    reasons: reasons, mocks: mk, lastMock: mk.length ? mk[mk.length - 1] : null
+                    reasons: reasons, mocks: mk, lastMock: mk.length ? mk[mk.length - 1] : null, speak: sp, lastSpeak: sp[0] || null
                 });
             });
         });
@@ -204,6 +217,7 @@
                     '<div class="jr-legend"><span><i style="background:var(--jr-good)"></i>' + esc(X('Был')) + ' ' + r.pr + '</span><span><i style="background:var(--jr-mid)"></i>' + esc(X('Опоздал')) + ' ' + r.lt + '</span><span><i style="background:var(--jr-low)"></i>' + esc(X('Не был')) + ' ' + r.ab + '</span></div>' +
                 '</div></div>' +
                 (mocks ? '<div><h4>Mock-тесты</h4><div class="jr-box">' + mocks + '</div></div>' : '') +
+                (r.speak && r.speak.length && window.SpeakingView ? '<div><h4>Speaking (' + esc(X('ИИ')) + ')</h4><div class="jr-box">' + window.SpeakingView.list(r.speak.slice(0, 6)) + '</div></div>' : '') +
                 '<div class="jr-box" style="font-size:.85rem;line-height:1.6">' +
                     '<b>' + esc(r.name || '@' + r.nick) + '</b> · @' + esc(r.nick) + '<br>' +
                     esc(X('Группа')) + ': ' + esc(r.group.name || '') + (r.group.subject ? ' · ' + esc(r.group.subject) : '') + '<br>' +
@@ -297,7 +311,7 @@
                     '<div class="jr-marks-c"><span class="jr-lbl">' + esc(X('Последние оценки')) + '</span><div class="jr-marks">' + (marks || '<small style="color:var(--ink-soft)">' + esc(X('нет оценок')) + '</small>') + '</div></div>' +
                     '<div class="jr-att"><span class="jr-lbl">' + esc(X('Посещаемость')) + '</span><b>' + (pc == null ? '—' : pc + '%') + '</b><div class="jr-pbar"><i style="width:' + (pc || 0) + '%;background:' + pcol + '"></i></div><small>' + (r.pr + r.lt + r.ab) + ' ' + esc(X('ур.')) + (r.ab ? ' · ' + r.ab + ' ' + esc(X('пропуск.')) : '') + '</small></div>' +
                     '<div><span class="jr-lbl">' + esc(X('Динамика')) + '</span>' + tr + '</div>' +
-                    '<div class="jr-mock"><span class="jr-lbl">Mock</span>' + (r.lastMock ? esc(r.lastMock.band != null ? r.lastMock.band : '—') + '<small>' + esc(r.lastMock.skill || '') + '</small>' : '<small>—</small>') + '</div>' +
+                    '<div class="jr-mock"><span class="jr-lbl">Mock</span>' + (r.lastMock ? esc(r.lastMock.band != null ? r.lastMock.band : '—') + '<small>' + esc(r.lastMock.skill || '') + '</small>' : '<small>—</small>') + (r.lastSpeak ? '<small class="jr-spk">Speaking <b>' + esc(Number(r.lastSpeak.overall).toFixed(1)) + '</b></small>' : '') + '</div>' +
                     '<div class="jr-caret">›</div>' +
                 '</div>' + (isOpen ? detailHtml(r, admin) : '');
             }).join('');
@@ -310,11 +324,11 @@
 
         function csv() {
             var rows = root._rows || [];
-            var out = [['Ученик', 'Никнейм', 'Группа', 'Направление', 'Учитель', 'Средний балл', 'Кол-во оценок', 'Оценки (по порядку)', 'Посещаемость %', 'Был', 'Опоздал', 'Не был', 'Динамика', 'Последний mock', 'Внимание']];
+            var out = [['Ученик', 'Никнейм', 'Группа', 'Направление', 'Учитель', 'Средний балл', 'Кол-во оценок', 'Оценки (по порядку)', 'Посещаемость %', 'Был', 'Опоздал', 'Не был', 'Динамика', 'Последний mock', 'Последний Speaking (ИИ)', 'Внимание']];
             rows.forEach(function (r) {
                 out.push([r.name || '', r.nick, r.group.name || '', r.group.subject || '', r.group.teacherName || '', r.avg == null ? '' : fmtS(r.avg), r.grades.length,
                     r.grades.map(function (g) { return fmtS(g.score); }).join(' '), r.attPct == null ? '' : r.attPct, r.pr, r.lt, r.ab,
-                    r.trend == null ? '' : fmtS(r.trend), r.lastMock ? (r.lastMock.band != null ? r.lastMock.band : '') : '', r.left ? 'вышел из группы' : r.reasons.join(', ')]);
+                    r.trend == null ? '' : fmtS(r.trend), r.lastMock ? (r.lastMock.band != null ? r.lastMock.band : '') : '', r.lastSpeak ? r.lastSpeak.overall : '', r.left ? 'вышел из группы' : r.reasons.join(', ')]);
             });
             var d = new Date();
             if (window.CsvExport) window.CsvExport.download('zhurnal_' + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '', out, { sheet: 'Журнал' });
@@ -340,6 +354,8 @@
             render();
         });
         root.addEventListener('click', function (e) {
+            var sb = e.target.closest('[data-spk-id]');
+            if (sb) { openSpeaking(sb.getAttribute('data-spk-id')); return; }
             var a = e.target.closest('[data-act]');
             if (a) { if (a.getAttribute('data-act') === 'csv') csv(); else load(); return; }
             var row = e.target.closest('.jr-item');
@@ -348,6 +364,18 @@
         root.addEventListener('keydown', function (e) {
             if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('jr-item')) { e.preventDefault(); e.target.click(); }
         });
+
+        function openSpeaking(id) {
+            var doc = null; (root._rows || []).forEach(function (r) { (r.speak || []).forEach(function (d) { if (d.id === id) doc = d; }); });
+            if (!doc || !window.SpeakingView) return;
+            var ov = document.createElement('div'); ov.className = 'jr-spk-ov';
+            ov.innerHTML = '<div class="jr-spk-dlg" role="dialog" aria-modal="true"><div class="jr-spk-top"><b>' + esc(doc.name || '') + '</b><button type="button" class="jr-spk-x" aria-label="' + esc(X('Закрыть')) + '">' + (window.Icons ? Icons.svg('x') : '×') + '</button></div>' + window.SpeakingView.result(doc) + '</div>';
+            var close = function () { ov.remove(); document.removeEventListener('keydown', onKey); };
+            var onKey = function (ev) { if (ev.key === 'Escape') close(); };
+            ov.addEventListener('click', function (ev) { if (ev.target === ov || ev.target.closest('.jr-spk-x')) close(); });
+            document.addEventListener('keydown', onKey);
+            document.body.appendChild(ov);
+        }
 
         async function load() {
             root.innerHTML = '<div class="jr-empty">' + esc(X('Загружаю журнал…')) + '</div>';

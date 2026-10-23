@@ -83,3 +83,23 @@ window.MOCK_AI_URL = 'https://starth-mock-ai.ВАШ-АККАУНТ.workers.dev';
 Новые: `mock-feedback.js`, `teacher-writing.js`.
 Заменить: `mock-engine.js`, `mock-exam.js`, `mock-exam.html`, `admin-mock.js`, `admin.html`, `dashboard.html`, `styles.css`, `i18n-extra.js`, `worker/mock-ai-worker.js` (если уже подключали ИИ: вставить заново в Cloudflare и нажать Deploy), `firebase-backend/firestore.rules`, `firebase-backend/storage.rules`.
 Если уже заливали v21: `mock-config.js` не трогайте (в нём ваш адрес посредника).
+
+## 7. Speaking с ИИ (страница speaking.html, v63)
+
+Ученик говорит вслух по-английски, ИИ отвечает и оценивает. Два режима:
+- **Пробный IELTS Speaking** — Part 1, Part 2 (карточка, 1 минута на подготовку, до 2 минут речи), Part 3. Вопросы берутся из `speaking-bank.js`, ИИ ставит балл в конце по 4 критериям.
+- **Разговор на тему** — свободный разговор с Emma, после каждого ответа ИИ показывает ошибки.
+
+Кто может: только вошедшие ученики, которые состоят хотя бы в одной группе (плюс учителя и админы). Проверка есть и на сайте, и в посреднике.
+Результаты сохраняются в Firestore `speakingResults`: ученик видит их в кабинете («Speaking с ИИ»), учитель — в «Журнале» (строка ученика → блок «Speaking»), админ — в журнале админки.
+
+Что сделать один раз:
+1. Cloudflare → Workers → **starth-ai** → Edit code → вставить новый `worker/mock-ai-worker.js` → **Deploy**. Ключ `ANTHROPIC_API_KEY` уже есть.
+2. Firebase → Firestore → Rules → вставить новый `firebase-backend/firestore.rules` → **Publish**.
+3. Необязательно — дневной лимит: Cloudflare → starth-ai → Settings → Bindings → Add → KV namespace, имя переменной `LIMITS` (создайте новый namespace, например `starth-limits`). По умолчанию 5 занятий в день на ученика; другое число — переменная `SPEAK_DAILY` (Text). Без KV лимит только «не больше 90 реплик за 10 минут».
+4. Необязательно — модели: `SPEAK_MODEL` (реплики в разговоре, по умолчанию claude-haiku-5-5 — дешёвая) и `MODEL` (оценка, по умолчанию claude-sonnet-5-5).
+
+Голос экзаменатора: если подключён Azure (`AZURE_SPEECH_KEY`, см. ASSISTANT_SETUP.md) — британский голос Sonia, иначе голос браузера.
+Распознавание речи — встроено в Chrome, Edge и Safari. В Firefox ученик отвечает текстом.
+Произношение ИИ оценивает примерно (по распознанному тексту), это написано ученику рядом с баллом.
+Расходы: реплики в разговоре идут на дешёвой модели, более дорогая модель вызывается один раз — для итоговой оценки. В пробном экзамене ИИ вызывается только один раз (оценка), вопросы задаёт сценарий.

@@ -22,11 +22,12 @@
         salary: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/>',
         absences: '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
         tlessons: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-        writing: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>'
+        writing: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+        speaking: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8"/>'
     };
     var NAV = {
         student: [
-            ['Учёба', [['home', 'Главная'], ['progress', 'Мой прогресс'], ['lessons', 'Мои уроки'], ['tests', 'Тесты']]],
+            ['Учёба', [['home', 'Главная'], ['progress', 'Мой прогресс'], ['lessons', 'Мои уроки'], ['speaking', 'Speaking с ИИ'], ['tests', 'Тесты']]],
             ['Ещё', [['bonus', 'Друзья и бонусы'], ['review', 'Оставить отзыв'], ['pay', 'Оплата']]],
             ['Помощь', [['guide', 'Инструкция'], ['profile', 'Профиль']]]
         ],
@@ -40,6 +41,7 @@
     var HINTS = {
         progress: 'Ваши оценки, посещаемость и результаты mock-тестов на графиках. Нажмите на точку, чтобы увидеть оценку.',
         lessons: 'Не сможете прийти — нажмите «Не смогу прийти» минимум за 24 часа до урока (или /absent в Telegram-боте). Позже урок считается проведённым.',
+        speaking: 'Говорите по-английски вслух: пробный IELTS Speaking с баллом или разговор на тему с исправлением ошибок. Результаты видит ваш учитель.',
         tests: 'Тест уровня английского и SAT Math. Пройти можно ещё раз — сохранится последний результат.',
         bonus: 'Пригласите друга — получите скидку 20%. Выполняйте квесты — получайте бонусы.',
         review: 'Ваш отзыв появится на сайте после проверки администратором.',
@@ -75,6 +77,7 @@
         if (p === 'absences' && window.StarthAbsence) { inited[p] = true; window.StarthAbsence.renderTeacher(document.getElementById('tcAbsRoot'), u.uid); return; }
         if (p === 'progress' && window.StudentProgress) { inited[p] = true; window.StudentProgress.progress(document.getElementById('stProgress'), u, profile); return; }
         if (p === 'lessons' && window.StarthAbsence) { inited[p] = true; window.StarthAbsence.renderStudent(document.getElementById('stAbsence'), u, profile); return; }
+        if (p === 'speaking') { inited[p] = true; renderSpeaking(); return; }
         if (p === 'guide') { inited[p] = true; renderGuide(); return; }
     }
 
@@ -97,6 +100,38 @@
     }
     function menu(open) { var s = document.getElementById('cabShell'); if (s) s.classList.toggle('cab-open', !!open); }
     function badge(p, n) { var b = document.getElementById('cabBadge-' + p); if (!b) return; b.hidden = !n; b.textContent = n > 9 ? '9+' : String(n || ''); }
+
+    // Student: AI Speaking — buttons to start, band chart, history (click → full result)
+    async function renderSpeaking() {
+        var el = document.getElementById('stSpeaking'); if (!el || !window.SpeakingView) return;
+        var V = window.SpeakingView, ic = function (n) { return window.Icons ? window.Icons.svg(n) : ''; };
+        el.innerHTML = '<div class="jr-empty">' + esc(X('Загружаю…')) + '</div>';
+        var member = false, docs = [];
+        try { member = !(await db.collection('groups').where('memberUids', 'array-contains', user.uid).limit(1).get()).empty; } catch (e) { member = false; }
+        try { docs = await V.load(user.uid); } catch (e) { docs = []; }
+        var start = member
+            ? '<div class="spc-start"><a class="btn-primary spc-btn" href="speaking?mode=exam">' + ic('mic') + esc(X('Пробный IELTS Speaking')) + '</a><a class="btn-outline spc-btn" href="speaking">' + ic('message') + esc(X('Разговор на тему')) + '</a></div>'
+            : '<div class="spc-note">' + ic('users') + '<span>' + esc(X('Speaking с ИИ доступен ученикам групп TheStarth. Попросите учителя добавить вас в группу.')) + '</span></div>';
+        var best = docs.reduce(function (m, d) { return d.overall > m ? d.overall : m; }, 0);
+        var tiles = docs.length ? '<div class="spc-tiles"><div><b>' + Number(docs[0].overall).toFixed(1) + '</b><span>' + esc(X('Последний балл')) + '</span></div><div><b>' + best.toFixed(1) + '</b><span>' + esc(X('Лучший балл')) + '</span></div><div><b>' + docs.length + '</b><span>' + esc(X('Занятий')) + '</span></div></div>' : '';
+        function list() {
+            el.innerHTML = start + tiles + (docs.length >= 2 ? '<div class="spc-box">' + V.chart(docs) + '</div>' : '') + '<h3 class="cab-sub">' + esc(X('Мои результаты')) + '</h3>' + V.list(docs);
+            el.querySelectorAll('[data-spk-id]').forEach(function (b) { b.onclick = function () {
+                var d = docs.filter(function (x) { return x.id === b.getAttribute('data-spk-id'); })[0]; if (!d) return;
+                el.innerHTML = '<button type="button" class="btn-outline spc-btn spc-back">' + ic('arrow-left') + esc(X('Назад')) + '</button>' + V.result(d);
+                el.querySelector('.spc-back').onclick = list; window.scrollTo({ top: 0 });
+            }; });
+        }
+        if (!document.getElementById('spc-css')) {
+            var st = document.createElement('style'); st.id = 'spc-css';
+            st.textContent = '.spc-start{display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem}.spc-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.75rem 1.2rem;border-radius:12px;text-decoration:none;font:inherit;cursor:pointer}' +
+                '.spc-back{margin-bottom:1rem}.spc-note{display:flex;gap:.6rem;align-items:flex-start;padding:.9rem 1rem;border-radius:14px;background:var(--accent-tint);margin-bottom:1rem;line-height:1.5}.spc-note svg{flex:0 0 auto;margin-top:.2em;color:var(--accent)}' +
+                '.spc-tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem}.spc-tiles div{background:var(--paper-alt);border:1px solid var(--rule);border-radius:14px;padding:.8rem 1rem}.spc-tiles b{display:block;font-size:1.6rem;color:var(--accent)}.spc-tiles span{font-size:.85rem;color:var(--ink-soft)}' +
+                '.spc-box{background:var(--paper-alt);border:1px solid var(--rule);border-radius:14px;padding:.8rem;margin-bottom:1rem}';
+            document.head.appendChild(st);
+        }
+        list();
+    }
 
     function renderGuide() {
         var el = document.getElementById('cabGuide'); if (!el) return;
