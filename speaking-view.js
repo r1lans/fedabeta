@@ -11,17 +11,17 @@
             prNote: 'Произношение оценено примерно — по тому, как компьютер распознал вашу речь.', exam: 'Пробный IELTS Speaking', practice: 'Разговор на тему',
             words: 'слов', wpm: 'слов в минуту', min: 'мин', strengths: 'Что получилось', improve: 'Что улучшить', mistakes: 'Ошибки и исправления',
             vocab: 'Слова и фразы для балла выше', sample: 'Пример сильного ответа (Band 7.5)', parts: 'По частям', part: 'Part', transcript: 'Текст разговора',
-            examiner: 'Экзаменатор', partner: 'Emma', you: 'Вы', empty: 'Пока нет результатов.', open: 'Открыть', student: 'Ученик' },
+            examiner: 'Экзаменатор', partner: 'Собеседник', you: 'Вы', empty: 'Пока нет результатов.', open: 'Открыть', student: 'Ученик' },
         uz: { band: 'Taxminiy IELTS Speaking bali', fc: 'Ravonlik va izchillik', lr: 'So‘z boyligi', gra: 'Grammatika', pr: 'Talaffuz',
             prNote: 'Talaffuz taxminan baholangan — kompyuter nutqingizni qanday tanib olganiga qarab.', exam: 'IELTS Speaking sinovi', practice: 'Mavzu bo‘yicha suhbat',
             words: 'so‘z', wpm: 'so‘z/daqiqa', min: 'daq', strengths: 'Nimalar yaxshi chiqdi', improve: 'Nimani yaxshilash kerak', mistakes: 'Xatolar va tuzatishlar',
             vocab: 'Yuqori ball uchun so‘z va iboralar', sample: 'Kuchli javob namunasi (Band 7.5)', parts: 'Qismlar bo‘yicha', part: 'Part', transcript: 'Suhbat matni',
-            examiner: 'Imtihonchi', partner: 'Emma', you: 'Siz', empty: 'Hozircha natijalar yo‘q.', open: 'Ochish', student: 'O‘quvchi' },
+            examiner: 'Imtihonchi', partner: 'Suhbatdosh', you: 'Siz', empty: 'Hozircha natijalar yo‘q.', open: 'Ochish', student: 'O‘quvchi' },
         en: { band: 'Estimated IELTS Speaking band', fc: 'Fluency and coherence', lr: 'Vocabulary', gra: 'Grammar', pr: 'Pronunciation',
             prNote: 'Pronunciation is estimated from how well the computer recognised your speech.', exam: 'IELTS Speaking mock test', practice: 'Topic conversation',
             words: 'words', wpm: 'words/min', min: 'min', strengths: 'What went well', improve: 'What to improve', mistakes: 'Mistakes and corrections',
             vocab: 'Words and phrases for a higher band', sample: 'Model answer (Band 7.5)', parts: 'By part', part: 'Part', transcript: 'Transcript',
-            examiner: 'Examiner', partner: 'Emma', you: 'You', empty: 'No results yet.', open: 'Open', student: 'Student' },
+            examiner: 'Examiner', partner: 'Partner', you: 'You', empty: 'No results yet.', open: 'Open', student: 'Student' },
     };
     const t = (k) => (L[lang()][k] != null ? L[lang()][k] : L.ru[k]);
     const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));

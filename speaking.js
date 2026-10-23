@@ -2,7 +2,7 @@
  * Two modes:
  *   exam      — a full mock IELTS Speaking test (Part 1, Part 2 with a cue card and 1 minute to prepare, Part 3).
  *               The examiner follows a script from speaking-bank.js (like a real examiner), the AI only marks it at the end.
- *   practice  — a free conversation on a topic with Emma (AI): after every answer she corrects real mistakes.
+ *   practice  — a free conversation on a topic with the AI partner (Emma, or James with a male voice): after every answer it corrects real mistakes.
  * Speech → text: the browser's speech recognition (Chrome / Edge / Safari). Without it the student types.
  * Examiner voice: Azure British voice through the AI helper when it is set up, otherwise the browser's English voice.
  * Who may use it: signed-in students who are in a group (also teachers and admins). The AI helper checks this again.
@@ -25,12 +25,12 @@
             denied: 'Speaking с ИИ доступен ученикам групп TheStarth. Если вы уже учитесь у нас, попросите учителя добавить вас в группу.', trial: 'Записаться на бесплатный урок',
             noai: 'Speaking с ИИ сейчас недоступен. Попробуйте позже.',
             examT: 'Пробный IELTS Speaking', examD: 'Как на настоящем экзамене: Part 1, Part 2 (карточка, минута на подготовку, до 2 минут речи) и Part 3. В конце — балл по 4 критериям и разбор ошибок.', examM: '11–14 минут',
-            pracT: 'Разговор на тему', pracD: 'Свободный разговор с Emma. После каждого ответа она показывает ошибки и как сказать лучше.', pracM: 'Сколько хотите',
+            pracT: 'Разговор на тему', pracD: 'Свободный разговор с ИИ-собеседником. После каждого ответа она показывает ошибки и как сказать лучше.', pracM: 'Сколько хотите',
             pickTopic: 'Выберите тему', ownTopic: 'Или своя тема (по-английски)', start: 'Начать', startExam: 'Начать экзамен',
             micTest: 'Проверить микрофон', micSay: 'Скажите что-нибудь по-английски…', micOk: 'Микрофон работает', micHeard: 'Я услышал:',
             subs: 'Показывать текст вопросов', tips: 'Советы', tip1: 'Наденьте наушники и сядьте в тихом месте.', tip2: 'Отвечайте развёрнуто: 2–4 предложения в Part 1, больше — в Part 3.', tip3: 'Закончили ответ — нажмите «Готово».',
             noSR: 'Ваш браузер не распознаёт речь — можно отвечать текстом. Для голоса откройте сайт в Chrome или Edge.',
-            history: 'Мои результаты', listening: 'Слушаю… говорите', speakingNow: 'Экзаменатор говорит…', thinking: 'Emma думает…',
+            history: 'Мои результаты', listening: 'Слушаю… говорите', speakingNow: 'Экзаменатор говорит…', thinking: '{n} думает…',
             done: 'Готово', repeat: 'Повторить вопрос', typeIt: 'Ответить текстом', sayIt: 'Ответить голосом', typePh: 'Напишите ответ по-английски…', send: 'Отправить',
             exit: 'Выйти', exitQ: 'Выйти? Ответы этого занятия не сохранятся.', exitYes: 'Да, выйти', exitNo: 'Продолжить',
             prep: 'Подготовка', prepHint: 'У вас 1 минута, чтобы подумать. Можно делать заметки.', notesPh: 'Заметки (их видите только вы)', ready: 'Я готов(а) говорить',
@@ -48,12 +48,12 @@
             denied: 'AI bilan Speaking faqat TheStarth guruhlari o‘quvchilari uchun. Agar bizda o‘qiyotgan bo‘lsangiz, o‘qituvchingizdan guruhga qo‘shishni so‘rang.', trial: 'Bepul darsga yozilish',
             noai: 'AI bilan Speaking hozir ishlamayapti. Keyinroq urinib ko‘ring.',
             examT: 'IELTS Speaking sinovi', examD: 'Haqiqiy imtihondagidek: Part 1, Part 2 (karta, tayyorlanish uchun 1 daqiqa, 2 daqiqagacha nutq) va Part 3. Oxirida 4 mezon bo‘yicha ball va xatolar tahlili.', examM: '11–14 daqiqa',
-            pracT: 'Mavzu bo‘yicha suhbat', pracD: 'Emma bilan erkin suhbat. Har bir javobdan keyin u xatolarni va qanday yaxshiroq aytishni ko‘rsatadi.', pracM: 'Xohlagancha',
+            pracT: 'Mavzu bo‘yicha suhbat', pracD: 'AI suhbatdosh bilan erkin suhbat. Har bir javobdan keyin u xatolarni va qanday yaxshiroq aytishni ko‘rsatadi.', pracM: 'Xohlagancha',
             pickTopic: 'Mavzuni tanlang', ownTopic: 'Yoki o‘z mavzuingiz (inglizcha)', start: 'Boshlash', startExam: 'Imtihonni boshlash',
             micTest: 'Mikrofonni tekshirish', micSay: 'Inglizcha biror narsa ayting…', micOk: 'Mikrofon ishlayapti', micHeard: 'Eshitdim:',
             subs: 'Savollar matnini ko‘rsatish', tips: 'Maslahatlar', tip1: 'Quloqchin taqing va tinch joyda o‘tiring.', tip2: 'Batafsil javob bering: Part 1 da 2–4 gap, Part 3 da ko‘proq.', tip3: 'Javobni tugatdingizmi — «Tayyor» ni bosing.',
             noSR: 'Brauzeringiz nutqni tanimaydi — javobni yozib berishingiz mumkin. Ovoz uchun saytni Chrome yoki Edge da oching.',
-            history: 'Mening natijalarim', listening: 'Tinglayapman… gapiring', speakingNow: 'Imtihonchi gapiryapti…', thinking: 'Emma o‘ylayapti…',
+            history: 'Mening natijalarim', listening: 'Tinglayapman… gapiring', speakingNow: 'Imtihonchi gapiryapti…', thinking: '{n} o‘ylayapti…',
             done: 'Tayyor', repeat: 'Savolni takrorlash', typeIt: 'Yozib javob berish', sayIt: 'Ovoz bilan javob berish', typePh: 'Javobni inglizcha yozing…', send: 'Yuborish',
             exit: 'Chiqish', exitQ: 'Chiqasizmi? Bu mashg‘ulot javoblari saqlanmaydi.', exitYes: 'Ha, chiqish', exitNo: 'Davom etish',
             prep: 'Tayyorlanish', prepHint: 'O‘ylash uchun 1 daqiqa. Qayd yozishingiz mumkin.', notesPh: 'Qaydlar (faqat siz ko‘rasiz)', ready: 'Gapirishga tayyorman',
@@ -71,12 +71,12 @@
             denied: 'Speaking with AI is available to students in TheStarth groups. If you already study with us, ask your teacher to add you to a group.', trial: 'Book a free lesson',
             noai: 'Speaking with AI is not available right now. Please try later.',
             examT: 'IELTS Speaking mock test', examD: 'Just like the real exam: Part 1, Part 2 (cue card, one minute to prepare, up to 2 minutes of speaking) and Part 3. Then a band for each of the 4 criteria and your mistakes explained.', examM: '11–14 minutes',
-            pracT: 'Topic conversation', pracD: 'A free conversation with Emma. After every answer she shows your mistakes and how to say it better.', pracM: 'As long as you like',
+            pracT: 'Topic conversation', pracD: 'A free conversation with an AI partner. After every answer it shows your mistakes and how to say it better.', pracM: 'As long as you like',
             pickTopic: 'Choose a topic', ownTopic: 'Or your own topic', start: 'Start', startExam: 'Start the test',
             micTest: 'Test microphone', micSay: 'Say something in English…', micOk: 'Microphone works', micHeard: 'I heard:',
             subs: 'Show question text', tips: 'Tips', tip1: 'Use headphones and sit somewhere quiet.', tip2: 'Give full answers: 2–4 sentences in Part 1, more in Part 3.', tip3: 'When you finish an answer, press “Done”.',
             noSR: 'Your browser cannot recognise speech — you can type your answers. For voice, open the site in Chrome or Edge.',
-            history: 'My results', listening: 'Listening… speak now', speakingNow: 'The examiner is speaking…', thinking: 'Emma is thinking…',
+            history: 'My results', listening: 'Listening… speak now', speakingNow: 'The examiner is speaking…', thinking: '{n} is thinking…',
             done: 'Done', repeat: 'Repeat the question', typeIt: 'Type instead', sayIt: 'Speak instead', typePh: 'Type your answer in English…', send: 'Send',
             exit: 'Exit', exitQ: 'Exit? The answers from this session will not be saved.', exitYes: 'Yes, exit', exitNo: 'Continue',
             prep: 'Preparation', prepHint: 'You have 1 minute to think. You can make notes.', notesPh: 'Notes (only you can see them)', ready: 'I’m ready to speak',
@@ -139,19 +139,34 @@
     const audio = typeof Audio !== 'undefined' ? new Audio() : null;
     let premium = (() => { try { const v = sessionStorage.getItem('spkTTS'); return v === '1' ? true : v === '0' ? false : null; } catch (e) { return null; } })();
     let sayTok = 0;
+    const FEMALE = /female|woman|sonia|libby|maisie|hazel|susan|serena|kate|stephanie|martha|samantha|karen|moira|tessa|fiona|victoria|zira|aria|jenny|ava|emma|michelle|natasha|clara|sara|allison|joanna|kendra|kimberly|salli|amy|ivy|olivia|nicky|catherine|ellie|abbi|bella|hollie|sonia/i;
+    const MALE = /\bmale\b|\bman\b|daniel|george|ryan|thomas|arthur|oliver|guy|david|mark|alex\b|fred|rishi|james|brian|christopher|eric|roger|steffan|andrew|aaron|gordon|lee\b|matthew|joey|justin|kevin|russell|noah|elliot|alfie|ethan|liam/i;
     function englishVoice() {
         if (!synth) return null;
-        let best = null, bs = -1;
+        let best = null, bs = -Infinity;
         (synth.getVoices() || []).forEach((v) => {
             const l = String(v.lang || '').toLowerCase().replace('_', '-'), n = String(v.name || ''); if (!l.startsWith('en')) return;
             let sc = l === 'en-gb' ? 4 : l === 'en-us' ? 3 : 1;
             if (/natural|neural|online/i.test(n)) sc += 6; if (/google/i.test(n)) sc += 3; if (/premium|enhanced|siri/i.test(n)) sc += 3;
-            if (/sonia|libby|serena|female|samantha|karen|moira|tessa/i.test(n)) sc += 1; if (/compact|espeak/i.test(n)) sc -= 4;
+            if (FEMALE.test(n)) sc += 5; if (MALE.test(n)) sc -= 8; if (/compact|espeak/i.test(n)) sc -= 4;
             if (sc > bs) { bs = sc; best = v; }
         });
         return best;
     }
     if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = () => {};
+    // Name of the examiner / partner follows the voice: a female voice is Emma, a male one is James.
+    async function voiceName() {
+        if (premium === null && audio && window.MOCK_AI_URL) {
+            try {
+                const r = await fetch(window.MOCK_AI_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'tts', lang: 'gb', purpose: 'speaking', text: 'Hi.' }) });
+                premium = r.ok && /audio/.test(r.headers.get('Content-Type') || '') ? true : [400, 401, 403, 404, 501].indexOf(r.status) >= 0 ? false : null;
+                if (premium !== null) try { sessionStorage.setItem('spkTTS', premium ? '1' : '0'); } catch (e) {}
+            } catch (e) { /* unknown — decide by the browser voice */ }
+        }
+        if (premium === true) return 'Emma';             // Azure voice en-GB-SoniaNeural (female)
+        const v = englishVoice();
+        return v && MALE.test(v.name || '') && !FEMALE.test(v.name || '') ? 'James' : 'Emma';
+    }
     function stopVoice() { sayTok++; try { if (synth) synth.cancel(); } catch (e) {} try { if (audio) { audio.pause(); audio.removeAttribute('src'); } } catch (e) {} }
     function say(text) {
         return new Promise(async (resolve) => {
@@ -322,20 +337,20 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
     function stopAll() { if (run) { run.dead = true; if (run.box) run.box.cancel(); clearInterval(run.tick); } run = null; Ear.stop(true); stopVoice(); }
     const pick = (arr, n) => arr.slice().sort(() => Math.random() - 0.5).slice(0, n);
 
-    function buildExam() {
+    function buildExam(NAME) {
         const p1 = pick(B.part1, 1)[0], card2 = pick(B.part2, 1)[0];
         const steps = [];
-        steps.push({ p: 1, k: 'say', text: "Good afternoon. My name is Emma, and I'll be your examiner today. In this first part, I'd like to ask you some questions about yourself." });
+        steps.push({ p: 1, k: 'say', text: "Good afternoon. My name is " + NAME + ", and I'll be your examiner today. In this first part, I'd like to ask you some questions about yourself." });
         steps.push({ p: 1, k: 'q', text: "Let's talk about what you do. Do you work, or are you a student?", ws: true });
-        steps.push({ p: 1, k: 'ws', i: 0 }); steps.push({ p: 1, k: 'ws', i: 1 });
+        steps.push({ p: 1, k: 'ws', i: 0, ai: true, topic: 'work or studies' }); steps.push({ p: 1, k: 'ws', i: 1, ai: true, topic: 'work or studies' });
         steps.push({ p: 1, k: 'say', text: "Now let's talk about " + p1.topic.toLowerCase() + '.' });
-        p1.q.forEach((q) => steps.push({ p: 1, k: 'q', text: q }));
+        p1.q.forEach((q, i) => steps.push({ p: 1, k: 'q', text: q, ai: i > 0, topic: p1.topic }));
         steps.push({ p: 2, k: 'say', text: "Now I'm going to give you a topic, and I'd like you to talk about it for one to two minutes. Before you talk, you'll have one minute to think about what you're going to say. You can make some notes if you wish. Here is your topic." });
         steps.push({ p: 2, k: 'card', card: card2 });
         steps.push({ p: 2, k: 'long', text: "All right. Remember, you have one to two minutes for this, so don't worry if I stop you. I'll tell you when the time is up. Can you start speaking now, please?", card: card2 });
-        steps.push({ p: 2, k: 'q', text: card2.round });
+        steps.push({ p: 2, k: 'q', text: card2.round, ai: true, topic: card2.card });
         steps.push({ p: 3, k: 'say', text: "We've been talking about " + card2.title.toLowerCase() + ", and I'd like to discuss with you one or two more general questions related to this." });
-        pick(card2.part3, 4).forEach((q) => steps.push({ p: 3, k: 'q', text: q, long: true }));
+        pick(card2.part3, 4).forEach((q, i) => steps.push({ p: 3, k: 'q', text: q, long: true, ai: i > 0, topic: card2.title + ' (general discussion)' }));
         steps.push({ p: 3, k: 'end', text: 'Thank you. That is the end of the speaking test.' });
         return { steps, topic: card2.title, ws: 'study' };
     }
@@ -345,7 +360,7 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
         const parts = [1, 2, 3].map((n) => `<span class="spk-pt${st.p === n ? ' on' : st.p > n ? ' done' : ''}">Part ${n}</span>`).join('');
         return `<div class="spk-run">
 <div class="spk-bar"><div class="spk-parts">${parts}</div><span class="spk-clock" id="spkTotal">${fmt((Date.now() - run.t0) / 1000)}</span><button type="button" class="spk-link" id="spkExit">${ic('x')}${t('exit')}</button></div>
-<div class="spk-stage"><div class="spk-ex" id="spkEx"><div class="spk-ava">${ic('users')}</div><div class="spk-ex-body"><div class="spk-ex-name">Emma · Examiner</div><div class="spk-ex-text" id="spkQ"></div></div></div>
+<div class="spk-stage"><div class="spk-ex" id="spkEx"><div class="spk-ava">${ic('users')}</div><div class="spk-ex-body"><div class="spk-ex-name">${esc(run.name)} · Examiner</div><div class="spk-ex-text" id="spkQ"></div></div></div>
 <div id="spkCard"></div><div id="spkAns"></div></div></div>`;
     }
     function bindExit() {
@@ -359,10 +374,11 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
             void was;
         };
     }
-    function startExam() {
+    async function startExam() {
         stopAll();
-        const ex = buildExam();
-        run = { kind: 'exam', steps: ex.steps, topic: ex.topic, i: 0, t0: Date.now(), tr: [], speakMs: 0, conf: [], session: newSession(), dead: false };
+        const name = await voiceName();
+        const ex = buildExam(name);
+        run = { kind: 'exam', name, steps: ex.steps, topic: ex.topic, i: 0, t0: Date.now(), tr: [], speakMs: 0, conf: [], session: newSession(), dead: false };
         S.view = 'exam';
         render(examFrame()); bindExit();
         run.tick = setInterval(() => { const el = $('spkTotal'); if (el && run) el.textContent = fmt((Date.now() - run.t0) / 1000); }, 1000);
@@ -391,6 +407,11 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
         }
         if (st.k === 'card') return cueCard(st.card);
         if (st.k === 'q' || st.k === 'long') {
+            if (st.ai && !st.asked) {
+                st.asked = true;
+                const q = $('spkQ'); if (q) q.innerHTML = '<span class="spk-dots"><i></i><i></i><i></i></span>';
+                st.text = await nextQuestion(st); if (my.dead) return;
+            }
             run.tr.push({ r: 'e', p: st.p, t: st.text });
             if (st.k === 'long') $('spkCard').innerHTML = cueHtml(st.card, true);
             setQ(st.text, true); await say(st.text); if (my.dead) return; setQ(st.text, false);
@@ -408,6 +429,15 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
                 },
             });
         }
+    }
+    // The examiner's next question follows from what the student has just said (AI); the script question is the fallback.
+    async function nextQuestion(st) {
+        const left = run.steps.slice(run.i + 1).filter((x) => x.p === st.p && (x.k === 'q' || x.k === 'ws')).length;
+        const req = ai({ mode: 'speak_q', name: run.name, session: run.session, part: st.p, topic: st.topic || '', planned: st.text, left,
+            history: run.tr.slice(-16).map((x) => ({ role: x.r === 's' ? 'student' : 'examiner', part: x.p, text: x.t })) })
+            .then((j) => (j && j.say ? String(j.say) : st.text)).catch(() => st.text);
+        const slow = new Promise((res) => setTimeout(() => res(st.text), 9000));
+        return Promise.race([req, slow]);
     }
     function cueHtml(c, compact) {
         return `<div class="spk-cue${compact ? ' compact' : ''}"><div class="spk-cue-h">${ic('note')}Part 2 · Cue card</div><b>${esc(c.card)}</b><div class="spk-cue-s">You should say:</div><ul>${c.points.map((p) => `<li>${esc(p)}</li>`).join('')}</ul></div>`;
@@ -427,9 +457,10 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
     }
 
     // ───────────── practice ─────────────
-    function startPractice(topic) {
+    async function startPractice(topic) {
         stopAll();
-        run = { kind: 'practice', topic, msgs: [], t0: Date.now(), speakMs: 0, conf: [], session: newSession(), dead: false, turns: 0 };
+        const name = await voiceName();
+        run = { kind: 'practice', name, topic, msgs: [], t0: Date.now(), speakMs: 0, conf: [], session: newSession(), dead: false, turns: 0 };
         S.view = 'practice';
         render(`<div class="spk-run">
 <div class="spk-bar"><div class="spk-parts"><span class="spk-pt on">${ic('message')}${esc(topic)}</span></div><span class="spk-clock" id="spkTotal">0:00</span><button type="button" class="spk-link" id="spkExit">${ic('x')}${t('exit')}</button></div>
@@ -456,9 +487,9 @@ ${!SR ? note(t('noSR'), 'bad') : ''}
     }
     async function practiceTurn() {
         const my = run; if (!my || my.dead) return;
-        run.wait = true; drawChat(); $('spkAns').innerHTML = `<div class="spk-wait small"><span class="spk-spin"></span>${t('thinking')}</div>`;
+        run.wait = true; drawChat(); $('spkAns').innerHTML = `<div class="spk-wait small"><span class="spk-spin"></span>${t('thinking').replace('{n}', run.name)}</div>`;
         let j;
-        try { j = await ai({ mode: 'speak_turn', topic: run.topic, session: run.session, history: run.msgs.map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'student', text: m.text })) }); }
+        try { j = await ai({ mode: 'speak_turn', name: run.name, topic: run.topic, session: run.session, history: run.msgs.map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'student', text: m.text })) }); }
         catch (e) {
             if (my.dead) return; run.wait = false; drawChat();
             if (e.message === 'daily' || e.message === 'denied') { S.msg = { text: t(e.message), kind: 'bad' }; return hub(); }

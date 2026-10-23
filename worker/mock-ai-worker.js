@@ -10,6 +10,7 @@
  *                      берёт из Firebase сам (обновляются автоматически). Есть лимит сообщений, чтобы не злоупотребляли.
  *   mode "tts"       — «живой» голос для голосового звонка с помощником (необязательно): голоса Microsoft Azure, есть узбекский.
  *                      Нужны AZURE_SPEECH_KEY (Secret) и AZURE_SPEECH_REGION (Text, например westeurope). Без них сайт говорит голосом браузера.
+ *   mode "speak_q"   — следующий вопрос экзаменатора в пробном Speaking: логично продолжает ответ ученика, не переспрашивает.
  *   mode "speak_turn" / "speak_eval" — ИИ-партнёр по Speaking (страница speaking.html): реплика в разговоре и итоговая
  *                      оценка IELTS Speaking. Только для вошедших учеников, которые состоят хотя бы в одной группе
  *                      (а также учителей и админов). Модели: SPEAK_MODEL для реплик (по умолчанию claude-haiku-5-5, дёшево),
@@ -57,7 +58,7 @@ export default {
         const who = await authenticate(request, env);
         if (!who) return json({ error: 'Войдите в аккаунт на сайте и повторите' }, 401);
 
-        if (mode === 'speak_turn' || mode === 'speak_eval') return speaking(request, env, body, json, useCF, who, mode);
+        if (mode === 'speak_turn' || mode === 'speak_eval' || mode === 'speak_q') return speaking(request, env, body, json, useCF, who, mode);
 
         let messages, maxTokens;
         if (mode === 'build') {
@@ -351,6 +352,7 @@ async function speaking(request, env, body, json, useCF, who, mode) {
     if (!(await canSpeak(request, env, who))) return json({ error: 'not_member' }, 403);
     const lang = EXPL[body.lang] ? body.lang : 'ru';
     const session = clip(body.session, 40);
+    const pname = body.name === 'James' ? 'James' : 'Emma';
     if (!(await dailyOk(env, who, session))) return json({ error: 'daily' }, 429);
 
     if (mode === 'speak_turn') {
@@ -362,7 +364,7 @@ async function speaking(request, env, body, json, useCF, who, mode) {
         const msgs = hist.length ? hist.map((m) => m.role === 'assistant' ? { role: 'assistant', content: JSON.stringify({ say: m.content }) } : m)
             : [{ role: 'user', content: '(The learner has just joined. Start the conversation.)' }];
         if (msgs[msgs.length - 1].role !== 'user') return json({ error: 'Пустой ответ' }, 400);
-        const system = `You are Emma, a warm and patient English speaking partner for a learner preparing for IELTS Speaking. Conversation topic: "${topic}".
+        const system = `You are ${pname}, a warm and patient English speaking partner for a learner preparing for IELTS Speaking. Conversation topic: "${topic}".
 The learner's messages come from automatic speech recognition: ignore punctuation, capital letters and obvious recognition slips (homophones, a missing article the recogniser dropped). Never correct those.
 Every turn:
 1) "say": react briefly and naturally to what the learner said (1–2 short spoken sentences) and ask ONE open follow-up question that makes them speak more (why / how / example / compare). Stay on the topic, vary the questions, IELTS Part 1 and Part 3 style. Use clear B1–B2 English unless the learner is clearly advanced. No emojis, no markdown, no lists.
@@ -375,6 +377,30 @@ Answer with ONE JSON object only: {"say":"...","fixes":[{"wrong":"...","right":"
         catch (e) { return json({ error: 'ai' }, 502); }
         if (!out) return json({ error: 'ai' }, 502);
         return json(out);
+    }
+
+    if (mode === 'speak_q') {
+        if (limited('st:' + who.uid, 90)) return json({ error: 'limit' }, 429);
+        const part = [1, 2, 3].indexOf(+body.part) !== -1 ? +body.part : 1;
+        const topic = clip(body.topic, 200), planned = clip(body.planned, 300), left = Math.max(0, Math.min(10, +body.left || 0));
+        const hist = (Array.isArray(body.history) ? body.history : []).slice(-16)
+            .map((m) => ((+m.part ? '[Part ' + (+m.part) + '] ' : '') + (m && m.role === 'student' ? 'Candidate: ' : 'Examiner: ') + clip(m && m.text, 1500))).join('\n');
+        const style = part === 1 ? 'Part 1: short, simple questions about the candidate\'s own life, habits and opinions on the part topic.'
+            : part === 2 ? 'This is the Part 2 rounding-off question: ONE short, simple question that follows from what the candidate just said in their long turn.'
+            : 'Part 3: discussion questions about people and society in general (not about the candidate personally). You may ask them to explain, give reasons, compare past and present, or speculate about the future, following on from their last answer.';
+        const system = `You are ${pname}, a certified IELTS Speaking examiner running Part ${part} of a mock test. Topic of this part: "${topic}".
+Say the examiner's NEXT line: exactly ONE question.
+- Read what the candidate has ALREADY said in the transcript. Never ask about something they have already told you. Example: if they said they study economics at university, do not ask "What do you study?" — ask a natural next question instead, e.g. why they chose economics, what they enjoy about it, or what they plan to do after university.
+- Prefer a question that follows logically from the candidate's last answer and stays on the topic of this part.
+- The script suggests: "${planned}". Use it (you may rephrase it to fit) only if it has not been answered yet and fits naturally; otherwise ask a better question on the same topic.
+- ${style}
+- Examiner style: neutral and polite. You may begin with a very short acknowledgement ("Okay.", "I see.", "Right."). Never praise, never correct, never comment on their English, never answer for them. At most 25 words. Plain spoken English, no emojis, no markdown.${left === 0 ? ' This is the last question of this part.' : ''}
+Answer with ONE JSON object only: {"say":"..."}`;
+        let out;
+        try { const o = parseJsonLoose(await llm(env, useCF, system, [{ role: 'user', content: 'TRANSCRIPT SO FAR:\n' + (hist || '(nothing yet)') }], 200, env.SPEAK_MODEL || 'claude-haiku-5-5')); out = o && clip(o.say, 300); }
+        catch (e) { return json({ error: 'ai' }, 502); }
+        if (!out) return json({ error: 'ai' }, 502);
+        return json({ say: out });
     }
 
     // speak_eval
